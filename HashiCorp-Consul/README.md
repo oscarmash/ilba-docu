@@ -2,6 +2,7 @@
 
 * [Desplegar consul](#id1)
 * [Registro servicios con docker-compose](#id2)
+* [Consulta de servicios](#id3)
 
 ## Desplegar consul <div id='id1' />
 
@@ -89,3 +90,36 @@ Verificamos que se haya registrado en Consul:
 ![alt text](images/consul-registry-docker-compose.png)
 
 ![alt text](images/consul-registry-docker-compose-2.png)
+
+## Consulta de servicios <div id='id3' />
+
+```
+root@consul:~# docker exec -it consul consul catalog services
+HTTP
+consul
+nginx
+```
+
+```
+root@consul-client:~# apt update && apt -y install jq
+
+root@consul-client:~# curl -s http://172.26.0.33:8500/v1/agent/service/HTTP
+{
+    "ID": "HTTP",
+    "Service": "HTTP",
+    "Tags": [],
+    "Meta": {},
+    "Port": 80,
+    "Address": "http://web.ilba.cat",
+    "Weights": {
+        "Passing": 1,
+        "Warning": 1
+    },
+    "EnableTagOverride": false,
+    "ContentHash": "b3279d556030b491",
+    "Datacenter": "dc1"
+}
+
+root@consul-client:~# curl -s http://172.26.0.33:8500/v1/agent/service/HTTP | jq -r '.Address'
+http://web.ilba.cat
+```
