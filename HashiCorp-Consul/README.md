@@ -84,4 +84,4 @@ root@consul-client:~# docker compose -f /etc/docker-compose/docker-compose.yaml 
 
 Verificamos que se haya registrado en Consul:
 
-![alt text](images/consul-servicio-creado-a-mano.png)
+![alt text](images/consul-registry-docker-compose.png)
