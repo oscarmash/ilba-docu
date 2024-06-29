@@ -1,4 +1,4 @@
-# Pruebas de Consul
+# Ceph Storage
 
 * [Getting Started](#id0)
 * [Ceph](#id1)
