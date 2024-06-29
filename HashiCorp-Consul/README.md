@@ -4,6 +4,7 @@
 * [Desplegar consul](#id1)
 * [Registro servicios con docker-compose](#id2)
 * [Consulta de servicios](#id3)
+* [Servicio de DNS](#id4)
 
 
 ## Getting Started <div id='id1' />
@@ -41,8 +42,8 @@ services:
     image: hashicorp/consul:1.19
     ports:
       - "8400:8400"
-      - "8500:8500" # this is the GUI/API
-      - "8600:8600"
+      - "8500:8500" # GUI/API
+      - "8600:8600" # DNS server
     dns:
      - "172.26.0.11"
     volumes:
@@ -145,4 +146,30 @@ root@consul-client:~# curl -s http://172.26.0.33:8500/v1/agent/service/HTTP
 
 root@consul-client:~# curl -s http://172.26.0.33:8500/v1/agent/service/HTTP | jq -r '.Address'
 http://web.ilba.cat
+```
+
+## Servicio de DNS <div id='id4' />
+
+```
+root@consul:~# apt update && apt install -y bind9 bind9utils bind9-doc dnsutils
+
+root@consul:~# vim /etc/bind/named.conf.local
+zone "consul" IN {
+   type forward;
+   forward only;
+   forwarders { 127.0.0.1 port 8600; };
+};
+
+root@consul:~# systemctl restart named
+root@consul:~# systemctl status named
+```
+
+```
+root@consul:~# dig @localhost -p 8600 myservice.consul ANY
+
+```
+
+```
+root@consul:~# dig @127.0.0.1 nginx.consul.ilba.cat
+
 ```
