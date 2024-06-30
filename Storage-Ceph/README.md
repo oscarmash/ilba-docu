@@ -88,7 +88,14 @@ root@ceph-aio:~# ceph -s
 ```
 root@ceph-aio:~# ceph auth add client.k8s mon 'allow r' osd 'allow rwx pool=pool-k8s'
 root@ceph-aio:~# ceph auth get-key client.k8s
-AQA1639mInLeGRAAutpa6Hssx3HsCY4kbCpG5A==
+AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
+```
+
+Verificar la key del usuario:
+
+```
+root@ceph-aio:~# ceph auth get-key client.k8s
+AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
 ```
 
 ## Config Ceph <div id='id2' /> 
@@ -119,7 +126,7 @@ secret:
   create: true
   name: csi-rbd-secret
   userID: k8s
-  userKey: AQA1639mInLeGRAAutpa6Hssx3HsCY4kbCpG5A==
+  userKey: AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
 ```
 
 ```
