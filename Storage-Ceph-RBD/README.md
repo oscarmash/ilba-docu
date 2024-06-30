@@ -12,6 +12,7 @@
 Partimos de la siguiente base:
 
 * Tenemos un cluster de K8S desplegado
+* Por experiencia propia: si no hay 3 wokers/nodes, no nos funcionará el sistema de storage de Ceph
 * Tenemos un sistema de Ceph desplegado (en esta caso es un All-In-One)
 
 Verificaremos que todo esté correcto
@@ -22,6 +23,7 @@ NAME               STATUS   ROLES           AGE    VERSION
 kubespray-aio      Ready    control-plane   162d   v1.27.5
 kubespray-aio-w1   Ready    <none>          161d   v1.27.5
 kubespray-aio-w2   Ready    <none>          161d   v1.27.5
+kubespray-aio-w3   Ready    <none>          161d   v1.27.5
 ```
 
 ```
