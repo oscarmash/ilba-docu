@@ -16,6 +16,13 @@ Cambiar el NS por defecto en el que estamos trabajando
 ```
 kubectl config set-context --current --namespace=newdefaultnamespace
 ```
+
+Port Forwarding
+
+```
+ilimit-paas-k8s-cp01:~# k -n client-vodafone-wordpress port-forward --address 0.0.0.0 service/vodafone-wordpress-standard-stack-bastion-clients 2222:22
+```
+
 ## Storage <div id='id20' />
 
 Change SC to default
