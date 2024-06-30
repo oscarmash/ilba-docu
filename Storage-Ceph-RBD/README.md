@@ -218,7 +218,7 @@ spec:
   selector:
     matchLabels:
       app: httpd
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -241,11 +241,22 @@ root@kubespray-aio:~# kubectl apply -f test-ceph.yaml
 ```
 
 ```
-root@kubespray-aio:~# kubectl -n test-ceph get pods
-root@kubespray-aio:~# kubectl -n test-ceph get pvc
+root@diba-master:~# kubectl -n test-ceph get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+httpd-deployment-6b74459564-bwhjw   1/1     Running   0          96s
+```
 
-$ k exec -it httpd-deployment-7c889df479-sqjbw -- bash
-root@httpd-deployment-7c889df479-sqjbw:/usr/local/apache2# df -h | grep mydata
+```
+root@diba-master:~# kubectl -n test-ceph get pvc
+NAME            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+pvc-fs-apache   Bound    pvc-03992982-0896-4fcc-916f-c289bad96b6c   1Gi        RWO            csi-rbd-sc     110s
+```
+
+```
+root@diba-master:~# kubectl -n test-ceph exec -it httpd-deployment-6b74459564-bwhjw -- bash
+
+root@httpd-deployment-6b74459564-bwhjw:/usr/local/apache2# df -h | grep mydata
+/dev/rbd0       974M   24K  958M   1% /mydata
 ```
 
 Si falla todo verificar:
@@ -282,34 +293,37 @@ rtt min/avg/max/mdev = 0.691/2.103/3.516/1.413 ms
 Como saber el enlace que hay entre los diferentes nombres que usa K8S y Ceph
 
 ```
-$ k get pvc
+root@diba-master:~# kubectl -n test-ceph get pvc
 NAME            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-pvc-fs-apache   Bound    pvc-97727ce7-261f-40ef-a19e-efcb361ca7aa   1Gi        RWO            csi-rbd-sc     44h        
+pvc-fs-apache   Bound    pvc-03992982-0896-4fcc-916f-c289bad96b6c   1Gi        RWO            csi-rbd-sc     3m36s
 
-$ k describe pv pvc-97727ce7-261f-40ef-a19e-efcb361ca7aa | grep VolumeHandle
-    VolumeHandle:      0001-0024-dd494d74-f6cd-11ec-a8ee-2ec1cc2a3fa9-0000000000000002-54a7278f-aacf-11ed-b85b-ee66881ed241
+root@diba-master:~# kubectl -n test-ceph describe pv pvc-03992982-0896-4fcc-916f-c289bad96b6c | grep VolumeHandle
+    VolumeHandle:      0001-0024-7d2b3cca-f1eb-11ee-a886-593bc87d3824-0000000000000006-24998e36-3844-4571-a4ce-6a667ae72851
 ```
+
+Verificaremos que el número: **24998e36-3844-4571-a4ce-6a667ae72851** coincide con el de Ceph en la siguiente imagen:
+
+![alt text](images/PVC-enlace-Ceph.png)
+
 
 Con los comandos anteriores podemos observar que el storage de K8S que usa para enlazar con Ceph es: 
 
 ```
-54a7278f-aacf-11ed-b85b-ee66881ed241
+root@ceph-aio:~# rbd ls pool-k8s
+csi-vol-24998e36-3844-4571-a4ce-6a667ae72851
 
-root@ceph-01:~# rbd ls pool-k8s
-csi-vol-54a7278f-aacf-11ed-b85b-ee66881ed241
-
-root@ceph-01:~# rbd info pool-k8s/csi-vol-54a7278f-aacf-11ed-b85b-ee66881ed241
-rbd image 'csi-vol-54a7278f-aacf-11ed-b85b-ee66881ed241':
+root@ceph-aio:~# rbd info pool-k8s/csi-vol-24998e36-3844-4571-a4ce-6a667ae72851
+rbd image 'csi-vol-24998e36-3844-4571-a4ce-6a667ae72851':
         size 1 GiB in 256 objects
         order 22 (4 MiB objects)
         snapshot_count: 0
-        id: 23358f193cab
-        block_name_prefix: rbd_data.23358f193cab
+        id: 1e4da98d50e09
+        block_name_prefix: rbd_data.1e4da98d50e09
         format: 2
         features: layering
         op_features:
         flags:
-        create_timestamp: Sun Feb 12 13:18:17 2023
-        access_timestamp: Sun Feb 12 13:18:17 2023
-        modify_timestamp: Sun Feb 12 13:18:17 2023
+        create_timestamp: Sun Jun 30 15:36:04 2024
+        access_timestamp: Sun Jun 30 15:36:04 2024
+        modify_timestamp: Sun Jun 30 15:36:04 2024
 ```
