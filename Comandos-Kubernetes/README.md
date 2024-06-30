@@ -17,7 +17,7 @@ Cambiar el NS por defecto en el que estamos trabajando
 kubectl config set-context --current --namespace=newdefaultnamespace
 ```
 
-Saber los contenedores que tiene un pod:
+Saber los contenedores que tiene un pod y ver los logs:
 
 ```
 root@kubespray-aio:~# kubectl get pods
@@ -27,6 +27,8 @@ cluster-mysql-1   0/2     Pending   0          11m
 
 root@kubespray-aio:~# kubectl get pods cluster-mysql-0 -o jsonpath='{.spec.containers[*].name}'
 sidecar mysql
+
+root@kubespray-aio:~# kubectl logs cluster-mysql-0 -c sidecar
 ```
 
 Port Forwarding
