@@ -72,6 +72,8 @@ Verificaremos via web que se ha creado el Pool correctamente:
 
 ![alt text](images/creado-pool.png)
 
+Verificaremos que el Ceph este **HEALTH_OK**
+
 ```
 root@ceph-aio:~# ceph -s
   cluster:
