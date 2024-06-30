@@ -28,7 +28,7 @@ cluster-mysql-1   0/2     Pending   0          11m
 root@kubespray-aio:~# kubectl get pods cluster-mysql-0 -o jsonpath='{.spec.containers[*].name}'
 sidecar mysql
 
-root@kubespray-aio:~# kubectl logs cluster-mysql-0 -c sidecar
+root@kubespray-aio:~# kubectl logs -f cluster-mysql-0 -c sidecar
 ```
 
 Port Forwarding
