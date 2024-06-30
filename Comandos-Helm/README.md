@@ -15,6 +15,12 @@ mariadb-operator/mariadb-operator       0.28.0          v0.0.28         Run and 
 mariadb-operator/mariadb-operator       0.27.0          v0.0.27         Run and operate MariaDB in a cloud native way
 ```
 
+Mostrar los valores por defecto:
+
+```
+root@kubespray-aio:~# helm show values mariadb-operator/mariadb-operator --version 0.29.0 > values-mariadb-operator.yaml
+```
+
 Búsquedas
 
 ```
