@@ -4,6 +4,17 @@
 
 ## Varios <div id='id10' />
 
+Instalar Helm:
+
+```
+helm upgrade --install \
+ingress-nginx ingress-nginx/ingress-nginx \
+--create-namespace \
+--namespace ingress-nginx \
+--version=4.7.1 \
+-f values-nginx.yaml
+```
+
 Mostrar versiones:
 
 ```
