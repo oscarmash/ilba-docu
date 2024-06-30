@@ -32,7 +32,7 @@ sidecar mysql
 Port Forwarding
 
 ```
-kubectl -n client-vodafone-wordpress port-forward --address 0.0.0.0 service/vodafone-wordpress-standard-stack-bastion-clients 2222:22
+kubectl -n wordpress port-forward --address 0.0.0.0 service/wordpress 2222:22
 ```
 
 ## Storage <div id='id20' />
