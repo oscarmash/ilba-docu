@@ -1,4 +1,4 @@
-# Ceph Storage
+# Ceph Storage RBD
 
 * [Getting Started](#id0)
 * [Ceph](#id1)
@@ -66,7 +66,13 @@ root@ceph-aio:~# ceph health mute POOL_NO_REDUNDANCY
 root@ceph-aio:~# ceph osd lspools
 1 .mgr
 6 pool-k8s
+```
 
+Verificaremos via web que se ha creado el Pool correctamente:
+
+![alt text](images/creado-pool.png)
+
+```
 root@ceph-aio:~# ceph -s
   cluster:
     id:     7d2b3cca-f1eb-11ee-a886-593bc87d3824
@@ -91,11 +97,17 @@ root@ceph-aio:~# ceph auth get-key client.k8s
 AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
 ```
 
-Verificar la key del usuario:
+Verificar "cosas" del usuario:
 
 ```
 root@ceph-aio:~# ceph auth get-key client.k8s
 AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
+
+root@ceph-aio:~# ceph auth get client.k8s
+[client.k8s]
+        key = AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
+        caps mon = "allow r"
+        caps osd = "allow rwx pool=pool-k8s"
 ```
 
 ## Config Ceph <div id='id2' /> 
@@ -173,6 +185,98 @@ csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           tr
 
 ## Testing <div id='id4' />
 
-:warning: FALTA
+```
+root@kubespray-aio:~# kubectl create ns test-ceph
+```
 
-:warning: PONER CAPTURA DE LA GUI DE EPH
+```
+root@kubespray-aio:~# vim test-ceph.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-fs-apache
+  namespace: test-ceph
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deployment
+  namespace: test-ceph
+spec:
+  selector:
+    matchLabels:
+      app: httpd
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      containers:
+      - name: httpd
+        image: httpd
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: data
+          mountPath: /mydata
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-fs-apache
+
+root@kubespray-aio:~# kubectl apply -f test-ceph.yaml
+```
+
+```
+root@kubespray-aio:~# kubectl -n test-ceph get pods
+root@kubespray-aio:~# kubectl -n test-ceph get pvc
+
+$ k exec -it httpd-deployment-7c889df479-sqjbw -- bash
+root@httpd-deployment-7c889df479-sqjbw:/usr/local/apache2# df -h | grep mydata
+```
+
+## Enlace de storage (nomenclatura)
+
+Como saber el enlace que hay entre los diferentes nombres que usa K8S y Ceph
+
+```
+$ k get pvc
+NAME            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+pvc-fs-apache   Bound    pvc-97727ce7-261f-40ef-a19e-efcb361ca7aa   1Gi        RWO            csi-rbd-sc     44h        
+
+$ k describe pv pvc-97727ce7-261f-40ef-a19e-efcb361ca7aa | grep VolumeHandle
+    VolumeHandle:      0001-0024-dd494d74-f6cd-11ec-a8ee-2ec1cc2a3fa9-0000000000000002-54a7278f-aacf-11ed-b85b-ee66881ed241
+```
+
+Con los comandos anteriores podemos observar que el storage de K8S que usa para enlazar con Ceph es: 
+
+```
+54a7278f-aacf-11ed-b85b-ee66881ed241
+
+root@ceph-01:~# rbd ls pool-k8s
+csi-vol-54a7278f-aacf-11ed-b85b-ee66881ed241
+
+root@ceph-01:~# rbd info pool-k8s/csi-vol-54a7278f-aacf-11ed-b85b-ee66881ed241
+rbd image 'csi-vol-54a7278f-aacf-11ed-b85b-ee66881ed241':
+        size 1 GiB in 256 objects
+        order 22 (4 MiB objects)
+        snapshot_count: 0
+        id: 23358f193cab
+        block_name_prefix: rbd_data.23358f193cab
+        format: 2
+        features: layering
+        op_features:
+        flags:
+        create_timestamp: Sun Feb 12 13:18:17 2023
+        access_timestamp: Sun Feb 12 13:18:17 2023
+        modify_timestamp: Sun Feb 12 13:18:17 2023
+```

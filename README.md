@@ -17,4 +17,4 @@ Documentación de productos usando docker-compose
 
 Documentación de productos usando Helm
 
-* [Helm - Storage - Ceph](./Storage-Ceph/README.md)
+* [Helm - Storage - Ceph (RBD)](./Storage-Ceph-RBD/README.md)
