@@ -5,6 +5,7 @@
 * [Config Ceph](#id2)
 * [Change SC to default](#id3)
 * [Testing](#id4)
+* [Enlace PV/PVC a Ceph](#id5)
 
 ## Getting Started <div id='id0' />
 
@@ -246,7 +247,7 @@ $ k exec -it httpd-deployment-7c889df479-sqjbw -- bash
 root@httpd-deployment-7c889df479-sqjbw:/usr/local/apache2# df -h | grep mydata
 ```
 
-## Enlace de storage (nomenclatura)
+## Enlace PV/PVC a Ceph <div id='id5' />
 
 Como saber el enlace que hay entre los diferentes nombres que usa K8S y Ceph
 
