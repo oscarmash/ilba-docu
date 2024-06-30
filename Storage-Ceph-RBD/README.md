@@ -45,6 +45,7 @@ root@ceph-aio:~# ceph -s
 
 ## Ceph <div id='id1' /> 
 
+
 ```
 root@ceph-aio:~# ceph osd lspools
 1 .mgr
@@ -217,7 +218,7 @@ spec:
   selector:
     matchLabels:
       app: httpd
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -245,6 +246,35 @@ root@kubespray-aio:~# kubectl -n test-ceph get pvc
 
 $ k exec -it httpd-deployment-7c889df479-sqjbw -- bash
 root@httpd-deployment-7c889df479-sqjbw:/usr/local/apache2# df -h | grep mydata
+```
+
+Si falla todo verificar:
+
+```
+root@kubespray-aio:~# kubectl -n ceph-csi logs -f ceph-csi-rbd-nodeplugin-m5nhf
+```
+
+```
+root@kubespray-aio:~# kubectl -n ceph-csi exec -it ceph-csi-rbd-nodeplugin-m5nhf -- bash
+```
+
+```
+[root@kubespray-aio /]# timeout 5 bash -c "</dev/tcp/172.26.0.239/6789" && echo $?
+0
+
+[root@kubespray-aio /]# timeout 5 bash -c "</dev/tcp/172.26.0.239/3300" && echo $?
+0
+```
+
+```
+[root@kubespray-aio /]# ping -c 2 172.26.0.239
+PING 172.26.0.239 (172.26.0.239) 56(84) bytes of data.
+64 bytes from 172.26.0.239: icmp_seq=1 ttl=64 time=3.52 ms
+64 bytes from 172.26.0.239: icmp_seq=2 ttl=64 time=0.691 ms
+
+--- 172.26.0.239 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1001ms
+rtt min/avg/max/mdev = 0.691/2.103/3.516/1.413 ms
 ```
 
 ## Enlace PV/PVC a Ceph <div id='id5' />
