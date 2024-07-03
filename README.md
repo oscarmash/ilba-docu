@@ -11,7 +11,7 @@ Documentación de comandos de K8S
 
 Documentación de productos usando docker-compose
 
-* [HashiCorp Consul](./HashiCorp-Consul/README.md)
+* [HashiCorp Consul](./DC-HashiCorp-Consul/README.md)
 
 ## Helm's
 
