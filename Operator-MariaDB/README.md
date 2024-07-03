@@ -66,13 +66,17 @@ mariadb-operator-webhook-77557c8867-ts744          0/1     Running   0          
 ```
 root@diba-master:~# kubectl create ns mi-mariadb
 root@diba-master:~# kubectl config set-context --current --namespace=mi-mariadb
+```
 
 Revisar que haya un StorageClass por defecto:
 
+```
 root@diba-master:~# kubectl get sc
 NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
 csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   5h19m
+```
 
+```
 root@diba-master:~# git clone https://github.com/mariadb-operator/mariadb-operator.git
 
 root@diba-master:~# sed -i 's/172.18.0.20/172.26.0.102/g' mariadb-operator/examples/manifests/mariadb.yaml
