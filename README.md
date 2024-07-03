@@ -21,6 +21,10 @@ Documentación de productos usando Helm
 
 ## Operators
 
+Los operators los podemos encontrar aquí:
+* https://operatorhub.io/
+* https://artifacthub.io/packages/search
+
 Documentación de productos usando Operators
 
 * [Operator - MariaDB](./Operator-MariaDB/README.md)

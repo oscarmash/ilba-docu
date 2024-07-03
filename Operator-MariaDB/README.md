@@ -86,24 +86,33 @@ root@diba-master:~# sed -i 's/name: mariadb-password/name: mariadb/g' mariadb-op
 
 root@diba-master:~# sed -i 's/generate: true/generate: false/g' mariadb-operator/examples/manifests/mariadb.yaml
 
-root@diba-master:~# kubectl apply -f mariadb-operator/examples/manifests/config/mariadb-secret.yaml
-root@diba-master:~# kubectl apply -f mariadb-operator/examples/manifests/mariadb.yaml
-
 root@diba-master:~# kubectl create secret generic mariadb-root --from-literal=password='MariaDB11!'
 root@diba-master:~# kubectl create secret generic mariadb-password --from-literal=password='MariaDB11!'
+
+root@diba-master:~# kubectl apply -f mariadb-operator/examples/manifests/config/mariadb-secret.yaml
+root@diba-master:~# kubectl apply -f mariadb-operator/examples/manifests/mariadb.yaml
 
 root@diba-master:~# apt-get update && apt-get install -y jq
 root@diba-master:~# kubectl get secret mariadb --template="{{.data.password}}" | base64 --decode && echo
 MariaDB11!
 ```
 
+Por si tenemos problemas, para borrarlo todo:
+
+```
+kubectl delete -f mariadb-operator/examples/manifests/mariadb.yaml
+kubectl delete -f mariadb-operator/examples/manifests/config/mariadb-secret.yaml
+kubectl delete pvc storage-mariadb-0
+rm -rf mariadb-operator/
+kubectl delete ns mi-mariadb && sleep 3 && kubectl create ns mi-mariadb
+```
+
 ## Funcionamiento <div id='id20' />
 
 ```
-
 root@diba-master:~# kubectl get pods
-NAME        READY   STATUS    RESTARTS      AGE
-mariadb-0   1/1     Running   1 (24s ago)   93s
+NAME        READY   STATUS    RESTARTS   AGE
+mariadb-0   1/1     Running   0          6m46s
 
 root@diba-master:~# kubectl get mariadbs
 NAME      READY   STATUS    PRIMARY POD   AGE
@@ -130,12 +139,13 @@ MariaDB [(none)]> SHOW DATABASES;
 +---------------------+
 6 rows in set (0.028 sec)
 
+root@diba-master:~# sed -i 's/name: database/name: database-ilba/g' mariadb-operator/examples/manifests/database.yaml
 root@diba-master:~# kubectl apply -f mariadb-operator/examples/manifests/database.yaml
 
 root@diba-master:~# kubectl get databases
-NAME               READY   STATUS    CHARSET   COLLATE           MARIADB   AGE   NAME
-database           True    Created   utf8      utf8_general_ci   mariadb   11s
-mariadb-database   True    Created   utf8      utf8_general_ci   mariadb   11m   mariadb
+NAME               READY   STATUS    CHARSET   COLLATE           MARIADB   AGE     NAME
+database-ilba      True    Created   utf8      utf8_general_ci   mariadb   5s
+mariadb-database   True    Created   utf8      utf8_general_ci   mariadb   9m57s   mariadb
 
 root@diba-master:~# kubectl exec -it mariadb-0 -- bash
 
@@ -146,12 +156,12 @@ MariaDB [(none)]> SHOW DATABASES;
 | Database            |
 +---------------------+
 | #mysql50#lost+found |
-| database            |
+| database-ilba       |
 | information_schema  |
 | mariadb             |
 | mysql               |
 | performance_schema  |
 | sys                 |
 +---------------------+
-7 rows in set (0.001 sec)
+7 rows in set (0.037 sec)
 ```
