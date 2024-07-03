@@ -6,6 +6,8 @@
 
 ## Getting Started <div id='id0' />
 
+Ubicación del operator: https://github.com/mariadb-operator/mariadb-operator/blob/main/README.md
+
 Partimos de la siguiente base:
 
 * Tenemos un cluster de K8S desplegado
