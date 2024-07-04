@@ -29,3 +29,7 @@ Los operators los podemos encontrar aquí:
 Documentación de productos usando Operators
 
 * [Operator - MariaDB](./Operator-MariaDB/README.md)
+
+## Varios
+
+* [Velero](./Varios-Velero/README.md)
