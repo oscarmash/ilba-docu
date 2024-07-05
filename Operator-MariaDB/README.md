@@ -46,7 +46,7 @@ root@ceph-aio:~# ceph -s
 
 ## Instalación <div id='id10' />
 
-Instalación del Operator
+### Instalación del Operator
 
 ```
 root@diba-master:~# helm repo add mariadb-operator https://helm.mariadb.com/mariadb-operator
@@ -65,17 +65,19 @@ mariadb-operator-cert-controller-8b7fc8d67-jzlnb   0/1     Running   0          
 mariadb-operator-webhook-77557c8867-ts744          0/1     Running   0          18s
 ```
 
-```
-root@diba-master:~# kubectl create ns mi-mariadb
-root@diba-master:~# kubectl config set-context --current --namespace=mi-mariadb
-```
-
 Revisar que haya un StorageClass por defecto:
 
 ```
 root@diba-master:~# kubectl get sc
 NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
 csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   5h19m
+```
+
+### Instalación de la BBDD
+
+```
+root@diba-master:~# kubectl create ns mi-mariadb
+root@diba-master:~# kubectl config set-context --current --namespace=mi-mariadb
 ```
 
 ```
@@ -85,15 +87,17 @@ root@diba-master:~# sed -i 's/172.18.0.20/172.26.0.102/g' mariadb-operator/examp
 
 root@diba-master:~# sed -i 's/name: mariadb-root/name: mariadb/g' mariadb-operator/examples/manifests/mariadb.yaml
 root@diba-master:~# sed -i 's/name: mariadb-password/name: mariadb/g' mariadb-operator/examples/manifests/mariadb.yaml
-
 root@diba-master:~# sed -i 's/generate: true/generate: false/g' mariadb-operator/examples/manifests/mariadb.yaml
+```
 
+```
 root@diba-master:~# kubectl create secret generic mariadb-root --from-literal=password='MariaDB11!'
 root@diba-master:~# kubectl create secret generic mariadb-password --from-literal=password='MariaDB11!'
 
 root@diba-master:~# kubectl apply -f mariadb-operator/examples/manifests/config/mariadb-secret.yaml
 root@diba-master:~# kubectl apply -f mariadb-operator/examples/manifests/mariadb.yaml
-
+```
+```
 root@diba-master:~# apt-get update && apt-get install -y jq
 root@diba-master:~# kubectl get secret mariadb --template="{{.data.password}}" | base64 --decode && echo
 MariaDB11!
@@ -123,7 +127,11 @@ mariadb   True    Running   mariadb-0     5m58s
 root@diba-master:~# kubectl get databases
 NAME               READY   STATUS    CHARSET   COLLATE           MARIADB   AGE   NAME
 mariadb-database   True    Created   utf8      utf8_general_ci   mariadb   10m   mariadb
+```
 
+Creación de una BBDD desde el operator (kubectl)
+
+```
 root@diba-master:~# kubectl exec -it mariadb-0 -- bash
 
 mysql@mariadb-0:/$ mysql -u root -p
