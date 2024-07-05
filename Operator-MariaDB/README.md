@@ -73,7 +73,9 @@ NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   AL
 csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   5h19m
 ```
 
-### Instalación de la BBDD
+### Instalación de MariaDB de forma simple
+
+Instalación con el operator que crea una instancia única de MariaDB
 
 ```
 root@diba-master:~# kubectl create ns mi-mariadb
@@ -129,7 +131,7 @@ NAME               READY   STATUS    CHARSET   COLLATE           MARIADB   AGE  
 mariadb-database   True    Created   utf8      utf8_general_ci   mariadb   10m   mariadb
 ```
 
-Creación de una BBDD desde el operator (kubectl)
+Creación de una BBDD desde el operator (kubectl) y verificación.
 
 ```
 root@diba-master:~# kubectl exec -it mariadb-0 -- bash
