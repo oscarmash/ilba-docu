@@ -1,6 +1,6 @@
 # Documentación de Ilba
 
-## Varios
+## Básicos
 
 Documentación de comandos de K8S
 
