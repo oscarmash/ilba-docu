@@ -7,6 +7,7 @@
 * [Config Grafana con Loki](#id40)
 * [Cosas de Loki](#id50)
   * [Cambio logs ingress-nginx](#id60)
+  * [Que es la pppppppppp...](#id70)
 
 Esquema:
 
@@ -561,3 +562,13 @@ root@diba-master:~# helm -n ingress-nginx ls
 NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART                   APP VERSION
 ingress-nginx   ingress-nginx   2               2024-07-06 12:55:40.468292411 +0200 CEST        deployed        ingress-nginx-4.7.1     1.8.1
 ```
+
+### Que es la pppppppppp... <div id='id70' />
+
+En el dashboard de loki podemos ver el siguiente mensaje:
+
+![alt text](images/pppppp-log.png)
+
+La respuesta es la siguiente:
+
+![alt text](images/pppppp-explicacion.png)
