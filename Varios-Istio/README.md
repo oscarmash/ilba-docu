@@ -1,22 +1,22 @@
 # Index:
 
 * [Instalación de Istio](#id10)
+  * [Descargandonos el Binario](#id11) Recomendada
+  * [Via HELM](#id12)
 * [Creación de un Ingress](#id20)
+* [Jaeger](#id30) FALLA
+* [Kiali](#id40) FALLA
 
 # Instalación de Istio <div id='id10' />
 
 ## Documentación
-
-Documentación encontrada:
-
-* xxxx
 
 Notas importantes de Istio:
 
 * Partimos de un cluster sin Ingress de ningún tipo
 * Lo único que hay montado es el MetalLB
 
-## Instalación
+## Descargandonos el Binario <div id='id11' />
 
 ```
 root@kubespray-aio:~# kubectl get nodes
@@ -64,6 +64,87 @@ istio-ingressgateway   LoadBalancer   10.233.49.152   172.26.0.101   15021:30511
 istiod                 ClusterIP      10.233.44.147   <none>         15010/TCP,15012/TCP,443/TCP,15014/TCP                                        66s
 ```
 
+## Via Helm <div id='id12' />
+
+```
+root@kubespray-aio:~# helm repo add istio https://istio-release.storage.googleapis.com/charts && helm repo update
+
+root@kubespray-aio:~# kubectl create ns istio-system
+
+root@kubespray-aio:~# helm install istio-base istio/base -n istio-system --set defaultRevision=default
+
+root@kubespray-aio:~# helm -n istio-system ls
+NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
+istio-base      istio-system    1               2024-07-06 08:38:31.152764741 +0200 CEST        deployed        base-1.22.2     1.22.2
+
+root@kubespray-aio:~# helm install istiod istio/istiod -n istio-system --wait
+
+root@kubespray-aio:~# helm -n istio-system ls
+NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
+istio-base      istio-system    1               2024-07-06 08:38:31.152764741 +0200 CEST        deployed        base-1.22.2     1.22.2
+istiod          istio-system    1               2024-07-06 08:39:01.60726576 +0200 CEST         deployed        istiod-1.22.2   1.22.2
+
+root@kubespray-aio:~# kubectl create ns istio-ingress
+
+root@kubespray-aio:~# kubectl get ns istio-ingress --show-labels
+NAME            STATUS   AGE   LABELS
+istio-ingress   Active   39s   kubernetes.io/metadata.name=istio-ingress
+
+root@kubespray-aio:~# echo "kind: DaemonSet" > values-istio.yaml
+root@kubespray-aio:~# helm upgrade --install istio-ingress istio/gateway -n istio-ingress -f values-istio.yaml --wait
+
+root@kubespray-aio:~# kubectl -n istio-ingress get pods -o wide
+NAME                  READY   STATUS    RESTARTS   AGE   IP              NODE               NOMINATED NODE   READINESS GATES
+istio-ingress-dl8k2   1/1     Running   0          32s   10.233.111.67   kubespray-aio      <none>           <none>
+istio-ingress-m2sv5   1/1     Running   0          32s   10.233.109.29   kubespray-aio-w1   <none>           <none>
+istio-ingress-xw4jp   1/1     Running   0          32s   10.233.112.20   kubespray-aio-w2   <none>           <none>
+
+root@kubespray-aio:~# helm -n istio-ingress ls
+NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
+istio-ingress   istio-ingress   1               2024-07-06 08:40:09.378262571 +0200 CEST        deployed        gateway-1.22.2  1.22.2
+
+root@kubespray-aio:~# POD=`kubectl -n istio-ingress get pods | grep istio-ingress | awk '{print $1}' | tail -1`
+root@kubespray-aio:~# kubectl -n istio-ingress logs -f $POD
+....
+2024-07-06T06:40:42.055182Z     info    Readiness succeeded in 1.110894429s
+2024-07-06T06:40:42.056220Z     info    Envoy proxy is ready
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Creación de un Ingress<div id='id20' />
 
 ```
@@ -77,13 +158,6 @@ metadata:
 ```
 
 ```
-root@kubespray-aio:~# cat 05-istio-deployment.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: test-ingress-istio
-  labels:
-    istio-injection: enabled
 root@kubespray-aio:~# cat 05-istio-deployment.yaml
 apiVersion: v1
 kind: Service
@@ -124,14 +198,15 @@ spec:
 
 ```
 root@kubespray-aio:~# cat 10-istio-ingress.yaml
+apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: httpbin-gateway
   namespace: test-ingress-istio
 spec:
   selector:
-    #istio: ingress        # instalación con helm
-    istio: ingressgateway  # instalación con istioctl
+    istio: ingress        # instalación con helm
+    #istio: ingressgateway  # instalación con istioctl
   servers:
   - port:
       number: 80
@@ -177,7 +252,8 @@ NAME                                    READY   STATUS    RESTARTS   AGE
 mi-primer-deployment-5b8f8476fb-f6trr   2/2     Running   0          93s
 mi-primer-deployment-5b8f8476fb-zzcf9   2/2     Running   0          93s
 
-root@kubespray-aio:~# kubectl get -n test-ingress-istio pods mi-primer-deployment-5b8f8476fb-f6trr -o jsonpath='{.spec.containers[*].name}' && echo
+root@kubespray-aio:~# POD=`kubectl -n test-ingress-istio get pods | grep mi-primer- | awk '{print $1}' | tail -1`
+root@kubespray-aio:~# kubectl get -n test-ingress-istio pods $POD -o jsonpath='{.spec.containers[*].name}' && echo
 mi-primer-deployment istio-proxy
 
 root@kubespray-aio:~# kubectl -n istio-system get svc
@@ -192,3 +268,115 @@ test-ingress-istio   httpbin   ["httpbin-gateway"]   ["www.dominio.cat"]   4m10s
 ```
 
 ![alt text](images/hello-kubernetes.png)
+
+# Jaeger <div id='id30' />
+
+Instalación de Jaeger
+
+```
+root@kubespray-aio:~# kubectl -n istio-system get cm istio -o yaml
+apiVersion: v1
+data:
+  mesh: |-
+    accessLogFile: /dev/stdout
+    defaultConfig:
+      discoveryAddress: istiod.istio-system.svc:15012
+      proxyMetadata: {}
+      tracing:
+        zipkin:
+          address: zipkin.istio-system:9411
+          ....
+
+root@kubespray-aio:~# helm repo add jaegertracing https://jaegertracing.github.io/helm-charts && helm repo update
+
+root@kubespray-aio:~# kubectl create ns istio-observability
+
+root@kubespray-aio:~# vim values-jaeger.yaml
+collector:
+  service:
+    zipkin:
+      port: 9411
+      nodePort:
+
+root@kubespray-aio:~# helm upgrade --install jaeger jaegertracing/jaeger -n istio-observability -f values-jaeger.yaml
+
+root@kubespray-aio:~# helm ls -n istio-observability
+NAME            NAMESPACE               REVISION        UPDATED                                         STATUS          CHART                   APP VERSION
+jaeger          istio-observability     1               2024-07-06 08:08:19.215108385 +0200 CEST        deployed        jaeger-3.1.0            1.53.0
+```
+
+:memo: esperar un rato + o - 10 minutos
+
+```
+root@kubespray-aio:~# kubectl -n istio-observability get pods
+NAME                                READY   STATUS      RESTARTS       AGE
+jaeger-agent-2mhk8                  1/1     Running     0              3m51s
+jaeger-agent-xxhs2                  1/1     Running     0              3m51s
+jaeger-agent-zv7jh                  1/1     Running     0              3m51s
+jaeger-cassandra-0                  1/1     Running     0              3m51s
+jaeger-cassandra-1                  0/1     Running     0              95s
+jaeger-cassandra-schema-wbjm6       0/1     Completed   0              3m51s
+jaeger-collector-78d5d578bd-nt85t   1/1     Running     5 (2m ago)     3m50s
+jaeger-query-6b98b9b7d5-zlmfh       2/2     Running     5 (108s ago)   3m50s
+```
+
+Testing de acceso:
+
+```
+root@kubespray-aio:~# kubectl port-forward svc/jaeger-query 666:80 -n istio-observability --address 0.0.0.0
+```
+
+![alt text](images/jaeger-tests-acceso.png)
+
+Se que esto es feo, pero ahora no se como hacerlo de otra forma.
+
+```
+root@kubespray-aio:~# kubectl -n istio-observability get svc
+NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                                         AGE
+...
+jaeger-collector   ClusterIP   10.233.2.224   <none>        14250/TCP,14268/TCP,9411/TCP,14269/TCP          7m2s
+...
+
+root@kubespray-aio:~# kubectl -n istio-system edit cm istio
+apiVersion: v1
+data:
+  mesh: |-
+    defaultConfig:
+      discoveryAddress: istiod.istio-system.svc:15012
+      tracing:
+        zipkin:
+          address: jaeger-collector.istio-observability.svc.cluster.local:9411  <----
+    defaultProviders:
+      metrics:
+      - prometheus
+```
+# Kiali <div id='id40' />
+
+Instalación de Kiali
+
+```
+root@kubespray-aio:~# helm repo add kiali https://kiali.org/helm-charts && helm repo update
+
+root@kubespray-aio:~# vim values-kiali.yaml
+istio_namespace: "istio-system"
+auth:
+  strategy: "anonymous"
+
+helm upgrade --install \
+--namespace istio-observability \
+-f values-kiali.yaml \
+kiali-server \
+kiali/kiali-server
+
+root@kubespray-aio:~# helm ls -n istio-observability
+NAME            NAMESPACE               REVISION        UPDATED                                         STATUS          CHART                   APP VERSION
+jaeger          istio-observability     1               2024-07-06 08:08:19.215108385 +0200 CEST        deployed        jaeger-3.1.0            1.53.0
+kiali-server    istio-observability     1               2024-07-06 08:19:29.580183939 +0200 CEST        deployed        kiali-server-1.86.2     v1.86.2
+```
+
+Testing de acceso:
+
+```
+root@kubespray-aio:~# kubectl port-forward svc/kiali 20001:20001 -n istio-observability --address 0.0.0.0
+```
+
