@@ -110,41 +110,6 @@ root@kubespray-aio:~# kubectl -n istio-ingress logs -f $POD
 2024-07-06T06:40:42.056220Z     info    Envoy proxy is ready
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Creación de un Ingress<div id='id20' />
 
 ```
