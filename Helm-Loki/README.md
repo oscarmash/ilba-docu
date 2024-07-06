@@ -1,9 +1,59 @@
 # Instalación de Loki
 
-* [MinIO](#id10)
+* [Grafana](#id5) en este caso es externo, el equipo se llama **monitoring**
+* [MinIO](#id10) 
 * [Loki](#id20)
 * [Promtail](#id30)
 * [Config Grafana con Loki](#id40)
+* [Cosas de Loki](#id50)
+  * [Cambio logs ingress-nginx](#id60)
+
+Esquema:
+
+```
+     +---+                    +---+               
+     |   |                    |   |               
+     |   |                    |   | Cluster de K8S
+     |   |                    |   |               
+     +---+                    +---+               
+Hostname: monitoring                              
+IP: 172.26.0.32                                   
+```
+
+## Grafana <div id='id5' />
+
+El grafana lo hemos puesto fuera del cluster de K8S, en un equipo llamado: **monitoring**
+
+Dejo el fichero del contenedor de grafana
+
+```
+root@monitoring:~# cat /etc/docker-compose/docker-compose.yml
+version: '3.7'
+
+volumes:
+  grafana_data: {}
+
+services:
+
+  grafana:
+    container_name: grafana
+    hostname: grafana
+    image: grafana/grafana:10.4.2    
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=sorisat
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=172.26.0.32:25
+      - GF_SMTP_FROM_ADDRESS=grafana_alerts@ilba.cat
+      - GF_SMTP_SKIP_VERIFY=true
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+```
 
 ## MinIO <div id='id10' />
 
@@ -38,8 +88,7 @@ mkdir /disk-local-minio-data
 ```
 
 ```
-$ cat values-minio.yaml
-
+root@diba-master:~# vim values-minio.yaml
 mode: distributed
 
 persistence:
@@ -129,11 +178,11 @@ nodeAffinity:
 
 
 ```
-helm repo add minio https://charts.min.io/ && helm repo update
+root@diba-master:~# helm repo add minio https://charts.min.io/ && helm repo update
 ```
 
 ```
-helm upgrade --install \
+root@diba-master:~# helm upgrade --install \
 minio minio/minio \
 --create-namespace \
 --namespace minio \
@@ -200,7 +249,7 @@ Por ejemplo: si bajamos las réplicas del _backend_ a 1, después cuando configu
 
 
 ```
-$ cat values-loki.yaml
+root@diba-master:~# vim values-loki.yaml
 global:
   dnsService: "coredns"
 
@@ -292,7 +341,9 @@ loki-write-0                                   1/1     Running   0          3m57
 ```
 root@diba-master:~# kubectl get ingress -A
 NAMESPACE      NAME                CLASS    HOSTS                    ADDRESS        PORTS   AGE
-loki           loki-gateway        nginx    gateway-loki.ilba.cat    172.26.0.101   80      7m4s
+loki           loki-gateway        nginx    gateway-loki.ilba.cat    172.26.0.101   80      43s
+minio          minio               nginx    api-minio.ilba.cat       172.26.0.101   80      4m22s
+minio          minio-console       nginx    console-minio.ilba.cat   172.26.0.101   80      4m22s
 ```
 
 ## Promtail <div id='id30' />
@@ -300,7 +351,7 @@ loki           loki-gateway        nginx    gateway-loki.ilba.cat    172.26.0.10
 ### Instalación de Promtail
 
 ```
-$ cat values-promtail.yaml
+root@diba-master:~# vim values-promtail.yaml
 config:
    clients:
     - url: http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push
@@ -348,8 +399,73 @@ root@diba-master:~# kubectl -n promtail logs -f promtail-gr8kf
 ## Send logs to Loki
 
 ```
+root@diba-master:~# cat testing.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-metallb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mi-primer-deployment
+  namespace: test-metallb
+spec:
+  selector:
+    matchLabels:
+      app: mi-primer-deployment
+  replicas: 2
+  template:
+    metadata:
+       labels:
+          app: mi-primer-deployment
+    spec:
+      containers:
+      - name: mi-primer-deployment
+        image: paulbouwer/hello-kubernetes:1.9
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mi-primer-service
+  namespace: test-metallb
+  labels:
+     app: mi-primer-service
+spec:
+  type: ClusterIP
+  selector:
+    app: mi-primer-deployment
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mi-primer-ingress
+  namespace: test-metallb
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: www.dominio.cat
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+               service:
+                  name: mi-primer-service
+                  port:
+                     number: 80
+```
+
+```
 root@diba-master:~# kubectl get ingress -A
 NAMESPACE      NAME                CLASS    HOSTS                    ADDRESS        PORTS   AGE
+...
 test-metallb   mi-primer-ingress   <none>   www.dominio.cat          172.26.0.101   80      3d
 ```
 
@@ -386,3 +502,62 @@ Configuramos el Data Source:
 
 Importar Dashboard: [15141](https://grafana.com/grafana/dashboards/15141-kubernetes-service-logs/)
 
+![alt text](images/dashboard-loki-config.png)
+
+![alt text](images/dashboard-loki.png)
+
+## Cosas de Loki <div id='id50' />
+
+### Cambio logs ingress-nginx <div id='id60' />
+
+Los logs por defecto que pone el ingress-nginx, sería como el siguiente:
+
+```
+172.26.0.204 - - [06/Jul/2024:10:49:28 +0000] "GET /images/kubernetes.png HTTP/1.1" 304 0 "http://www.dominio.cat/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" 498 0.005 [test-metallb-mi-primer-service-80] [] 10.38.25.68:8080 0 0.005 304 08940f37d2170d2b790a3a02cb29f080
+```
+
+Lo que queremos es que salga más información tipo:
+
+```
+{"timestamp": "2024-07-06T10:56:39+00:00", "requestID": "070e446fb0d703a424693ce792228f1d", "proxyUpstreamName": "test-metallb-mi-primer-service-80", "proxyAlternativeUpstreamName": "","upstreamStatus": "304", "upstreamAddr": "10.38.25.68:8080","httpRequest":{"requestMethod": "GET", "requestUrl": "www.dominio.cat/images/kubernetes.png", "status": 304,"requestSize": "498", "responseSize": "0", "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36", "remoteIp": "172.26.0.204", "referer": "http://www.dominio.cat/", "latency": "0.005 s", "protocol":"HTTP/1.1"}}
+```
+
+Para ello, modificaremos el **log-format** del ingress-nginx:
+
+```
+root@diba-master:~# vim values-nginx.yaml
+controller:
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: "Local"
+  publishService:
+    enabled: true
+  kind: DaemonSet
+  config:
+    log-format-upstream: '{"timestamp": "$time_iso8601", "requestID": "$req_id", "proxyUpstreamName":
+    "$proxy_upstream_name", "proxyAlternativeUpstreamName": "$proxy_alternative_upstream_name","upstreamStatus":
+    "$upstream_status", "upstreamAddr": "$upstream_addr","httpRequest":{"requestMethod":
+    "$request_method", "requestUrl": "$host$request_uri", "status": $status,"requestSize":
+    "$request_length", "responseSize": "$upstream_response_length", "userAgent": "$http_user_agent",
+    "remoteIp": "$remote_addr", "referer": "$http_referer", "latency": "$upstream_response_time s",
+    "protocol":"$server_protocol"}}'
+```
+
+Y aplicaremos los cambios:
+
+```
+helm upgrade --install \
+ingress-nginx ingress-nginx/ingress-nginx \
+--create-namespace \
+--namespace ingress-nginx \
+--version=4.7.1 \
+-f values-nginx.yaml
+```
+
+Verificaremos el correcto despliegue:
+
+```
+root@diba-master:~# helm -n ingress-nginx ls
+NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART                   APP VERSION
+ingress-nginx   ingress-nginx   2               2024-07-06 12:55:40.468292411 +0200 CEST        deployed        ingress-nginx-4.7.1     1.8.1
+```
