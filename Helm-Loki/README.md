@@ -567,8 +567,8 @@ ingress-nginx   ingress-nginx   2               2024-07-06 12:55:40.468292411 +0
 
 En el dashboard de loki podemos ver el siguiente mensaje:
 
-![alt text](images/pppppp-log.png)
+![alt text](images/ppppppp-log.png)
 
 La respuesta es la siguiente:
 
-![alt text](images/pppppp-explicacion.png)
+![alt text](images/ppppppp-explicacion.png)
