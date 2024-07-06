@@ -1,7 +1,8 @@
 # Comandos de Kubernetes
 
 * [Working daily](#id10)
-* [Storage](#id20)
+* [Cosas específicas](#id20)
+* [Alias](#id30)
 
 ## Working daily <div id='id10' />
 
@@ -37,7 +38,7 @@ Port Forwarding
 kubectl -n wordpress port-forward --address 0.0.0.0 service/wordpress 2222:22
 ```
 
-## Storage <div id='id20' />
+## Cosas específicas <div id='id20' />
 
 Change SC to default
 
@@ -52,3 +53,16 @@ root@kubespray-aio:~# kubectl get sc
 NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
 csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   4m59s
 ```
+
+## Alias <div id='id30' />
+
+Alias básicos:
+
+```
+alias k='kubectl'
+alias kcdf='kubectl delete -f'
+alias kcaf='kubectl apply -f'
+alias kcdp='kubectl delete pod --grace-period=0 --force'
+```
+
+Todos los alias, los mpuedes encontrar [aquí](https://github.com/ahmetb/kubectl-aliases/blob/master/.kubectl_aliases)
