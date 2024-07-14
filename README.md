@@ -33,8 +33,8 @@ Los operators los podemos encontrar aquí:
 
 Documentación de productos usando Operators
 
-* [Operator - MariaDB](./Operator/MariaDB/README.md)
-* [Operator - Prometheus](./Operator/Prometheus/README.md)
+* [Operator - MariaDB](./Operators/MariaDB/README.md)
+* [Operator - Prometheus](./Operators/Prometheus/README.md)
 
 ## Varios
 
