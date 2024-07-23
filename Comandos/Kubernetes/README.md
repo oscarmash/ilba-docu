@@ -38,6 +38,24 @@ Port Forwarding
 kubectl -n wordpress port-forward --address 0.0.0.0 service/wordpress 2222:22
 ```
 
+NS que no se borra:
+
+```
+root@ilimit-paas-k8s-test-cp01:~# kubectl delete ns argocd
+namespace "argocd" deleted
+
+root@ilimit-paas-k8s-test-cp01:~# kubectl get ns
+NAME               STATUS        AGE
+argocd             Terminating   2d5h
+calico-apiserver   Active        35m
+ceph-csi-cephfs    Active        2d5h
+```
+
+```
+NS=`kubectl get ns |grep Terminating | awk 'NR==1 {print $1}'` && kubectl get namespace "$NS" -o json   | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/"   | kubectl replace --raw /api/v1/namespaces/$NS/finalize -f -
+```
+
+
 ## Cosas específicas <div id='id20' />
 
 Change SC to default
