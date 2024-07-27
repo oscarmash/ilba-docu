@@ -18,6 +18,7 @@ Documentación de productos usando docker-compose
 Bootstrap (helms básicos)
 
 * [Helm - Ingress Nginx](./Helm/Ingress-Nginx/README.md)
+* [Helm - multiples Ingress Nginx (LAN / DMZ)](./Helm/multiples-lan-dmz-Ingress-Nginx/README.md)
 
 Helms avanzados:
 
