@@ -7,7 +7,8 @@
 * [Testing](#id50)
   * [LAN](#id51)
   * [DMZ](#id52)
-
+* [Kyverno](#id60)
+* [Kyverno Rules](#id70)
 
 # Prerequisites <div id='id10' />
 
@@ -349,3 +350,18 @@ Commercial support is available at
 </body>
 </html>
 ```
+
+# Kyverno <div id='id60' />
+
+Instalación de [Kyverno](../../Helm/Kyverno/README.md)
+
+# Kyverno Rules <div id='id70' />
+
+```
+root@kubespray-aio:~# kubectl port-forward service/lan-policy-reporter-ui 8082:8080 -n lan-policy-reporter --address 0.0.0.0
+```
+
+Policy rules:
+* [restrict-ingress-classes.yaml](../..//Helm/Kyverno-Rules/README.md)
+* [restrict-address-pool.yaml](../..//Helm/Kyverno-Rules/README.md)
+ 

@@ -1,0 +1,28 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-address-pool
+  annotations:
+    policies.kyverno.io/title: Restrict Ingress Classes
+    policies.kyverno.io/category: Sample
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Ingress
+    policies.kyverno.io/minversion: 1.6.0
+    policies.kyverno.io/description: >-
+      Address Pool should only be allowed which match `lan-ippool` or `dmz-ippool`.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+  - name: validate-address-pool
+    match:
+      any:
+      - resources:
+          kinds:
+          - Ingress
+    validate:
+      message: "Unknown address pool."
+      pattern:
+        metadata:
+          annotations:
+            metallb.universe.tf/address-pool: "lan-ippool | dmz-ippool"

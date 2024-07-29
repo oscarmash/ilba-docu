@@ -157,3 +157,7 @@ disallow-latest-tag   true        true         audit             True    2m23s  
 ```
 
 ![alt text](images/policy-reporter-ui-errores.png)
+
+```
+root@kubespray-aio:~# kubectl delete -f disallow-latest-tag.yaml
+```
