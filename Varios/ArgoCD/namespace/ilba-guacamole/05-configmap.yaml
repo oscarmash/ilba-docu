@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guacamole-conf
+  namespace: ilba-guacamole
+data:
+  user-mapping.xml: |
+    <user-mapping>
+    <authorize 
+    username="admin" 
+    password="142c56491d80b16a4da71a0ad86898c6" 
+    encoding="md5">
+      <connection name="host1.ilba.cat">
+        <protocol>ssh</protocol>
+        <param name="hostname">host1.ilba.cat</param>
+        <param name="port">22</param>
+        <param name="username">root</param>
+        <param name="password">C@dinor1988</param>
+      </connection>
+      <connection name="host2.ilba.cat">
+        <protocol>ssh</protocol>
+        <param name="hostname">host2.ilba.cat</param>
+        <param name="port">22</param>
+        <param name="username">root</param>
+        <param name="password">C@dinor1988</param>
+      </connection>
+      <connection name="ubuntu-cp.ilba.cat">
+        <protocol>ssh</protocol>
+        <param name="hostname">ubuntu-cp.ilba.cat</param>
+        <param name="port">22</param>
+        <param name="username">root</param>
+        <param name="password">sorisat</param>
+      </connection>
+    </authorize>
+    </user-mapping>

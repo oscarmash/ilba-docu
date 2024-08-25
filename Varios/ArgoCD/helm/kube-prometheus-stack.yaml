@@ -1,0 +1,123 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+  project: ilba
+  source:
+    chart: kube-prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 32.0.1
+    helm:
+      releaseName: kube-prometheus-stack
+      values: |
+        alertmanager:
+          config:
+            global:
+              resolve_timeout: 5m
+              smtp_from: 'kps@ilba.ilimit.net'
+              smtp_smarthost: 'relaysmtp.ilba.ilimit.net:25'
+            route:
+              group_by: ['job']
+              group_wait: 30s
+              group_interval: 1m
+              repeat_interval: 1h
+              receiver: 'smtp'
+              routes:
+              - match:
+                  alertname: Watchdog
+                receiver: 'smtp'
+              - match:
+                  severity: critical
+                continue: true
+                receiver: 'smtp'
+              - match:
+                  severity: warning
+                continue: true
+                receiver: 'smtp'        
+            receivers:
+            - name: 'smtp'
+              email_configs:
+              - to: 'oscarmash@gmail.com'
+                send_resolved: true  
+            templates:
+            - '/etc/alertmanager/config/*.tmpl'
+          ingress:
+            enabled: true
+            annotations:
+              kubernetes.io/ingress.class: "nginx"
+              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+            labels: {}
+            hosts:
+              - kps-alermanager.ilba.ilimit.net
+            path: /
+            tls:
+              - secretName: kps-alermanager-secret
+                hosts:
+                  - kps-alermanager.ilba.ilimit.net
+          alertmanagerSpec: 
+            storage:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: nfs-client
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 50Gi
+
+        grafana:
+          defaultDashboardsTimezone: Europe/Madrid
+          adminPassword: C@dinor1988
+          ingress:
+            enabled: true
+            annotations:
+              kubernetes.io/ingress.class: "nginx"
+              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+            labels: {}
+            hosts:
+              - kps-grafana.ilba.ilimit.net
+            path: /
+            tls:
+              - secretName: kps-grafana-secret
+                hosts:
+                  - kps-grafana.ilba.ilimit.net
+
+        prometheus:
+          ingress:
+            enabled: true
+            annotations:
+              kubernetes.io/ingress.class: "nginx"
+              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+            labels: {}
+            hosts:
+              - kps-prometheus.ilba.ilimit.net
+            paths: 
+              - /
+            tls:
+              - secretName: kps-prometheus-secret
+                hosts:
+                  - kps-prometheus.ilba.ilimit.net
+          prometheusSpec:
+            retention: 30d
+            storageSpec:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: nfs-client
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 100Gi
+
+        kubeControllerManager:
+          service:
+            targetPort: 10257
+          serviceMonitor:
+            https: true
+            insecureSkipVerify: true      
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-prometheus-stack
