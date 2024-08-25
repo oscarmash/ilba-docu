@@ -1,0 +1,7 @@
+controller:
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: "Local"
+  publishService:
+    enabled: true
+  kind: DaemonSet

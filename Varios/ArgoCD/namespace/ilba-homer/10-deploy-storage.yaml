@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homer
+  namespace: ilba-homer
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      run: homer
+  template:
+    metadata:
+      labels:
+        run: homer
+    spec:
+      containers:
+      - name: homer
+        image: b4bz/homer:22.02.1
+        env:
+          - name: UID
+            value: "1000"
+          - name: GID
+            value: "1000"
+        ports:
+        - name: http
+          containerPort: 8080 
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 45
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 2
+          timeoutSeconds: 10
+        volumeMounts:
+        - name: homer-conf
+          mountPath: /www/default-assets
+      volumes:
+        - name: homer-conf
+          persistentVolumeClaim:
+            claimName: homer-conf-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homer-conf-pvc
+  namespace: ilba-homer
+  labels:
+    run: homer
+spec:
+  storageClassName: nfs-homer
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 4Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: homer-conf-pv
+  namespace: ilba-homer
+  labels:
+    run: homer
+spec:
+  storageClassName: nfs-homer
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 172.26.0.58
+    path: "/nfs-k8s/k8s_homer"

@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-plex
+  namespace: argocd
+spec:
+  project: ilba
+  source:
+    repoURL: git@gitlab.ilba.cat:gitops/argocd.git
+    targetRevision: HEAD
+    path: namespace/ilba-plex
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ilba-plex
+  syncPolicy:
+    automated: {}
