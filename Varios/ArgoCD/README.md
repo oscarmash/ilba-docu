@@ -15,7 +15,23 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 ## Hacer consultas a ArgoCD
 
-Primero nos hemos de loginar
+Primero nos hemos de loginar, pero antes nos hgemos de instalar el binario en nuestro sistema
+
+```
+$ ARGOCD_VERSION=$(curl --silent "https://api.github.com/repos/argoproj/argo-cd/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+$ curl -sSL -o /tmp/argocd-${ARGOCD_VERSION} https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-amd64
+$ chmod +x /tmp/argocd-${ARGOCD_VERSION}
+$ mv /tmp/argocd-${ARGOCD_VERSION} /usr/local/bin/argocd 
+
+$argocd version --client
+argocd: v2.12.2+560953c
+  BuildDate: 2024-08-23T03:49:50Z
+  GitCommit: 560953c37b343c956f3a18f3db7d006e694c0dc4
+  GitTreeState: clean
+  GoVersion: go1.22.6
+  Compiler: gc
+  Platform: linux/amd64
+```
 
 ```
 oscar@PRT-OMAS:~$ argocd --insecure login 172.26.0.102:443
