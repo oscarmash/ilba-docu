@@ -2,6 +2,7 @@
 
 * [Instalación de Zabbix](#id10)
 * [Configuración en servidor de Zabbix](#id20)
+* [Verificaciones](#id30)
 
 # Instalación de Zabbix <div id='id10' />
 
@@ -70,3 +71,30 @@ A partir de aquí realizaremos la configuración:
 Ha de quedar así:
 
 ![alt text](images/end.png)
+
+# Verificaciones <div id='id30' />
+
+```
+$ cat pod_roto.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-roto
+  namespace: default
+spec:
+  containers:
+    - name: pod
+      image: registre.ili.es/prker_com/library/ubuntu:20.04
+      command: [ "/bin/bash", "-c", "--" ]
+      args: [ "while true; do sleep 300; done;" ]
+```
+
+```
+$ kubectl apply -f pod_roto.yaml
+```
+
+![alt text](images/pod_roto.png)
+
+```
+$ kubectl delete -f pod_roto.yaml
+```
