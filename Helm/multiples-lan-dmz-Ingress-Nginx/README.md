@@ -77,6 +77,7 @@ controller:
   service:
     type: LoadBalancer
     externalTrafficPolicy: "Local"
+    loadBalancerIP: "10.1.68.62"
   publishService:
     enabled: true
   kind: DaemonSet
@@ -104,14 +105,22 @@ ingress-nginx-controller-tdfdz   1/1     Running   0          29s   10.233.109.2
 ```
 
 ```
-root@kubespray-aio:~# cp -a lan-values-nginx.yaml dmz-values-nginx.yaml
-root@kubespray-aio:~# sed -i 's/lan/dmz/g' dmz-values-nginx.yaml
 root@kubespray-aio:~# cat dmz-values-nginx.yaml
-
-root@kubespray-aio:~# vim dmz-values-nginx.yaml
-    ...
+controller:
+  service:
     type: LoadBalancer
-    ...
+    externalTrafficPolicy: "Local"
+    loadBalancerIP: "172.16.3.84"
+  publishService:
+    enabled: true
+  kind: DaemonSet
+  nodeSelector:
+    workload: dmz
+  ingressClassByName: true
+  ingressClass: dmz-ingress
+  ingressClassResource:
+    name: dmz-ingress
+    controllerValue: k8s.io/dmz-ingress
 ```
 
 ```
@@ -151,7 +160,6 @@ helm upgrade --install metallb-system metallb/metallb \
 
 ```
 root@kubespray-aio:~# cat lan-dmz-crd-ip.yaml
-apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   creationTimestamp: null
@@ -159,7 +167,8 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 172.26.0.101/32
+  - 10.1.68.62/32
+  autoAssign: false
 status: {}
 ---
 apiVersion: metallb.io/v1beta1
@@ -170,7 +179,8 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 172.26.0.102/32
+  - 172.16.3.84/32
+  autoAssign: false
 status: {}
 ---
 apiVersion: metallb.io/v1beta1
