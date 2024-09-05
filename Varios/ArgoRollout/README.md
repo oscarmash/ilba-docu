@@ -1,7 +1,7 @@
 # Index:
 
 * [Instalación de Argo Rollout](#id10)
-* [blue/green](#id20)
+* [Blue-Green](#id20)
 
 # Instalación de Argo Rollout <div id='id10' />
 
@@ -49,13 +49,19 @@ NAME                      CLASS   HOSTS                    ADDRESS        PORTS 
 argo-rollouts-dashboard   nginx   argo-rollouts.ilba.cat   172.26.0.101   80      34h
 ```
 
-# blue/green <div id='id20' />
+# Blue-Green <div id='id20' />
 
-## Qué es blue/green ?
+## Qué es Blue-Green ?
 
 A blue-green deployment is a technique for releasing new software versions by maintaining two separate yet identical environments, called the blue and the green. The existing production environment is called the blue environment, whereas the new software version is deployed to the green environment. Upon a thorough test and validation, the green environment is switched to the production environment by routing traffic to the green environment. This makes the green environment the new blue environment. The former blue can be taken down once the new Blue environment becomes stable.
 
 ![alt text](images/blue-green-deployments-in-kubernetes.png)
+
+## Desventajas
+
+Desventajas de la implementación de Blue-green:
+
+* blue-green strategy is that you must have enough capacity to support both versions running simultaneously
 
 ## Trabajando con blue/green
 
