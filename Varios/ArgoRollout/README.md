@@ -6,10 +6,19 @@
 
 # Argo Rollout <div id='id05' />
 
-## Qué es Argo Rollout:
+## Qué es Argo Rollout ?
+
 Argo Rollout in an advanced deployment controller for Kubernetes.
 
-Provide additional deployment startegies like [Blue-Green](#id20) and Canary
+Extend the existing funcionality of Kubernetes native deployments
+
+It allows the develoer to define varius strategies for updating an application
+
+Provide additional deployment startegies like:
+* [Blue-Green](#id20)
+* Canary
+* Weighted traffic shifting
+* etc...
 
 ## Key Features
 Características principales: 
@@ -19,6 +28,8 @@ Características principales:
 * Customizable Metrics: custom metrics for accessing success and making automated decisions
 
 # Instalación de Argo Rollout <div id='id10' />
+
+## Instalación de Argo Rollout
 
 ```
 root@kubespray-aio:~# kubectl get nodes
@@ -71,6 +82,14 @@ root@kubespray-aio:~# kubectl -n argo-rollouts get ingress
 NAME                      CLASS   HOSTS                    ADDRESS        PORTS   AGE
 argo-rollouts-dashboard   nginx   argo-rollouts.ilba.cat   172.26.0.101   80      34h
 ```
+## Instalación del  plugin
+
+xxxx
+
+```
+$ kubectl argo rollouts version
+xxxx
+```
 
 # Blue-Green <div id='id20' />
 
@@ -112,7 +131,9 @@ spec:
               number: 80
 ```
 
-Vamos a usar **kind: Rollout** en vez del típico **kind: deployment**
+Vamos a usar **kind: Rollout** en vez del típico **kind: deployment** 
+
+Documentación del [kind: Rollout](https://argo-rollouts.readthedocs.io/en/stable/features/specification/)
 
 ```
 root@kubespray-aio:~# cat 03-argo-rollouts-rollout.yaml
@@ -192,25 +213,39 @@ NAME                                    READY   STATUS    RESTARTS   AGE
 bluegreen-deployment-6878c78ff5-blbcp   1/1     Running   0          45s
 bluegreen-deployment-6878c78ff5-fws68   1/1     Running   0          45s
 bluegreen-deployment-6878c78ff5-kdsrg   1/1     Running   0          45s
+```
 
+```
 root@kubespray-aio:~# kubectl -n argo-rollouts-bluegreen get rollout
 NAME                   DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 bluegreen-deployment   3         3         3            3           56s
 ```
 
 ```
+root@kubespray-aio:~# kubectl -n argo-rollouts-bluegreen argo rollouts kist rollouts
+xxxxx
+```
+
+```
+root@kubespray-aio:~# kubectl argo rollouts -n argo-rollouts-bluegreen get rollout bluegreen-deployment
+xxxxx
+```
+
+En este caso usaremos la imagen **yellow**, pero podriamos usar cualquiera del [repositorio del Argo Rollouts Demo](https://hub.docker.com/r/argoproj/rollouts-demo/tags)
+
+```
 root@kubespray-aio:~# kubectl argo rollouts -n argo-rollouts-bluegreen set image bluegreen-deployment "*=argoproj/rollouts-demo:yellow"
 ```
+
 ![alt text](images/blue-green-deployments-in-kubernetes-yellow.png)
 
 ```
 root@kubespray-aio:~# kubectl -n argo-rollouts-bluegreen get rollout
-NAME                   DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-bluegreen-deployment   3         6         3            3           4m15s
 ```
 
 ```
-kubectl argo rollouts -n argo-rollouts-bluegreen promote bluegreen-deployment
+root@kubespray-aio:~# kubectl argo rollouts -n argo-rollouts-bluegreen promote bluegreen-deployment
+xxxxx
 ```
 
 
@@ -224,6 +259,11 @@ kubectl argo rollouts -n argo-rollouts-bluegreen promote bluegreen-deployment
 root@kubespray-aio:~# kubectl -n argo-rollouts-bluegreen get rollout
 NAME                   DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 bluegreen-deployment   3         3         3            3           5m50s
+```
+
+```
+root@kubespray-aio:~# kubectl -n argo-rollouts-bluegreen argo rollouts kist rollouts
+xxxxx
 ```
 
 ```
