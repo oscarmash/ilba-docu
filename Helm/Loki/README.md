@@ -58,6 +58,8 @@ services:
 
 ## MinIO <div id='id10' />
 
+[!CAUTION] para el storage de MinIO no usar [host path](https://github.com/minio/minio/discussions/18598#discussioncomment-7766467) [!CAUTION]
+
 ### Errores minio
 
 Para desplegar minio el equipo ha de tener la siguiente flag:
