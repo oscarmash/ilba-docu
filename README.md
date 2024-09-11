@@ -22,7 +22,7 @@ Bootstrap (helms básicos)
 
 Helms avanzados:
 
-* [Helm - Storage - NFS](./Helm/Storage-NFS/README.md)
+* [Helm - Storage - NFS](./Helm/Storage-NFS/README.md) **No usar: Helm obsoleto**
 * [Helm - Storage - Ceph (RBD)](./Helm/Storage-Ceph-RBD/README.md)
 * [Helm - Loki](./Helm/Loki/README.md)
 * [Helm - Kyverno](./Helm/Kyverno/README.md)
@@ -47,3 +47,7 @@ Documentación de productos usando Operators
 
 * [Istio](./Varios-k8s/Istio/README.md) (sin eBPF)
 * [Velero](./Varios-k8s/Velero/README.md)
+
+## Varios
+
+* [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) **Work in progress**
