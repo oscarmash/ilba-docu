@@ -27,6 +27,9 @@ Helms avanzados:
 * [Helm - Loki](./Helm/Loki/README.md)
 * [Helm - Kyverno](./Helm/Kyverno/README.md)
 * [Helm - Kyverno Rules](./Helm/Kyverno-Rules/README.md)
+* [Helm - Zabbix](./Helm/Zabbix/README.md)
+* [Helm - Argo CD](./Helm/ArgoCD/README.md)
+* [Helm - Argo Rollout](./Helm/ArgoRollout/README.md)
 
 ## Operators
 
@@ -44,6 +47,3 @@ Documentación de productos usando Operators
 
 * [Istio](./Varios/Istio/README.md) (sin eBPF)
 * [Velero](./Varios/Velero/README.md)
-* [Zabbix](./Varios/Zabbix/README.md)
-* [Argo CD](./Varios/ArgoCD/README.md)
-* [Argo Rollout](./Varios/ArgoRollout/README.md)
