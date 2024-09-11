@@ -43,7 +43,7 @@ Documentación de productos usando Operators
 * [Operator - Prometheus](./Operators/Prometheus/README.md) **No acabado**
 * [Operator - Loki](./Operators/Loki/README.md) **No acabado**
 
-## Varios
+## Varios Kubernetes
 
-* [Istio](./Varios/Istio/README.md) (sin eBPF)
-* [Velero](./Varios/Velero/README.md)
+* [Istio](./Varios-k8s/Istio/README.md) (sin eBPF)
+* [Velero](./Varios-k8s/Velero/README.md)
