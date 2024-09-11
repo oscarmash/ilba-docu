@@ -38,6 +38,13 @@ root@ceph-aio:~# ceph -s
 root@ceph-aio:~# ceph orch apply rgw rgw_ilba
 Scheduled rgw.rgw_ilba update...
 
+root@ceph-aio:~# ceph orch host label add ceph-aio rgw
+Added label rgw to host ceph-aio
+
+root@ceph-aio:~# ceph orch apply rgw rgw_ilba
+Scheduled rgw.rgw_ilba update...
+
+
 ```
 
 https://docs.ceph.com/en/latest/cephadm/services/rgw/
