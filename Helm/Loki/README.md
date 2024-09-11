@@ -238,6 +238,55 @@ Hay que crear a mano el "Lifecycle Rules":
 
 ![alt text](images/MinIO-Lifecycle-Rules.png)
 
+### Comandos "mc"
+
+```
+ilimit-paas-k8s-cp01:~# wget https://dl.min.io/client/mc/release/linux-amd64/mc
+ilimit-paas-k8s-cp01:~# chmod 755 mc
+```
+
+```
+ilimit-paas-k8s-cp01:~# kubectl -n velero get svc
+NAME    TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+minio   NodePort   10.43.151.139   <none>        9000:30724/TCP   78d
+
+
+ilimit-paas-k8s-cp01:~# ./mc alias set myminio http://10.43.151.139:9000 minio minio123
+
+ilimit-paas-k8s-cp01:~# ./mc alias ls
+...
+myminio
+  URL       : http://10.43.151.139:9000
+  AccessKey : minio
+  SecretKey : minio123
+  API       : s3v4
+  Path      : auto
+...
+```
+
+```
+ilimit-paas-k8s-cp01:~# ./mc alias ls myminio
+myminio
+  URL       : http://10.43.151.139:9000
+  AccessKey : minio
+  SecretKey : minio123
+  API       : s3v4
+  Path      : auto
+
+ilimit-paas-k8s-cp01:~# ./mc admin info myminio
+●  10.43.151.139:9000
+   Uptime:2 weeks
+   Version: 2024-06-04T19:20:08Z
+   Network: 1/1OK
+   Drives: 1/1OK
+   Pool: 1
+┌──────┬───────────────────────┬─────────────────────┬──────────────┐
+│ Pool │ Drives Usage          │ Erasure stripe size │ Erasure sets │
+│ 1st  │ 76.3% (total: 56 GiB) │ 1                   │ 1            │
+└──────┴───────────────────────┴─────────────────────┴──────────────┘
+1 drive online, 0 drives offline, EC:0
+```
+
 ## Loki <div id='id20' />
 
 ### Instalación de Loki

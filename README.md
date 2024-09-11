@@ -29,7 +29,7 @@ Helms avanzados:
 * [Helm - Kyverno Rules](./Helm/Kyverno-Rules/README.md)
 * [Helm - Zabbix](./Helm/Zabbix/README.md)
 * [Helm - Argo CD](./Helm/ArgoCD/README.md)
-* [Helm - Argo Rollout](./Helm/ArgoRollout/README.md)
+* [Helm - Argo Rollout](./Helm/ArgoRollout/README.md) **No acabado**
 
 ## Operators
 
