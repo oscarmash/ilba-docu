@@ -238,53 +238,173 @@ Hay que crear a mano el "Lifecycle Rules":
 
 ![alt text](images/MinIO-Lifecycle-Rules.png)
 
+### Monitorización con Prometheus
+
+Verificamos que todo esté bien:
+
+```
+root@kubespray-aio:~# kubectl -n minio get pods
+NAME      READY   STATUS    RESTARTS   AGE
+minio-0   1/1     Running   0          66s
+minio-1   1/1     Running   0          66s
+minio-2   1/1     Running   0          66s
+```
+
+Instalamos el "mc", para que nos de la configuración de prometheus
+
+```
+root@kubespray-aio:~# wget https://dl.min.io/client/mc/release/linux-amd64/mc
+root@kubespray-aio:~# chmod 755 mc
+
+root@kubespray-aio:~# kubectl -n minio get svc
+NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+minio           ClusterIP   10.233.62.98   <none>        9000/TCP   23m
+minio-console   ClusterIP   10.233.5.8     <none>        9001/TCP   23m
+minio-svc       ClusterIP   None           <none>        9000/TCP   23m
+
+root@kubespray-aio:~# ./mc alias set myminio http://10.233.62.98:9000 admin admin-password
+
+root@kubespray-aio:~# ./mc admin prometheus generate myminio
+scrape_configs:
+- job_name: minio-job
+  bearer_token: TOKEN
+  metrics_path: /minio/v2/metrics/cluster
+  scheme: http
+  static_configs:
+  - targets: ['10.233.62.98:9000']
+
+root@kubespray-aio:~# kubectl -n minio get ingress
+NAME            CLASS   HOSTS                    ADDRESS        PORTS   AGE
+minio           nginx   api-minio.ilba.cat       172.26.0.101   80      9m41s
+minio-console   nginx   console-minio.ilba.cat   172.26.0.101   80      9m41s
+```
+
+Añadimos la configuración a nuestro prometheus:
+
+```
+root@monitoring:~# vim /etc/prometheus/prometheus.yml
+    - job_name: minio-job
+    bearer_token: TOKEN
+    metrics_path: /minio/v2/metrics/cluster
+    scheme: http
+    static_configs:
+    - targets: ['api-minio.ilba.cat']
+
+root@monitoring:~# curl -X POST localhost:9090/-/reload
+```
+
+![alt text](images/prometheus-target-minio.png)
+
+
+```
+root@monitoring:~# cat /etc/prometheus/prometheus.yml
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+root@monitoring:~# vim /etc/prometheus/rules/05-minio.yml
+groups:
+
+- name: 'MinIO -> K8s kubespray-aio'
+  rules:
+
+  - alert: MinioClusterDiskOffline
+    expr: minio_cluster_drive_offline_total > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Minio cluster disk offline (instance {{ $labels.instance }})
+      description: "Minio cluster disk is offline\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+  - alert: MinioNodeDiskOffline
+    expr: minio_cluster_nodes_offline_total > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Minio node disk offline (instance {{ $labels.instance }})
+      description: "Minio cluster node disk is offline\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+  - alert: MinioDiskSpaceUsage
+    expr: disk_storage_available / disk_storage_total * 100 < 10
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: Minio disk space usage (instance {{ $labels.instance }})
+      description: "Minio available free space is low (< 10%)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+root@monitoring:~# curl -X POST localhost:9090/-/reload
+```
+
+![alt text](images/prometheus-alerts-minio.png)
+
 ### Comandos "mc"
 
 ```
-ilimit-paas-k8s-cp01:~# wget https://dl.min.io/client/mc/release/linux-amd64/mc
-ilimit-paas-k8s-cp01:~# chmod 755 mc
+root@kubespray-aio:~# wget https://dl.min.io/client/mc/release/linux-amd64/mc
+root@kubespray-aio:~# chmod 755 mc
 ```
 
 ```
-ilimit-paas-k8s-cp01:~# kubectl -n velero get svc
-NAME    TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
-minio   NodePort   10.43.151.139   <none>        9000:30724/TCP   78d
+root@kubespray-aio:~# kubectl -n minio get svc
+NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+minio           ClusterIP   10.233.62.98   <none>        9000/TCP   4m33s
+minio-console   ClusterIP   10.233.5.8     <none>        9001/TCP   4m33s
+minio-svc       ClusterIP   None           <none>        9000/TCP   4m33s
 
+root@kubespray-aio:~# ./mc alias set myminio http://10.233.62.98:9000 admin admin-password
+Added `myminio` successfully.
 
-ilimit-paas-k8s-cp01:~# ./mc alias set myminio http://10.43.151.139:9000 minio minio123
-
-ilimit-paas-k8s-cp01:~# ./mc alias ls
+root@kubespray-aio:~# ./mc alias ls
 ...
 myminio
-  URL       : http://10.43.151.139:9000
-  AccessKey : minio
-  SecretKey : minio123
+  URL       : http://10.233.62.98:9000
+  AccessKey : admin
+  SecretKey : admin-password
   API       : s3v4
   Path      : auto
 ...
 ```
 
 ```
-ilimit-paas-k8s-cp01:~# ./mc alias ls myminio
+root@kubespray-aio:~# ./mc alias ls myminio
 myminio
-  URL       : http://10.43.151.139:9000
-  AccessKey : minio
-  SecretKey : minio123
+  URL       : http://10.233.62.98:9000
+  AccessKey : admin
+  SecretKey : admin-password
   API       : s3v4
   Path      : auto
 
-ilimit-paas-k8s-cp01:~# ./mc admin info myminio
-●  10.43.151.139:9000
-   Uptime:2 weeks
-   Version: 2024-06-04T19:20:08Z
-   Network: 1/1OK
-   Drives: 1/1OK
+root@kubespray-aio:~# ./mc admin info myminio
+●  minio-0.minio-svc.minio.svc.cluster.local:9000
+   Uptime: 5 minutes
+   Version: 2024-01-11T07:46:16Z
+   Network: 3/3 OK
+   Drives: 1/1 OK
    Pool: 1
-┌──────┬───────────────────────┬─────────────────────┬──────────────┐
-│ Pool │ Drives Usage          │ Erasure stripe size │ Erasure sets │
-│ 1st  │ 76.3% (total: 56 GiB) │ 1                   │ 1            │
-└──────┴───────────────────────┴─────────────────────┴──────────────┘
-1 drive online, 0 drives offline, EC:0
+
+●  minio-1.minio-svc.minio.svc.cluster.local:9000
+   Uptime: 5 minutes
+   Version: 2024-01-11T07:46:16Z
+   Network: 3/3 OK
+   Drives: 1/1 OK
+   Pool: 1
+
+●  minio-2.minio-svc.minio.svc.cluster.local:9000
+   Uptime: 5 minutes
+   Version: 2024-01-11T07:46:16Z
+   Network: 3/3 OK
+   Drives: 1/1 OK
+   Pool: 1
+
+┌──────┬────────────────────────┬─────────────────────┬──────────────┐
+│ Pool │ Drives Usage           │ Erasure stripe size │ Erasure sets │
+│ 1st  │ 10.6% (total: 117 GiB) │ 3                   │ 1            │
+└──────┴────────────────────────┴─────────────────────┴──────────────┘
+
+0 B Used, 1 Bucket, 0 Objects
+3 drives online, 0 drives offline, EC:1
 ```
 
 ## Loki <div id='id20' />
