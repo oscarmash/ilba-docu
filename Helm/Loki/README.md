@@ -2,6 +2,13 @@
 
 * [Grafana](#id5) en este caso es externo, el equipo se llama **monitoring**
 * [MinIO](#id10) 
+  * [No host path](#id11)
+  * [Error minio CPU](#id12)
+  * [Instalación minio](#id13)
+  * [Verificaciones de MinIO](#id14)
+  * [Configuración de Lifecycle](#id15)
+  * [Monitorización con Prometheus](#id16)
+  * [Comando "mc" ](#id17)
 * [Loki](#id20)
 * [Promtail](#id30)
 * [Config Grafana con Loki](#id40)
@@ -58,20 +65,7 @@ services:
 
 ## MinIO <div id='id10' />
 
-:warning: para el storage de MinIO no usar [host path](https://github.com/minio/minio/discussions/18598#discussioncomment-7766467) :warning:
-
-### Errores minio
-
-Para desplegar minio el equipo ha de tener la siguiente flag:
-
-```
-root@diba-master:~# kubectl -n minio logs -f minio-post-job-bsl9n minio-make-policy
-Fatal glibc error: CPU does not support x86-64-v2
-```
-
-**SOLVED** switched to [x86-64-v2-AES CPU type](https://github.com/makeplane/plane/issues/3527#issuecomment-1925070815)
-
-Necesitamos un cluster de 3 nodos::
+Necesitamos un cluster de 3 nodos:
 
 ```
 root@diba-master:~# kubectl get nodes
@@ -82,7 +76,23 @@ diba-master-2   Ready    <none>          45d   v1.28.6
 diba-master-3   Ready    <none>          45d   v1.28.6
 ```
 
-### Instalación minio
+### No host path <div id='id11' />
+
+Para el storage de MinIO no usar [host path](https://github.com/minio/minio/discussions/18598#discussioncomment-7766467)
+
+### Error minio CPU <div id='id12' />
+
+Para desplegar minio el equipo ha de tener la siguiente flag:
+
+```
+root@diba-master:~# kubectl -n minio logs -f minio-post-job-bsl9n minio-make-policy
+Fatal glibc error: CPU does not support x86-64-v2
+```
+
+**SOLVED** switched to [x86-64-v2-AES CPU type](https://github.com/makeplane/plane/issues/3527#issuecomment-1925070815)
+
+
+### Instalación minio <div id='id13' />
 
 Crear el directorio en los workers, ya que en este caso no usaremos un storage compartido, se usará el storage local de cada worker de K8S:
 
@@ -193,7 +203,7 @@ minio minio/minio \
 -f values-minio.yaml
 ```
 
-### Verificaciones de MinIO
+### Verificaciones de MinIO <div id='id14' />
 
 ```
 root@diba-master:~# helm ls -n minio
@@ -232,13 +242,13 @@ Verificamos que se pueda acceder via web:
 * Username: admin
 * Password: admin-password
 
-### Cosas a hacer en MinIO
+### Configuración de Lifecycle <div id='id15' />
 
 Hay que crear a mano el "Lifecycle Rules":
 
 ![alt text](images/MinIO-Lifecycle-Rules.png)
 
-### Monitorización con Prometheus
+### Monitorización con Prometheus <div id='id16' />
 
 Verificamos que todo esté bien:
 
@@ -339,7 +349,7 @@ root@monitoring:~# curl -X POST localhost:9090/-/reload
 
 ![alt text](images/prometheus-alerts-minio.png)
 
-### Comandos "mc"
+### Comando "mc"  <div id='id17' />
 
 ```
 root@kubespray-aio:~# wget https://dl.min.io/client/mc/release/linux-amd64/mc
