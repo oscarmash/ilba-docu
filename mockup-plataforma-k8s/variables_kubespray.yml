@@ -1,0 +1,2 @@
+resolvconf_mode: docker_dns
+calico_apiserver_enabled: true

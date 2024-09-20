@@ -1,0 +1,18 @@
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: secret
+    secret:
+      # The name of secret which contains keys named:
+      # "tls.crt" - the certificate
+      # "tls.key" - the private key
+      secretName: "harbor-tls"
+  ingress:
+    className: "nginx"
+    hosts:
+      core: harbor.dev.test-upc.ilimit.net
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: harbor.dev.test-upc.ilimit.net
+externalURL: https://harbor.dev.test-upc.ilimit.net
+harborAdminPassword: "supersecurepasswd"

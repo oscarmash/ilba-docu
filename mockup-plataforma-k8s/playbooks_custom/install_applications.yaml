@@ -1,0 +1,124 @@
+---
+- name: Install Helm
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+    - name: Create helm temp dir
+      ansible.builtin.file:
+          path: /tmp/helm
+          state: directory
+      tags: install_helm
+
+    - name: Download helm
+      ansible.builtin.get_url:
+              dest: /tmp/
+              url: "https://get.helm.sh/helm-{{ helm_release }}-linux-amd64.tar.gz"
+      tags: install_helm
+
+    - name: Unarchive helm  
+      ansible.builtin.unarchive:
+              src: "/tmp/helm-{{ helm_release }}-linux-amd64.tar.gz"
+              dest: /tmp/helm
+              remote_src: yes
+      tags: install_helm
+
+    - name: Install helm  
+      ansible.builtin.copy:
+              src: /tmp/helm/linux-amd64/helm
+              dest: /usr/local/bin/helm
+              mode: 0755
+              remote_src: yes
+      become: true
+      tags: install_helm
+
+#Dependency needed in order to apply yaml files
+- name: Requirements
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+    - name: Install openshift dependency
+      ansible.builtin.package:
+        name: python3-openshift
+        state: present
+
+#Metallb installation
+- name: Metallb installation and configuration
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+    - name: Create Metallb namespace with specific annotations
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/metallb/metallb_ns.yaml') | from_yaml }}"
+      tags: metallb_setup
+
+    - name: Install Metallb Chart
+      kubernetes.core.helm:
+        binary_path: /usr/local/bin/helm
+        name: metallb
+        create_namespace: true
+        namespace: metallb-system
+        chart_repo_url: https://metallb.github.io/metallb
+        chart_ref: metallb
+        chart_version: "{{ chart_version_metallb }}"
+        wait: true
+      tags: metallb_installation
+
+    - name: Configure Metallb
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/metallb/metallb_config.yaml') | from_yaml_all }}"
+      tags: metallb_manifests
+
+#Ingress-nginx installation
+- name: Ingress-nginx installation and configuration
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+    - name: Install ingress-nginx Chart
+      kubernetes.core.helm:
+        binary_path: /usr/local/bin/helm
+        name: ingress-nginx
+        create_namespace: true
+        namespace: ingress-nginx
+        chart_repo_url: https://kubernetes.github.io/ingress-nginx
+        chart_ref: ingress-nginx
+        chart_version: "{{ chart_version_ingress_nginx }}"
+        wait: true
+      tags: ingress-nginx_installation
+
+#Metrics Server installation
+- name: Metrics server installation and configuration
+  hosts: kube_control_plane
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+    - name: Install Metrics server Chart
+      kubernetes.core.helm:
+        binary_path: /usr/local/bin/helm
+        name: metrics-server
+        namespace: kube-system
+        chart_repo_url: https://kubernetes-sigs.github.io/metrics-server/
+        chart_ref: metrics-server
+        chart_version: "{{ chart_version_metrics_server }}"
+        wait: true
+        values: 
+          args: 
+            - --kubelet-insecure-tls
+      tags: metrics-server_installation
+
+#ingress-testing
+- name: Deploy a simple ingress-testing
+  hosts: kube_control_plane
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+    - name: Apply deploy a simple sample project
+      k8s:
+        definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/ingress-testing/project.yaml') | from_yaml_all }}"
+        state: present
+      tags: ingress_testing

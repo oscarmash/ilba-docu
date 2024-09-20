@@ -1,0 +1,14 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: base-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 172.26.0.101/32
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: advertisement-ips
+  namespace: metallb-system

@@ -1,0 +1,4 @@
+helm_release: v3.15.3
+chart_version_metallb: 0.14.3
+chart_version_ingress_nginx: 4.10.1
+chart_version_metrics_server: 3.12.0

@@ -1,0 +1,56 @@
+- name: Custom pre install - SWAP
+  hosts: k8s_cluster
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  vars:
+    bashrc: /root/.bashrc
+  tasks:
+
+    - name: Disable SWAP since kubernetes can't work with swap enabled
+      shell: |
+        swapoff -a
+
+    - name: Remove multiple packages
+      apt:
+        name:
+          - dphys-swapfile
+          - zram-tools
+        state: absent
+
+    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+
+- name: kubectl aliases
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  vars:
+    bashrc: /root/.bashrc
+  tasks:
+
+    - name: Alias kubectl
+      lineinfile:
+        path: "{{ bashrc }}"
+        line: alias k='kubectl'
+        create: true
+
+    - name: Alias kubectl delete
+      lineinfile:
+        path: "{{ bashrc }}"
+        line: alias kcdf='kubectl delete -f'
+        create: true
+
+    - name: Alias kubectl apply
+      lineinfile:
+        path: "{{ bashrc }}"
+        line: alias kcaf='kubectl apply -f'
+        create: true
+
+    - name: Alias kubectl delete pod grace-period force
+      lineinfile:
+        path: "{{ bashrc }}"
+        line: alias kcdp='kubectl delete pod --grace-period=0 --force'
+        create: true

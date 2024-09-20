@@ -2,6 +2,10 @@
 
 ## Básicos
 
+Instalación de K8s con KubeSpray + BootStrap
+
+* [KubeSpray + BootStrap](./mockup-plataforma-k8s/README.md)
+
 Documentación de comandos de K8S
 
 * [Comandos de Kubernetes](./Comandos/Kubernetes/README.md)
