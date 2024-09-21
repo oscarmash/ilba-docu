@@ -5,6 +5,7 @@
 Instalación de K8s con KubeSpray + BootStrap
 
 * [KubeSpray + BootStrap](./mockup-plataforma-k8s/README.md)
+* [Imágenes Kubernetes](./Comandos/Imagenes/README.md)
 
 Documentación de comandos de K8S
 
