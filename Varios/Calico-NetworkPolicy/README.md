@@ -1,0 +1,189 @@
+# Index:
+
+* [Instalación](#id10)
+* [Configuración](#id20)
+
+# Instalación <div id='id10' />
+
+Para levantar el API del Networking de Calico con Kubespray, hemos de habilitar el siguiente flag:
+
+```
+calico_apiserver_enabled: true
+```
+
+de hecho, esto lo único que hace es que podamos interactuar con Calico desde el [kubectl, sin tener que instalar calicoctl](https://docs.tigera.io/calico/latest/operations/install-apiserver)
+
+Para verificar que funciona, en el cluster hemos de ver lo siguiente:
+
+```
+root@k8s-test-cp:~# kubectl get ns
+NAME               STATUS   AGE
+calico-apiserver   Active   12h
+...
+
+root@k8s-test-cp:~# kubectl -n calico-apiserver get pods
+NAME                               READY   STATUS    RESTARTS      AGE
+calico-apiserver-c744cd8bb-nbgcv   1/1     Running   2 (11h ago)   12h
+```
+
+# Pruebas <div id='id20' />
+
+## Preparación
+
+```
+root@k8s-test-cp:~# kubectl create ns cliente-a
+root@k8s-test-cp:~# kubectl create ns cliente-b
+root@k8s-test-cp:~# kubectl create ns cliente-c
+```
+
+```
+root@k8s-test-cp:~# vim cliente.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-cliente-a
+  namespace: cliente-a
+  labels:
+    app.kubernetes.io/name: cliente-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cliente-a
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cliente-a
+    spec:
+      containers:
+        - name: container-cliente-a
+          image: nginx
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-cliente-a
+  namespace: cliente-a
+spec:
+  selector:
+    app.kubernetes.io/name: cliente-a
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: http
+```
+
+```
+root@k8s-test-cp:~# kubectl apply -f cliente.yaml
+root@k8s-test-cp:~# sed -i 's/cliente-a/cliente-b/g' cliente.yaml
+root@k8s-test-cp:~# kubectl apply -f cliente.yaml
+root@k8s-test-cp:~# sed -i 's/cliente-b/cliente-c/g' cliente.yaml
+root@k8s-test-cp:~# kubectl apply -f cliente.yaml
+```
+
+Ahora disponemos de 3 clientes:
+* cliente-a
+* cliente-b
+* cliente-c
+
+```
+root@k8s-test-cp:~# kubectl get pods -A
+NAMESPACE          NAME                                       READY   STATUS      RESTARTS      AGE
+...
+cliente-a          deployment-cliente-a-6fbd9cb8c9-tdlkt      1/1     Running     0             10m
+cliente-b          deployment-cliente-b-5dcf949cc5-vrctm      1/1     Running     0             9m57s
+cliente-c          deployment-cliente-c-6bfc6fcbbc-rwv2n      1/1     Running     0             94s
+...
+```
+## Pruebas
+
+
+Verificaremos que desde el *pod-cliente-b* podemos acceder al *pod-cliente-a*:
+
+```
+root@k8s-test-cp:~# NAME_POD=`kubectl -n cliente-b get pods | grep cliente-b | awk '{print $1}'`
+root@k8s-test-cp:~# kubectl -n cliente-b exec -it $NAME_POD -- bash
+
+root@deployment-cliente-b-5dcf949cc5-vrctm:/# curl service-cliente-a.cliente-a.svc.cluster.local
+...
+<h1>Welcome to nginx!</h1>
+...
+```
+
+Verificaremos que desde el *pod-cliente-c* podemos acceder al *pod-cliente-a*:
+
+```
+root@k8s-test-cp:~# NAME_POD=`kubectl -n cliente-c get pods | grep cliente-c | awk '{print $1}'`
+root@k8s-test-cp:~# kubectl -n cliente-c exec -it $NAME_POD -- bash
+
+root@deployment-cliente-c-6bfc6fcbbc-rwv2n:/# curl service-cliente-a.cliente-a.svc.cluster.local
+...
+<h1>Welcome to nginx!</h1>
+...
+```
+
+## Bloqueo de tráfico http
+
+### Aplicamos políticas
+
+Vamos a hacer que el *pod-cliente-b* no puede acceder al puerto 80 (http) del *pod-cliente-a*.
+
+En cambio del *pod-cliente-c*, podrá acceder al *pod-cliente-a* pot http
+
+```
+root@k8s-test-cp:~# vim network-policy-cliente-a.yaml
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: netpolicies-cliente-a
+  namespace: cliente-a 
+spec:
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: app.kubernetes.io/name == 'cliente-c'
+        namespaceSelector: kubernetes.io/metadata.name == 'cliente-c'
+      destination:
+        selector: app.kubernetes.io/name == 'cliente-a'
+        ports:
+        - 80
+        - 443
+```
+
+Fijate, que en la NetworkPolicy, estamos acotando en el source:
+* selector: app.kubernetes.io/name == 'cliente-c'
+* namespaceSelector: kubernetes.io/metadata.name == 'cliente-c'
+
+```
+root@k8s-test-cp:~# kubectl apply -f network-policy-cliente-a.yaml
+```
+
+### Verificamos
+
+Verificaremos que desde el pod-cliente-b **NO** podemos acceder al pod-cliente-a:
+
+```
+root@k8s-test-cp:~# NAME_POD=`kubectl -n cliente-b get pods | grep cliente-b | awk '{print $1}'`
+root@k8s-test-cp:~# kubectl -n cliente-b exec -it $NAME_POD -- bash
+root@deployment-cliente-b-5dcf949cc5-vrctm:/# curl service-cliente-a.cliente-a.svc.cluster.local --connect-timeout 5
+curl: (28) Failed to connect to service-cliente-a.cliente-a.svc.cluster.local port 80 after 5000 ms: Timeout was reached
+```
+
+Verificaremos que desde el *pod-cliente-c* **SI** podemos acceder al *pod-cliente-a*:
+
+```
+root@k8s-test-cp:~# NAME_POD=`kubectl -n cliente-c get pods | grep cliente-c | awk '{print $1}'`
+root@k8s-test-cp:~# kubectl -n cliente-c exec -it $NAME_POD -- bash
+
+root@deployment-cliente-c-6bfc6fcbbc-rwv2n:/# curl service-cliente-a.cliente-a.svc.cluster.local --connect-timeout 5
+...
+<h1>Welcome to nginx!</h1>
+...
+```
