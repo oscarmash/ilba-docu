@@ -52,8 +52,8 @@ Documentación de productos usando Operators
 
 * [Istio](./Varios-k8s/Istio/README.md) (sin eBPF)
 * [Velero](./Varios-k8s/Velero/README.md)
+* [Calico - NetworkPolicy](./Varios-k8s/Calico-NetworkPolicy/README.md)
 
 ## Varios
 
-* [Calico - NetworkPolicy](./Varios/Calico-NetworkPolicy/README.md)
 * [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) **Work in progress**
