@@ -2,6 +2,7 @@
 
 * [Instalación](#id10)
 * [Configuración](#id20)
+* [Ver logs](#id30)
 
 # Instalación <div id='id10' />
 
@@ -186,4 +187,54 @@ root@deployment-cliente-c-6bfc6fcbbc-rwv2n:/# curl service-cliente-a.cliente-a.s
 ...
 <h1>Welcome to nginx!</h1>
 ...
+```
+
+# Ver logs <div id='id30' />
+
+```
+root@k8s-test-cp:~# cat network-policy-cliente-a.yaml
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: netpolicies-cliente-a
+  namespace: cliente-a
+spec:
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: app.kubernetes.io/name == 'cliente-c'
+        namespaceSelector: kubernetes.io/metadata.name == 'cliente-c'
+      destination:
+        selector: app.kubernetes.io/name == 'cliente-a'
+        ports:
+        - 80
+        - 443
+    - action: Log
+      protocol: TCP
+      destination:
+        selector: app.kubernetes.io/name == 'cliente-a'
+        ports:
+        - 80
+```
+
+```
+root@k8s-test-cp:~# kubectl apply -f network-policy-cliente-a.yaml
+```
+
+Revisamos donde está el pod:
+
+```
+root@k8s-test-cp:~# kubectl -n cliente-a get pods -o wide
+NAME                                    READY   STATUS      RESTARTS   AGE     IP              NODE            NOMINATED NODE   READINESS GATES
+deployment-cliente-a-6fbd9cb8c9-hjkvz   1/1     Running     0          6h8m    10.233.113.82   k8s-test-wk01   <none>           <none>
+```
+
+Nos vamos al equipo **k8s-test-wk01**:
+
+```
+root@k8s-test-wk01:~# dmesg
+[  799.618599] calico-packet: IN= OUT=calie5cb85a6dac SRC=10.233.113.81 DST=10.233.113.82 LEN=60 TOS=0x00 PREC=0x00 TTL=63 ID=36055 DF PROTO=TCP SPT=52580 DPT=80 WINDOW=64860 RES=0x00 SYN URGP=0 MARK=0x9b100000
 ```
