@@ -1,10 +1,16 @@
 # Index:
 
 * [Instalación](#id10)
-* [Configuración](#id20)
+* [Testing](#id20)
 * [Ver logs](#id30)
 
 # Instalación <div id='id10' />
+
+The Kubernetes network policy specification defines the following behavior:
+
+* If no network policies apply to a pod, then all traffic to/from that pod is allowed.
+* If one or more network policies apply to a pod containing ingress rules, then only the ingress traffic specifically allowed by those policies is allowed.
+* If one or more network policies apply to a pod containing egress rules, then only the egress traffic specifically allowed by those policies is allowed.
 
 Para levantar el API del Networking de Calico con Kubespray, hemos de habilitar el siguiente flag:
 
@@ -27,7 +33,7 @@ NAME                               READY   STATUS    RESTARTS      AGE
 calico-apiserver-c744cd8bb-nbgcv   1/1     Running   2 (11h ago)   12h
 ```
 
-# Pruebas <div id='id20' />
+# Testing <div id='id20' />
 
 ## Preparación
 
@@ -102,6 +108,7 @@ cliente-c          deployment-cliente-c-6bfc6fcbbc-rwv2n      1/1     Running   
 ```
 ## Pruebas
 
+![alt text](images/todo_ok.png)
 
 Verificaremos que desde el *pod-cliente-b* podemos acceder al *pod-cliente-a*:
 
@@ -168,6 +175,8 @@ root@k8s-test-cp:~# kubectl apply -f network-policy-cliente-a.yaml
 
 ### Verificamos
 
+![alt text](images/b_no_puede.png)
+
 Verificaremos que desde el pod-cliente-b **NO** podemos acceder al pod-cliente-a:
 
 ```
@@ -187,6 +196,12 @@ root@deployment-cliente-c-6bfc6fcbbc-rwv2n:/# curl service-cliente-a.cliente-a.s
 ...
 <h1>Welcome to nginx!</h1>
 ...
+```
+
+```
+root@k8s-test-cp:~# kubectl -n cliente-a get networkpolicy.p
+NAME                    CREATED AT
+netpolicies-cliente-a   2024-09-21T09:08:55Z
 ```
 
 # Ver logs <div id='id30' />
