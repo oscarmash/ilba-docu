@@ -14,3 +14,10 @@ $ make shell
 root@kubespray:/kubespray# apt-get update && apt-get install less
 root@kubespray:/kubespray# less roles/kubespray-defaults/defaults/main/checksums.yml
 ```
+
+---
+
+De la siguiente [web](https://quay.io/repository/kubespray/kubespray?tab=tags&tag=latest), sacamos la versión del: **KUBESPRAY_VERSION**
+
+---
+
