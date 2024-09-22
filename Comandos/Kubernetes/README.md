@@ -12,11 +12,15 @@ Eliminar un pod de manera agresiva:
 kubectl delete pod --grace-period=0 --force
 ```
 
+---
+
 Cambiar el NS por defecto en el que estamos trabajando
 
 ```
 kubectl config set-context --current --namespace=newdefaultnamespace
 ```
+
+---
 
 Saber los contenedores que tiene un pod y ver los logs:
 
@@ -32,11 +36,15 @@ sidecar mysql
 root@kubespray-aio:~# kubectl logs -f cluster-mysql-0 -c sidecar
 ```
 
+---
+
 Port Forwarding
 
 ```
 kubectl -n wordpress port-forward --address 0.0.0.0 service/wordpress 2222:22
 ```
+
+---
 
 NS que no se borra:
 
