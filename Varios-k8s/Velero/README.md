@@ -3,8 +3,8 @@
 * [Instalación de Velero](#id8)
 * [Instalación de CEPH RBD (Velero)](#id81)
 * [Velero Backup Storage Locations (BSL)](#id82)
-* [Velero Backup Hooks](#id83)
-* [Velero Restore](#id84)
+* [Velero Backup Hooks + Restore BBDD en otro NS](#id83)
+* [xxx ](#id84)
 
 # Instalación de Velero <div id='id8' />
 
@@ -501,7 +501,9 @@ backup-09-20   Completed   0        0          2024-06-16 09:20:29 +0200 CEST   
 
 ![alt text](images/MinIO-batman.png)
 
-# Velero Backup Hooks <div id='id83' />
+# Velero Backup Hooks + Restore BBDD en otro NS <div id='id83' />
+
+## Velero Backup Hooks
 
 ```
 root@diba-master:~# kubectl create ns test-mysql-hooks
@@ -611,8 +613,7 @@ NAME           STATUS      ERRORS   WARNINGS   CREATED                          
 backup-13-21   Completed   0        0          2024-06-16 13:21:39 +0200 CEST   29d       default            <none>
 ```
 
-
-# Velero Restore <div id='id84' />
+## Restore BBDD en otro NS
 
 Revisaremos que todo esté correcto:
 
@@ -687,3 +688,5 @@ mysql> SELECT * FROM agenda.datos;
 
 mysql> quit
 ```
+
+# xxxxx <div id='id84' />
