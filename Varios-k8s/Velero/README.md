@@ -4,7 +4,7 @@
 * [Instalación de CEPH RBD (Velero)](#id81)
 * [Velero Backup Storage Locations (BSL)](#id82)
 * [Velero Backup Hooks + Restore BBDD en otro NS](#id83)
-* [xxx ](#id84)
+* [Clonar una aplicación (modificando ingress)](#id84)
 
 # Instalación de Velero <div id='id8' />
 
@@ -689,4 +689,141 @@ mysql> SELECT * FROM agenda.datos;
 mysql> quit
 ```
 
-# xxxxx <div id='id84' />
+# Clonar una aplicación (modificando ingress) <div id='id84' />
+
+## La aplicación
+
+Esta es la aplicación de demo, para después restaurarla
+
+```
+root@k8s-test-cp:~# vim app-ilba.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app-ilba
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-ilba-deployment
+  namespace: app-ilba
+  labels:
+    app.kubernetes.io/name: app-ilba
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: app-ilba
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: app-ilba
+    spec:
+      containers:
+        - name: app-kubernetes
+          image: nginx
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-ilba-service
+  namespace: app-ilba
+spec:
+  selector:
+    app.kubernetes.io/name: app-ilba
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ilba-ingress
+  namespace: app-ilba
+spec:
+  ingressClassName: nginx               
+  rules:
+  - host: app-ilba.ilba.cat
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: app-ilba-service
+            port:
+              number: 80
+```
+
+```
+root@k8s-test-cp:~# kubectl apply -f app-ilba.yaml
+
+root@k8s-test-cp:~# kubectl get ingress -A
+NAMESPACE         NAME               CLASS   HOSTS                      ADDRESS        PORTS   AGE
+app-ilba          app-ilba-ingress   nginx   app-ilba.ilba.cat          172.26.0.101   80      31s
+
+root@k8s-test-cp:~# curl -s -H "Host: app-ilba.ilba.cat" 172.26.0.101
+...
+<h1>Welcome to nginx!</h1>
+...
+```
+
+Realizamos un backup de la applicación:
+
+```
+root@k8s-test-cp:~# velero backup create "backup-app-ilba" --include-namespaces app-ilba --default-volumes-to-fs-backup
+
+root@k8s-test-cp:~# velero get backups
+NAME              STATUS      ERRORS   WARNINGS   CREATED                          EXPIRES   STORAGE LOCATION   SELECTOR
+backup-app-ilba   Completed   0        0          2024-09-23 14:55:40 +0200 CEST   29d       default            <none>
+```
+
+## Clonamos la aplicación
+
+Restauramos el namespace **app-ilba** a **app-ilba-restore**, pero le indicamos que no recuperamos los **ingress**:
+
+```
+velero restore create \
+--from-backup backup-app-ilba \
+--namespace-mappings app-ilba:app-ilba-restore \
+--exclude-resources \
+ingress.extensions,ingress.networking.k8s.io
+```
+
+```
+root@k8s-test-cp:~# kubectl get ingress -A
+NAMESPACE         NAME               CLASS   HOSTS                      ADDRESS        PORTS   AGE
+app-ilba          app-ilba-ingress   nginx   app-ilba.ilba.cat          172.26.0.101   80      8m33s
+
+root@k8s-test-cp:~# kubectl -n app-ilba-restore get pods
+NAME                                   READY   STATUS    RESTARTS   AGE
+app-ilba-deployment-6bf9fd859f-znxkh   1/1     Running   0          32s
+```
+
+Cogemos el  el ingress del NS **app-ilba** y lo aplicamos en el NS **app-ilba-restore**:
+
+```
+root@k8s-test-cp:~# kubectl -n app-ilba get ingress app-ilba-ingress -o yaml > app-ilba-restore.yaml
+
+root@k8s-test-cp:~# sed -i 's/app-ilba.ilba.cat/app-ilba-restore.ilba.cat/g' app-ilba-restore.yaml
+root@k8s-test-cp:~# sed -i 's/namespace: app-ilba/namespace: app-ilba-restore/g' app-ilba-restore.yaml
+
+root@k8s-test-cp:~# kubectl apply -f app-ilba-restore.yaml
+```
+
+```
+root@k8s-test-cp:~# kubectl get ingress -A
+NAMESPACE          NAME               CLASS   HOSTS                       ADDRESS        PORTS   AGE
+app-ilba-restore   app-ilba-ingress   nginx   app-ilba-restore.ilba.cat   172.26.0.101   80      65s
+app-ilba           app-ilba-ingress   nginx   app-ilba.ilba.cat           172.26.0.101   80      44m
+
+root@k8s-test-cp:~# curl -s -H "Host: app-ilba-restore.ilba.cat" 172.26.0.101
+...
+<h1>Welcome to nginx!</h1>
+...
+```
