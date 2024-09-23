@@ -51,7 +51,8 @@ volumesnapshotcontents            vsc,vscs            snapshot.storage.k8s.io/v1
 volumesnapshots                   vs                  snapshot.storage.k8s.io/v1             true         VolumeSnapshot
 ```
 
-Si no lo encontramos, hemos de instalar este Helm (revisar si hay alguno más oficial):
+Si no lo encontramos, hemos de instalar este Helm ([revisar si hay alguno más oficial](https://artifacthub.io/packages/helm/piraeus-charts/snapshot-controller)):
+
 
 ```
 helm repo add piraeus-charts https://piraeus.io/helm-charts/
