@@ -120,16 +120,38 @@ Notas de instalación de velero:
 * Plugin para [CSI](https://github.com/vmware-tanzu/velero-plugin-for-csi?tab=readme-ov-file#compatibility)
 
 ```
+root@diba-master:~# PLUGIN_AWS=v1.10.1
+root@diba-master:~# PLUGIN_CSI=v0.7.1
+```
+
+
+
+A partir de la versión: 1.31, [no es necesario indicar el plugin de CSI](https://github.com/vmware-tanzu/velero/issues/2527#issuecomment-626755147), ya viene integrado. 
+
+```
+...
+--plugins velero/velero-plugin-for-aws:$PLUGIN_AWS,velero/velero-plugin-for-csi:$PLUGIN_CSI \
+...
+```
+
+Si lo ponemos nos saldrá el siguiente error:
+
+```
+An error occurred: unable to register plugin (kind=BackupItemActionV2, name=velero.io/csi-pvc-backupper, command=/plugins/velero-plugin-for-csi) because another plugin is already registered for this kind and name (command=/velero)
+```
+
+```
 velero install \
 --provider aws \
 --features=EnableCSI \
---plugins velero/velero-plugin-for-aws:v1.9.2,velero/velero-plugin-for-csi:v0.7.1 \
+--plugins velero/velero-plugin-for-aws:$PLUGIN_AWS \
 --bucket velero \
 --secret-file ./credentials-velero \
 --use-volume-snapshots=true \
---backup-location-config region=minio,s3ForcePathStyle="true",s3Url=http://172.26.0.196:9000 \
+--backup-location-config region=minio,s3ForcePathStyle="true",s3Url=http://172.26.0.35:9000 \
 --use-node-agent
 ```
+
 
 ```
 root@diba-master:~# kubectl -n velero get pods
