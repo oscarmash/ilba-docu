@@ -11,6 +11,7 @@
 
 Partimos de la siguiente base:
 
+* El microprocesador de los equipos del cluster de K8s, han de tener el flag: **x86-64-v2**
 * Tenemos un cluster de K8S desplegado
 * Por experiencia propia: si no hay 3 wokers/nodes, no nos funcionará el sistema de storage de Ceph
 * Tenemos un sistema de Ceph desplegado (en esta caso es un All-In-One)
