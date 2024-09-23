@@ -51,6 +51,18 @@ volumesnapshotcontents            vsc,vscs            snapshot.storage.k8s.io/v1
 volumesnapshots                   vs                  snapshot.storage.k8s.io/v1             true         VolumeSnapshot
 ```
 
+Si no lo encontramos, hemos de instalar este Helm (revisar si hay alguno más oficial):
+
+```
+helm repo add piraeus-charts https://piraeus.io/helm-charts/
+helm repo update
+
+helm upgrade --install \
+snapshot-controller piraeus-charts/snapshot-controller \
+--create-namespace \
+--namespace snapshot-controller \
+--version=3.0.6
+```
 
 ## Montaje de MinIO (por si no lo tenemos)
 
