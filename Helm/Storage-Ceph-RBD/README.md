@@ -256,7 +256,8 @@ pvc-fs-apache   Bound    pvc-03992982-0896-4fcc-916f-c289bad96b6c   1Gi        R
 ```
 
 ```
-root@diba-master:~# kubectl -n test-ceph exec -it httpd-deployment-6b74459564-bwhjw -- bash
+root@diba-master:~# NAME_POD=`kubectl -n test-ceph get pods | grep httpd-deployment | awk '{print $1}'`
+root@diba-master:~# kubectl -n test-ceph exec -it $NAME_POD -- bash
 
 root@httpd-deployment-6b74459564-bwhjw:/usr/local/apache2# df -h | grep mydata
 /dev/rbd0       974M   24K  958M   1% /mydata
