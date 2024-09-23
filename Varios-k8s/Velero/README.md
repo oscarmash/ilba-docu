@@ -92,13 +92,15 @@ Crearemos el bucket:
 
 ## Instalación de Velero
 
-Descargamos el binario de velero:
+Descargamos el [binario de velero](https://github.com/vmware-tanzu/velero/releases):
 
 ```
-root@diba-master:~# wget https://github.com/vmware-tanzu/velero/releases/download/v1.13.2/velero-v1.13.2-linux-amd64.tar.gz
-root@diba-master:~# tar xzvf velero-v1.13.2-linux-amd64.tar.gz
-root@diba-master:~# mv velero-v1.13.2-linux-amd64/velero /usr/local/sbin/velero-v1.13.2-linux-amd64
-root@diba-master:~# ln -s /usr/local/sbin/velero-v1.13.2-linux-amd64 /usr/local/sbin/velero
+root@diba-master:~# VELERO_RELEASE=v1.14.1
+root@diba-master:~# wget https://github.com/vmware-tanzu/velero/releases/download/$VELERO_RELEASE/velero-$VELERO_RELEASE-linux-amd64.tar.gz
+root@diba-master:~# tar xzvf velero-$VELERO_RELEASE-linux-amd64.tar.gz
+root@diba-master:~# mv velero-$VELERO_RELEASE-linux-amd64/velero /usr/local/sbin/velero-$VELERO_RELEASE-linux-amd64
+root@diba-master:~# ln -s /usr/local/sbin/velero-$VELERO_RELEASE-linux-amd64 /usr/local/sbin/velero
+root@diba-master:~# rm -rf velero-$VELERO_RELEASE-linux-amd64
 ```
 
 Creamos el Token en el MinIO:
