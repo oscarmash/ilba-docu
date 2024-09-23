@@ -8,6 +8,14 @@
 
 # Instalación de Velero <div id='id8' />
 
+## Prerequisites
+
+Necesidades:
+
+* Cluster de K8s
+* Sistema de Object Storage (MinIO/Ceph/etc...)
+* Sistema de CSI (Ceph/NFS/etc...)
+
 ## Documentación
 
 Documentación encontrada:
