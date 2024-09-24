@@ -63,6 +63,39 @@ ceph-csi-cephfs    Active        2d5h
 NS=`kubectl get ns |grep Terminating | awk 'NR==1 {print $1}'` && kubectl get namespace "$NS" -o json   | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/"   | kubectl replace --raw /api/v1/namespaces/$NS/finalize -f -
 ```
 
+---
+
+Ver un secret:
+
+```
+root@ilimit-paas-k8s-test2-cp01:~# kubectl -n ceph-csi-rbd describe secrets csi-rbd-secret
+Name:         csi-rbd-secret
+Namespace:    ceph-csi-rbd
+Labels:       app=ceph-csi-rbd
+              app.kubernetes.io/managed-by=Helm
+              chart=ceph-csi-rbd-3.11.0
+              heritage=Helm
+              release=ceph-csi-rbd
+Annotations:  meta.helm.sh/release-name: ceph-csi-rbd
+              meta.helm.sh/release-namespace: ceph-csi-rbd
+
+Type:  Opaque
+
+Data
+====
+encryptionPassphrase:  15 bytes
+userID:                15 bytes
+userKey:               40 bytes
+```
+
+```
+root@ilimit-paas-k8s-test2-cp01:~# kubectl -n ceph-csi-rbd get secret csi-rbd-secret -o json | jq '.data | map_values(@base64d)'
+{
+  "encryptionPassphrase": "test_passphrase",
+  "userID": "ilimit-paas-k8s",
+  "userKey": "AQAqUAFmIzO9KxAAODxZC68xLN7n/cRLd8W3DA=="
+}
+```
 
 ## Cosas específicas <div id='id20' />
 
