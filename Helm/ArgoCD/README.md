@@ -1,3 +1,13 @@
+# Base de conocimientos
+
+Antes de empezar con ArgoCD hay que tener claro estos conceptos:
+
+![alt text](images/proyectos.png)
+
+![alt text](images/aplicaciones.png)
+
+![alt text](images/repositorios.png)
+
 # Instalación
 
 ```
