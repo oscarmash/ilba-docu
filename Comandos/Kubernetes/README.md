@@ -97,6 +97,14 @@ root@ilimit-paas-k8s-test2-cp01:~# kubectl -n ceph-csi-rbd get secret csi-rbd-se
 }
 ```
 
+---
+
+Buscar pods rotos
+
+```
+$ k get pods -A | grep -Ev 'Running|Completed'
+```
+
 ## Cosas específicas <div id='id20' />
 
 Change SC to default
