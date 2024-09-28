@@ -174,8 +174,8 @@ ceph-csi-rbd-provisioner-66d99f8ffb-jmrpq   7/7     Running   0          3m54s
 ceph-csi-rbd-provisioner-66d99f8ffb-rm2fg   7/7     Running   0          3m54s
 
 root@kubespray-aio:~# kubectl get sc
-NAME         PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
-csi-rbd-sc   rbd.csi.ceph.com   Delete          Immediate           true                   41s
+NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   42s
 ```
 
 ## Change SC to default <div id='id3' />
