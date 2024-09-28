@@ -140,6 +140,8 @@ storageClass:
   name: csi-rbd-sc
   clusterID: 7d2b3cca-f1eb-11ee-a886-593bc87d3824
   pool: pool-k8s
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
 
 secret:
   create: true
