@@ -1,4 +1,4 @@
-# Instalación de Loki
+# Instalación de Promtail / Loki / MinIO
 
 * [Grafana](#id5) en este caso es externo, el equipo se llama **monitoring**
 * [MinIO](#id10) 

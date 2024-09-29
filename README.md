@@ -29,7 +29,7 @@ Helms avanzados:
 
 * [Helm - Storage - NFS](./Helm/Storage-NFS/README.md)
 * [Helm - Storage - Ceph (RBD)](./Helm/Storage-Ceph-RBD/README.md)
-* [Helm - Loki](./Helm/Loki/README.md)
+* [Helm - Promtail / Loki / MinIO](./Helm/Promtail-Loki-MinIO/README.md)
 * [Helm - Kyverno](./Helm/Kyverno/README.md)
 * [Helm - Kyverno Rules](./Helm/Kyverno-Rules/README.md)
 * [Helm - Zabbix](./Helm/Zabbix/README.md)
