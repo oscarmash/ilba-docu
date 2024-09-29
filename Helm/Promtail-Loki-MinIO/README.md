@@ -215,6 +215,9 @@ Verificamos que se pueda acceder via web:
 
 ### Configuración de Lifecycle <div id='id15' />
 
+Si optamos por usar este sistema de *Lifecycle*, el valor de *days* que pogamos en el MinIO, ha de ser mayor que el indicado en el Loki *compactor*, dicho de otra manera:
+* If you have a lifecycle policy configured on the object store, please ensure that it is longer than the retention period.
+
 Hay que crear a mano el "Lifecycle Rules":
 
 ![alt text](images/MinIO-Lifecycle-Rules.png)
