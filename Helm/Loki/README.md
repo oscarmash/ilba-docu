@@ -10,6 +10,9 @@
   * [Monitorización con Prometheus](#id16)
   * [Comando "mc" ](#id17)
 * [Loki](#id20)
+  * [Notas del montaje de Loki](#id21)
+  * [Instalación de Loki](#id22)
+  * [Verificaciones de Loki](#id23)
 * [Promtail](#id30)
 * [Config Grafana con Loki](#id40)
 * [Cosas de Loki](#id50)
@@ -94,30 +97,21 @@ Fatal glibc error: CPU does not support x86-64-v2
 
 ### Instalación minio <div id='id13' />
 
-Crear el directorio en los workers, ya que en este caso no usaremos un storage compartido, se usará el storage local de cada worker de K8S:
+En este caso, hemos desplegado MinIO con **1 sólo pod**:
 
-```
-mkdir /disk-local-minio-data
-```
+
 
 ```
 root@diba-master:~# vim values-minio.yaml
-mode: distributed
+mode: standalone
 
 persistence:
-  enabled: false
-
-extraVolumes:
-  - name: minio-data
-    hostPath:
-      path: /disk-local-minio-data
-      type: Directory
-extraVolumeMounts:
-  - name: minio-data
-    mountPath: /export
+  enabled: true
+  storageClass: "csi-rbd-sc"
+  size: 20Gi
 
 drivesPerNode: 1
-replicas: 3
+replicas: 1
 pools: 1
 
 ingress:
@@ -127,7 +121,7 @@ ingress:
   annotations: {}
   path: /
   hosts:
-    - api-minio.ilba.cat
+    - minio-api.ilba.cat
   tls: []
 
 consoleIngress:
@@ -137,19 +131,19 @@ consoleIngress:
   annotations: {}
   path: /
   hosts:
-    - console-minio.ilba.cat
+    - minio-console.ilba.cat
   tls: []
 
 resources:
   requests:
-    memory: 1Gi
+    memory: 2Gi
 
 users:
   - accessKey: admin
-    secretKey: admin-password
+    secretKey: Er2Ophgundeat2
     policy: consoleAdmin
   - accessKey: loki
-    secretKey: loki-password
+    secretKey: We2spertaudO12
     policy: loki-policy
 
 policies:
@@ -173,20 +167,9 @@ policies:
         - "s3:ListBucketMultipartUploads"
 
 buckets:
-  - name: loki-chunks
+  - name: loki-k8s
     policy: none
     purge: false
-
-nodeAffinity:
-  required:
-    nodeSelectorTerms:
-    - matchExpressions:
-      - key: kubernetes.io/hostname
-        operator: In
-        values:
-        - diba-master-1
-        - diba-master-2
-        - diba-master-3
 ```
 
 
@@ -199,48 +182,36 @@ root@diba-master:~# helm upgrade --install \
 minio minio/minio \
 --create-namespace \
 --namespace minio \
---version=5.0.15 \
+--version=5.2.0 \
 -f values-minio.yaml
 ```
 
 ### Verificaciones de MinIO <div id='id14' />
 
 ```
-root@diba-master:~# helm ls -n minio
+root@diba-master:~# helm -n minio ls
 NAME    NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
-minio   minio           1               2024-05-17 10:31:58.495053209 +0200 CEST        deployed        minio-5.0.15    RELEASE.2024-01-11T07-46-16Z
+minio   minio           2               2024-09-29 07:56:01.582158116 +0200 CEST        deployed        minio-5.2.0     RELEASE.2024-04-18T19-09-19Z
 ```
 
 ```
-root@diba-master:~# kubectl -n minio get pods -o wide
-NAME      READY   STATUS    RESTARTS   AGE     IP            NODE            NOMINATED NODE   READINESS GATES
-minio-0   1/1     Running   0          2m54s   10.38.28.19   diba-master-2   <none>           <none>
-minio-1   1/1     Running   0          2m54s   10.38.25.14   diba-master-1   <none>           <none>
-minio-2   1/1     Running   0          2m54s   10.38.26.12   diba-master-3   <none>           <none>
+root@diba-master:~# root@k8s-test-cp:~# kubectl -n minio get pods
+NAME                     READY   STATUS              RESTARTS   AGE
+minio-f8bb597d7-n6kn9    1/1     Running             0          88m
 ```
 
 ```
 root@diba-master:~# kubectl get ingress -A
-NAMESPACE      NAME                CLASS    HOSTS                    ADDRESS        PORTS   AGE
-minio          minio               nginx    api-minio.ilba.cat       172.26.0.101   80      68s
-minio          minio-console       nginx    console-minio.ilba.cat   172.26.0.101   80      68s
+NAMESPACE         NAME               CLASS   HOSTS                      ADDRESS        PORTS   AGE
+minio             minio              nginx   minio-api.ilba.cat         172.26.0.101   80      74m
+minio             minio-console      nginx   minio-console.ilba.cat     172.26.0.101   80      89m
 ```
 
-Verificar que en los workes se ha creado la estructura de directorios
-
-```
-$ ls -la /disk-local-minio-data/
-total 16
-drwxr-xr-x  4 root root 4096 May 17 10:32 .
-drwxr-xr-x 19 root root 4096 May 17 10:13 ..
-drwxr-xr-x  2 root root 4096 May 17 10:32 loki-chunks
-drwxr-xr-x  6 root root 4096 May 17 10:32 .minio.sys
-```
 
 Verificamos que se pueda acceder via web:
-* URL: [console-minio.ilba.cat](http://console-minio.ilba.cat)
+* URL: [minio-console.ilba.cat](http://minio-console.ilba.cat)
 * Username: admin
-* Password: admin-password
+* Password: Er2Ophgundeat2
 
 ### Configuración de Lifecycle <div id='id15' />
 
@@ -250,15 +221,6 @@ Hay que crear a mano el "Lifecycle Rules":
 
 ### Monitorización con Prometheus <div id='id16' />
 
-Verificamos que todo esté bien:
-
-```
-root@kubespray-aio:~# kubectl -n minio get pods
-NAME      READY   STATUS    RESTARTS   AGE
-minio-0   1/1     Running   0          66s
-minio-1   1/1     Running   0          66s
-minio-2   1/1     Running   0          66s
-```
 
 Instalamos el "mc", para que nos de la configuración de prometheus
 
@@ -285,8 +247,8 @@ scrape_configs:
 
 root@kubespray-aio:~# kubectl -n minio get ingress
 NAME            CLASS   HOSTS                    ADDRESS        PORTS   AGE
-minio           nginx   api-minio.ilba.cat       172.26.0.101   80      9m41s
-minio-console   nginx   console-minio.ilba.cat   172.26.0.101   80      9m41s
+minio           nginx   minio-api.ilba.cat       172.26.0.101   80      76m
+minio-console   nginx   minio-console.ilba.cat   172.26.0.101   80      90m
 ```
 
 Añadimos la configuración a nuestro prometheus:
@@ -298,7 +260,7 @@ root@monitoring:~# vim /etc/prometheus/prometheus.yml
     metrics_path: /minio/v2/metrics/cluster
     scheme: http
     static_configs:
-    - targets: ['api-minio.ilba.cat']
+    - targets: ['minio-api.ilba.cat']
 
 root@monitoring:~# curl -X POST localhost:9090/-/reload
 ```
@@ -363,7 +325,7 @@ minio           ClusterIP   10.233.62.98   <none>        9000/TCP   4m33s
 minio-console   ClusterIP   10.233.5.8     <none>        9001/TCP   4m33s
 minio-svc       ClusterIP   None           <none>        9000/TCP   4m33s
 
-root@kubespray-aio:~# ./mc alias set myminio http://10.233.62.98:9000 admin admin-password
+root@kubespray-aio:~# ./mc alias set myminio http://10.233.62.98:9000 admin Er2Ophgundeat2
 Added `myminio` successfully.
 
 root@kubespray-aio:~# ./mc alias ls
@@ -387,90 +349,107 @@ myminio
   Path      : auto
 
 root@kubespray-aio:~# ./mc admin info myminio
-●  minio-0.minio-svc.minio.svc.cluster.local:9000
-   Uptime: 5 minutes
-   Version: 2024-01-11T07:46:16Z
-   Network: 3/3 OK
+●  10.233.9.56:9000
+   Uptime: 1 hour
+   Version: 2024-04-18T19:09:19Z
+   Network: 1/1 OK
    Drives: 1/1 OK
    Pool: 1
 
-●  minio-1.minio-svc.minio.svc.cluster.local:9000
-   Uptime: 5 minutes
-   Version: 2024-01-11T07:46:16Z
-   Network: 3/3 OK
-   Drives: 1/1 OK
-   Pool: 1
+┌──────┬──────────────────────┬─────────────────────┬──────────────┐
+│ Pool │ Drives Usage         │ Erasure stripe size │ Erasure sets │
+│ 1st  │ 0.0% (total: 20 GiB) │ 1                   │ 1            │
+└──────┴──────────────────────┴─────────────────────┴──────────────┘
 
-●  minio-2.minio-svc.minio.svc.cluster.local:9000
-   Uptime: 5 minutes
-   Version: 2024-01-11T07:46:16Z
-   Network: 3/3 OK
-   Drives: 1/1 OK
-   Pool: 1
-
-┌──────┬────────────────────────┬─────────────────────┬──────────────┐
-│ Pool │ Drives Usage           │ Erasure stripe size │ Erasure sets │
-│ 1st  │ 10.6% (total: 117 GiB) │ 3                   │ 1            │
-└──────┴────────────────────────┴─────────────────────┴──────────────┘
-
-0 B Used, 1 Bucket, 0 Objects
-3 drives online, 0 drives offline, EC:1
+288 KiB Used, 1 Bucket, 10 Objects, 10 Versions
+1 drive online, 0 drives offline, EC:0
 ```
 
 ## Loki <div id='id20' />
 
-### Instalación de Loki
+### Notas del montaje de Loki <div id='id21' />
+
+**NOTA:** Hemos creado la mínima infraestructura para que funcione, no está pensado para montaje en HA
+
+Datos importantes del values.yaml de Loki:
+* By default the compactor.retention-enabled flag is not set, so the logs sent to Loki live forever.
+* [URL de configuración del compactor](https://grafana.com/docs/loki/latest/operations/storage/retention/#retention-configuration)
+* Si ponemos el valor: *loki.commonConfig.replication_factor* a 1, hemos de configurar: 
+*backend.extraVolumeMounts* y *backend.extraVolumes*, sinó nos dará el siguiente error:
+
+```
+root@k8s-test-cp:~# kubectl -n loki logs -f loki-backend-0 -c loki
+level=error ts=2024-09-29T06:40:02.44940159Z caller=log.go:216 msg="error running loki" err="init compactor: mkdir /data: read-only file system\nerror initialising module: compactor\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:458\nmain.main\n\t/src/loki/cmd/loki/main.go:129\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:271\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1695"
+```
+
+### Instalación de Loki <div id='id22' />
 
 ```
 helm repo add grafana https://grafana.github.io/helm-charts && helm repo update
 ```
-
-**NOTA:** No modificar las replicas del fichero _values-loki.yaml_, ya que son las mínimas que para que pueda funcionar.  
-Por ejemplo: si bajamos las réplicas del _backend_ a 1, después cuando configuremos Grafana, no funcionará y saldrá el siguiente error: 
-[Status: 500. Message: index gateway get ring: too many unhealthy instances in the ring](https://github.com/grafana/loki/issues/10537#issuecomment-1717322802)
-
 
 ```
 root@diba-master:~# vim values-loki.yaml
 global:
   dnsService: "coredns"
 
+chunksCache:
+  allocatedMemory: 100
+
 loki:
-  auth_enabled: false
-  compactor:
-    retention_enabled: true
+  commonConfig:
+    replication_factor: 1
   storage:
     bucketNames:
-      chunks: loki-chunks
-      ruler: loki-chunks
-      admin: loki-chunks
+      chunks: loki-k8s
+      ruler: loki-k8s
+      admin: loki-k8s
     type: s3
     s3:
       endpoint: http://minio.minio.svc.cluster.local:9000
       accessKeyId: loki
-      secretAccessKey: loki-password
+      secretAccessKey: We2spertaudO12
       s3ForcePathStyle: true
       insecure: false
       http_config:
         insecure_skip_verify: true
+  auth_enabled: false
+  compactor:
+    retention_enabled: true
+  schemaConfig:
+    configs:
+      - from: 2024-09-28
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  compactor:
+    working_directory: /data/retention
+    compaction_interval: 10m
+    retention_enabled: true # By default the compactor.retention-enabled flag is not set, so the logs sent to Loki live forever.
+    retention_delete_delay: 2h
+    retention_delete_worker_count: 150
+    delete_request_store: s3
 
 write:
-  replicas: 2
+  replicas: 1
   persistence:
     volumeClaimsEnabled: false
 
 read:
-  replicas: 2
+  replicas: 1
   persistence:
     volumeClaimsEnabled: false
 
 gateway:
-  replicas: 2
+  replicas: 1
   ingress:
     enabled: true
     ingressClassName: nginx
     hosts:
-      - host: gateway-loki.ilba.cat
+      - host: loki-gateway.ilba.cat
         paths:
           - path: /
             pathType: Prefix
@@ -482,9 +461,13 @@ gateway:
     password: loki-gateway-password
 
 backend:
-  replicas: 3
-  persistence:
-    volumeClaimsEnabled: false
+  replicas: 1
+  extraVolumeMounts:
+  - name: compactor-data
+    mountPath: /data/retention
+  extraVolumes:
+    - name: compactor-data
+      emptyDir: {}
 ```
 
 ```
@@ -492,40 +475,38 @@ helm upgrade --install \
 loki grafana/loki \
 --create-namespace \
 --namespace loki \
---version=5.47.2 \
+--version=6.15.0 \
 -f values-loki.yaml
 ```
 
-### Verificaciones de Loki
+### Verificaciones de Loki <div id='id23' />
 
 ```
 root@diba-master:~# helm ls -n loki
 NAME    NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
-loki    loki            1               2024-05-17 13:15:47.659556826 +0200 CEST        deployed        loki-5.47.2     2.9.6
+loki    loki            1               2024-09-29 08:46:43.921348391 +0200 CEST        deployed        loki-6.15.0     3.1.1
 ```
 
 ```
 root@diba-master:~# kubectl -n loki get pods
-NAME                                           READY   STATUS    RESTARTS   AGE
-loki-backend-0                                 1/2     Running   0          3m57s
-loki-canary-cmn7p                              1/1     Running   0          3m58s
-loki-canary-krngx                              1/1     Running   0          3m58s
-loki-canary-zmztt                              1/1     Running   0          3m58s
-loki-gateway-5ccdb57c44-spmhl                  1/1     Running   0          38s
-loki-grafana-agent-operator-59556555b8-hrlh9   1/1     Running   0          3m58s
-loki-logs-62ltq                                2/2     Running   0          3m35s
-loki-logs-l79sd                                2/2     Running   0          3m35s
-loki-logs-wkszz                                2/2     Running   0          3m35s
-loki-read-6d9b895c4-v6bf6                      1/1     Running   0          3m58s
-loki-write-0                                   1/1     Running   0          3m57s
+NAME                           READY   STATUS    RESTARTS   AGE
+loki-backend-0                 2/2     Running   0          29m
+loki-canary-6kqlq              1/1     Running   0          29m
+loki-canary-b748c              1/1     Running   0          29m
+loki-canary-n4lds              1/1     Running   0          29m
+loki-chunks-cache-0            2/2     Running   0          29m
+loki-gateway-9ccb49f86-q2xlk   1/1     Running   0          29m
+loki-read-5cdfb66d66-hh6t4     1/1     Running   0          29m
+loki-results-cache-0           2/2     Running   0          29m
+loki-write-0                   1/1     Running   0          29m
 ```
 
 ```
 root@diba-master:~# kubectl get ingress -A
-NAMESPACE      NAME                CLASS    HOSTS                    ADDRESS        PORTS   AGE
-loki           loki-gateway        nginx    gateway-loki.ilba.cat    172.26.0.101   80      43s
-minio          minio               nginx    api-minio.ilba.cat       172.26.0.101   80      4m22s
-minio          minio-console       nginx    console-minio.ilba.cat   172.26.0.101   80      4m22s
+NAMESPACE         NAME               CLASS   HOSTS                      ADDRESS        PORTS   AGE
+loki              loki-gateway       nginx   loki-gateway.ilba.cat      172.26.0.101   80      30m
+minio             minio              nginx   minio-api.ilba.cat         172.26.0.101   80      80m
+minio             minio-console      nginx   minio-console.ilba.cat     172.26.0.101   80      95m
 ```
 
 ## Promtail <div id='id30' />
@@ -547,7 +528,7 @@ helm upgrade --install \
 promtail grafana/promtail \
 --create-namespace \
 --namespace promtail \
---version=6.15.5 \
+--version=6.16.6 \
 -f values-promtail.yaml
 ```
 
@@ -556,7 +537,7 @@ promtail grafana/promtail \
 ```
 root@diba-master:~# helm -n promtail ls
 NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
-promtail        promtail        1               2024-05-17 19:16:05.444210472 +0200 CEST        deployed        promtail-6.15.5 2.9.3
+promtail        promtail        1               2024-09-29 08:49:56.541490009 +0200 CEST        deployed        promtail-6.16.6 3.0.0
 ```
 
 Verificamos que estén todos los pods.  
@@ -654,7 +635,7 @@ test-metallb   mi-primer-ingress   <none>   www.dominio.cat          172.26.0.10
 ### Accediendo por Consola
 
 ```
-$ while curl -sI -o /dev/null -w "%{http_code}\n" -H "Host: www.dominio.cat" "http://172.26.0.101/"; do sleep 1; done;
+$ while curl -sI -o /dev/null -w "%{http_code}\n" -H "Host: www.dominio.cat" "http://172.26.0.101/"; do sleep 1; date; done;
 ```
 
 ### Accediendo por URL
@@ -667,9 +648,9 @@ Acceso a la [web de testing](http://www.dominio.cat/)
 
 Verificamos que en el MinIO se haya guardado algo de datos:
 
-* URL: [console-minio.ilba.cat](http://console-minio.ilba.cat)
+* URL: [minio-console.ilba.cat](http://minio-console.ilba.cat)
 * Username: admin
-* Password: admin-password
+* Password: Er2Ophgundeat2
 
 ![alt text](images/MinIO-show-bucket.png)
 
@@ -678,7 +659,7 @@ Accedemos a [Grafana](http://172.26.0.32:3000) (está ubicado fuera del cluster 
 Configuramos el Data Source:
 
 * Name: Loki-K8S
-* URL: http://gateway-loki.ilba.cat
+* URL: http://loki-gateway.ilba.cat
 * User: loki-gateway
 * Password: loki-gateway-password
 
