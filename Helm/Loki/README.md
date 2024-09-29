@@ -372,7 +372,7 @@ root@kubespray-aio:~# ./mc admin info myminio
 **NOTA:** Hemos creado la mínima infraestructura para que funcione, no está pensado para montaje en HA
 
 Datos importantes del values.yaml de Loki:
-* By default the compactor.retention-enabled flag is not set, so the logs sent to Loki live forever.
+* By default the *compactor.working_directory* flag is not set, so the logs sent to Loki live forever.
 * [URL de configuración del compactor](https://grafana.com/docs/loki/latest/operations/storage/retention/#retention-configuration)
 * Si ponemos el valor: *loki.commonConfig.replication_factor* a 1, hemos de configurar: 
 *backend.extraVolumeMounts* y *backend.extraVolumes*, sinó nos dará el siguiente error:
