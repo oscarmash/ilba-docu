@@ -417,8 +417,6 @@ loki:
       http_config:
         insecure_skip_verify: true
   auth_enabled: false
-  compactor:
-    retention_enabled: true
   schemaConfig:
     configs:
       - from: 2024-09-28
@@ -430,11 +428,13 @@ loki:
           period: 24h
   compactor:
     working_directory: /data/retention
-    compaction_interval: 10m
+    compaction_interval: 5m
     retention_enabled: true
-    retention_delete_delay: 2h
+    retention_delete_delay: 10m
     retention_delete_worker_count: 150
     delete_request_store: s3
+  limits_config:
+    retention_period: 15m
 
 write:
   replicas: 1
