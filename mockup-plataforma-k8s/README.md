@@ -81,7 +81,7 @@ root@debian-node1:~# tail -f /var/log/syslog
 2024-10-01T11:34:07.899178+02:00 debian-node1 kubelet[1914]: E1001 11:34:07.899084    1914 bootstrap.go:266] part of the existing bootstrap client certificate in /etc/kubernetes/kubelet.conf is expired: 2024-09-12 09:18:55 +0000 UTC
 ```
 
-Como hemos hecho para solucionarlo ?
+Como hemos hecho para [solucionarlo](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/troubleshooting-kubeadm/#kubelet-client-cert) ? 
 
 ```
 root@debian-node1:~# rm -rf /etc/kubernetes/kubelet.conf
