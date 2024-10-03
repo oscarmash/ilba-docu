@@ -6,6 +6,14 @@
 
 ## Working daily <div id='id10' />
 
+Ver pods muertos
+
+```
+kubectl get pods -A | grep -Ev 'Running|Completed'
+```
+
+---
+
 Eliminar un pod de manera agresiva:
 
 ```
