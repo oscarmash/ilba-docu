@@ -111,7 +111,7 @@ Pod para debug:
 
 ```
 $ kubectl -n default run debug -it --image=debian
-root@debug:/# apt-get update && apt install -y iputils-ping net-tools dnsutils curl
+root@debug:/# apt-get update && apt install -y iputils-ping net-tools dnsutils curl telnet nmap
 ```
 
 ## Cosas específicas <div id='id20' />
