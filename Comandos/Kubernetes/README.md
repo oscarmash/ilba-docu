@@ -107,10 +107,11 @@ root@ilimit-paas-k8s-test2-cp01:~# kubectl -n ceph-csi-rbd get secret csi-rbd-se
 
 ---
 
-Buscar pods rotos
+Pod para debug:
 
 ```
-$ k get pods -A | grep -Ev 'Running|Completed'
+$ kubectl -n default run debug -it --image=debian
+root@debug:/# apt-get update && apt install -y iputils-ping net-tools dnsutils
 ```
 
 ## Cosas específicas <div id='id20' />
