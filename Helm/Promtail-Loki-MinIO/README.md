@@ -368,6 +368,13 @@ root@kubespray-aio:~# ./mc admin info myminio
 1 drive online, 0 drives offline, EC:0
 ```
 
+Compresión de MinIO, ver [documentación](https://min.io/docs/minio/linux/administration/object-management/data-compression.html#tutorials)
+
+```
+ilimit-k8s-pre-master01:~# ./mc admin config get myminio compression
+compression enable=off allow_encryption=off extensions=.txt,.log,.csv,.json,.tar,.xml,.bin mime_types=text/*,application/json,application/xml,binary/octet-stream
+```
+
 ## Loki <div id='id20' />
 
 ### Notas del montaje de Loki <div id='id21' />
