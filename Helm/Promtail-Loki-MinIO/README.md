@@ -18,6 +18,7 @@
 * [Cosas de Loki](#id50)
   * [Cambio logs ingress-nginx](#id60)
   * [Que es la pppppppppp...](#id70)
+  * [Compactor de loki funciona ?](#id80)
 
 Esquema:
 
@@ -744,3 +745,17 @@ En el dashboard de loki podemos ver el siguiente mensaje:
 La respuesta es la siguiente:
 
 ![alt text](images/ppppppp-explicacion.png)
+
+### Compactor de loki funciona ? <div id='id80' />
+
+```
+$ kubectl logs loki-backend-0 -c loki | grep compac
+level=info ts=2024-10-08T11:11:26.254835113Z caller=compactor.go:765 msg="compacting table" table-name=index_20004
+level=info ts=2024-10-08T11:11:26.271687709Z caller=util.go:77 table-name=index_20004 user-id=fake user-id=fake file-name=1728385436477729510-compactor-1728338397256-1728385209867-5be581f9.tsdb.gz msg="downloaded file" total_time=7.621875ms
+level=info ts=2024-10-08T11:11:26.289079209Z caller=util.go:124 table-name=index_20004 user-id=fake user-id=fake file-name=1728385436477729510-compactor-1728338397256-1728385209867-5be581f9.tsdb.gz size="1.3 MB" msg="downloaded and extracted file" downloadtime=7.621875ms extracttime=17.342891ms
+level=info ts=2024-10-08T11:11:26.375124825Z caller=compactor.go:770 msg="finished compacting table" table-name=index_20004
+level=info ts=2024-10-08T11:11:26.375198677Z caller=compactor.go:765 msg="compacting table" table-name=index_20003
+level=info ts=2024-10-08T11:11:26.389680896Z caller=util.go:77 table-name=index_20003 user-id=fake user-id=fake file-name=1728353036608183398-compactor-1728304259317-1728352782656-b78c6dac.tsdb.gz msg="downloaded file" total_time=3.544578ms
+level=info ts=2024-10-08T11:11:26.409778496Z caller=util.go:124 table-name=index_20003 user-id=fake user-id=fake file-name=1728353036608183398-compactor-1728304259317-1728352782656-b78c6dac.tsdb.gz size="1.3 MB" msg="downloaded and extracted file" downloadtime=3.544578ms extracttime=20.056905ms
+level=info ts=2024-10-08T11:11:26.513104323Z caller=compactor.go:770 msg="finished compacting table" table-name=index_20003
+```
