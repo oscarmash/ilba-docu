@@ -1,0 +1,8 @@
+controller:
+  metrics:
+    enabled: true
+    service:
+      enabled: true
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "10254"

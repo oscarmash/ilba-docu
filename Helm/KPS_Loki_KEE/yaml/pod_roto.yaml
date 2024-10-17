@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-roto
+  namespace: default
+spec:
+  containers:
+    - name: pod
+      image: nginx:6.6.6
+      command: [ "/bin/bash", "-c", "--" ]
+      args: [ "while true; do sleep 300; done;" ]

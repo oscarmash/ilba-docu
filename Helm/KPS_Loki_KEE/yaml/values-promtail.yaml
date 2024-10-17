@@ -1,0 +1,6 @@
+config:
+   clients:
+    - url: http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push
+      basic_auth:
+         username: loki-gateway
+         password: loki-gateway-password

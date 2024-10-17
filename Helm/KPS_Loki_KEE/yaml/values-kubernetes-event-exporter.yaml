@@ -1,0 +1,18 @@
+replicaCount: 1
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+config:
+  logLevel: debug
+  logFormat: pretty
+  receivers:
+    - name: loki
+      webhook:
+        endpoint: "http://kubernetes-event-exporter-loki-gateway.kubernetes-event-exporter-loki.svc.cluster.local/loki/api/v1/push"
+  route:
+    routes:
+      - match:
+          - receiver: "loki"
