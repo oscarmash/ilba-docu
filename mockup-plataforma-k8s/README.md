@@ -2,6 +2,7 @@
 
 
 * [Instalación de K8s](#id10)
+* [Actualización de K8s](#id11)
 * [Dudas](#id20) 
 * [Errores](#id30) 
   * [Kubelet client certificate rotation fails](#id31)
@@ -13,6 +14,18 @@ Pasos a seguir
 * make pre_install
 * make install_kubespray ENV=k8s-test KUBE_VERSION=v1.30.4
 * make install_applications
+
+# Actualización de K8s <div id='id10' />
+
+Pasos a seguir:
+
+* kubectl drain --ignore-daemonsets --delete-emptydir-data nombre_nodo
+* kubectl get nodes -o wide
+* make upgrade_kubespray ENV=k8s-test KUBE_VERSION=v1.30.4 NODE=nombre_nodo
+* ssh nombre_nodo
+* apt-get update && apt-get -y upgrade && apt-get dist-upgrade -y && apt-get -y autoremove && apt-get autoclean && apt-get clean && fstrim --fstab --verbose && reboot
+* kubectl get nodes -o wide
+* kubectl uncordon nombre_nodo
 
 # Dudas <div id='id20' />
 
