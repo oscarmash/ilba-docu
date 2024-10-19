@@ -1,4 +1,7 @@
 resolvconf_mode: docker_dns
 calico_apiserver_enabled: true
 kubernetes_audit: true
-audit_log_maxage: 2
+audit_log_maxage: 0
+audit_log_maxbackups: 0
+audit_log_maxsize: 100000
+audit_log_path: /var/log/kubernetes/audit/kube-apiserver-audit.log
