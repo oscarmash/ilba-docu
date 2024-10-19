@@ -33,6 +33,9 @@ pre_install:
 install_kubespray:
 	$(BIN) ansible-playbook -i inventory/$(ENV)/inventory.ini playbooks/cluster.yml -e kube_version=$(KUBE_VERSION) -e "@variables_kubespray.yml" -b
 
+post_install:
+	$(BIN) ansible-playbook -i inventory/$(ENV)/inventory.ini playbooks_custom/post_install.yaml -b
+
 install_applications:
 	$(BIN) ansible-playbook -i inventory/$(ENV)/inventory.ini playbooks_custom/install_applications.yaml -e cluster_name=$(ENV)
 

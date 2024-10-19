@@ -1,0 +1,53 @@
+- name: logrotate
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 3600
+      tags: logrotate
+
+    - name: Installing logrotate
+      apt:
+        pkg:
+          - logrotate
+        state: latest
+        update_cache: true
+      tags: logrotate
+
+    - name: Copy file kubernetes-apiserver-audit.conf
+      ansible.builtin.copy:
+        src: files/kubernetes-apiserver-audit.conf
+        dest: /etc/logrotate.d/kubernetes-apiserver-audit.conf
+      tags: logrotate
+
+    - name: Start and enable logrotate
+      ansible.builtin.service:
+        name: logrotate
+        state: restarted
+        enabled: yes
+      tags: logrotate
+
+- name: Backups etcd
+  hosts: kube_control_plane
+  gather_facts: true
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+
+    - name: Backup etcd - Copy script
+      ansible.builtin.template:
+        src: templates/backup_etcd.j2
+        dest: /usr/local/sbin/backup.sh
+        mode: '0755'
+      tags: backup_etcd
+
+    - name: Backup etcd - Copy cron
+      copy:
+        src: files/backup_etcd.cron
+        dest: /etc/cron.d/backup-etcd
+        mode: "0644"
+      tags: backup_etcd
