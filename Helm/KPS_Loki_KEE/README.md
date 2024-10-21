@@ -97,6 +97,13 @@ NAME                     READY   STATUS    RESTARTS   AGE
 minio-75d45cc59f-8pdpp   1/1     Running   0          36s
 ```
 
+Verificamos que se pueda acceder via web:
+* URL: [minio-console.ilba.cat](http://minio-console.ilba.cat)
+* Username: admin
+* Password: Er2Ophgundeat2
+
+![alt text](images/minio-00.png)
+
 ```
 helm upgrade --install \
 loki grafana/loki \
@@ -173,6 +180,10 @@ kubernetes-event-exporter-loki grafana/loki \
 --namespace kubernetes-event-exporter-loki \
 --version=6.16.0 \
 -f values-kubernetes-event-exporter-loki.yaml
+```
+
+```
+kubectl -n kubernetes-event-exporter-loki get pods
 ```
 
 ```
