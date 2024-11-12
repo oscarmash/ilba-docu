@@ -6,6 +6,15 @@
 
 ## Working daily <div id='id10' />
 
+Saber fecha de caducidad de un certificado de K8s:
+
+```
+$ cat .kube/config-ilimit-pro-k8s | grep client-certificate-data | awk -F " " '{print $2}'| base64 --decode| openssl x509  -enddate -noout
+notAfter=Feb 13 10:30:46 2025 GMT
+```
+
+---
+
 Ver pods muertos
 
 ```
