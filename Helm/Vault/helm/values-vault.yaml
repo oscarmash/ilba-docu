@@ -1,0 +1,62 @@
+injector:
+  enabled: true
+
+server:
+  enabled: true
+  affinity:
+  resources: {}
+  ingress:
+    enabled: true
+    labels:
+      traffic: external
+    ingressClassName: "nginx"
+    activeService: true
+    hosts:
+      - host: vault-k8s.ilba.cat
+        paths: []
+  dataStorage:
+    size : 10Gi
+    storageClass: csi-rbd-sc
+  standalone:
+    enabled: false
+  ha:
+    enabled: true
+    raft:
+      enabled: true
+      setNodeId: true
+
+      config: |
+        # CONFIG
+        ui = true
+        disable_mlock = true
+        cluster_name = "cluster-vault-k8s"
+
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+          retry_join {
+            leader_api_addr = "http://vault-0.vault-internal.vault.svc.cluster.local:8200"
+          }
+          retry_join {
+            leader_api_addr = "http://vault-1.vault-internal.vault.svc.cluster.local:8200"
+          }
+          retry_join {
+            leader_api_addr = "http://vault-2.vault-internal.vault.svc.cluster.local:8200"
+          }
+        }
+
+        seal "transit" {
+          address = "http://172.26.0.235"
+          token = "hvs.CAESIOqhI0JeLQszCg3k7sOMbQmUqujaE6pn5bb0R-YdHRA_Gh4KHGh2cy5aTkhCZFZXeEhFSEw0b2FaNjRySGJtNXU"
+          disable_renewal = "false"
+          key_name = "autounseal"
+          mount_path = "transit/"
+          tls_skip_verify = "true"
+        }
+
+        service_registration "kubernetes" {}

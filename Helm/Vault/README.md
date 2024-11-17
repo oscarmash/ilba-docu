@@ -275,19 +275,104 @@ NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   AL
 csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   4m45s
 ```
 
+```
+$ scp helm/values-vault.yaml 172.26.0.230:
 
+root@k8s-test-cp:~# helm repo add hashicorp https://helm.releases.hashicorp.com
+root@k8s-test-cp:~# helm repo update
 
+root@k8s-test-cp:~# helm search repo hashicorp/vault
+NAME                                    CHART VERSION   APP VERSION     DESCRIPTION
+hashicorp/vault                         0.29.0          1.18.1          Official HashiCorp Vault Chart
 
+helm upgrade --install \
+vault hashicorp/vault \
+--create-namespace \
+--namespace vault \
+--version=0.29.0 \
+-f values-vault.yaml
 
+root@k8s-test-cp:~# helm -n vault ls
+NAME    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
+vault   vault           1               2024-11-17 17:25:53.24776856 +0100 CET  deployed        vault-0.29.0    1.18.1
 
+root@k8s-test-cp:~# kubectl -n vault get pods
+NAME                                    READY   STATUS    RESTARTS   AGE
+vault-0                                 0/1     Running   0          12s
+vault-1                                 0/1     Running   0          11s
+vault-2                                 0/1     Running   0          11s
+vault-agent-injector-7c59f6dc9f-2fkgt   0/1     Running   0          12s
+```
 
+```
+root@k8s-test-cp:~# kubectl -n vault exec -it vault-0 -- ash
+/ $ vault operator init
 
+Recovery Key 1: xePEWIxe+M9pQt/n0UXhxvQrkkl0OEmGG+JYNPD3S1Vh
+Recovery Key 2: gQOxR3iQveVGIMiRXBWHsuy53L81y8XXHgFiXzG39erw
+Recovery Key 3: +2ZyjrO0D6IoJhBHqLMZ/xL7CIatwIAoHWPDmcXrQqWF
+Recovery Key 4: l2YTnOmJamfwvpZMJ3i0Xx5d1+9t0SceR0+9BtUWIhzf
+Recovery Key 5: cjFkr861etu3T2KvYFHZfkLUG6sScwfta5qR/TRCAJ6B
 
+Initial Root Token: hvs.AeDsT07sVmujzAvzfzJt0vk7
 
-
-
-
-
-
+/ $ vault operator unseal
+/ $ export VAULT_ADDR=http://127.0.0.1:8200
+/ $ vault login hvs.AeDsT07sVmujzAvzfzJt0vk7
 
 / $ vault operator raft list-peers
+Node       Address                        State       Voter
+----       -------                        -----       -----
+vault-0    vault-0.vault-internal:8201    leader      true
+vault-1    vault-1.vault-internal:8201    follower    true
+vault-2    vault-2.vault-internal:8201    follower    true
+
+/ $ exit
+```
+
+```
+root@k8s-test-cp:~# wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+root@k8s-test-cp:~# echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+root@k8s-test-cp:~# apt update && apt install vault
+
+root@k8s-test-cp:~# export VAULT_ADDR=http://172.26.0.235
+root@k8s-test-cp:~# vault login hvs.xBV3t49lOCmaDrXrLQqN4AE6
+root@k8s-test-cp:~# vault auth enable kubernetes
+
+root@k8s-test-cp:~# apt-get update && apt-get install -y jq
+
+root@k8s-test-cp:~# cat > vault-secret.yaml <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vault-token-g955r
+  namespace: vault
+  annotations:
+    kubernetes.io/service-account.name: vault
+type: kubernetes.io/service-account-token
+EOF
+
+root@k8s-test-cp:~# kubectl apply -f vault-secret.yaml
+root@k8s-test-cp:~# VAULT_HELM_SECRET_NAME=$(kubectl -n vault get secrets --output=json | jq -r '.items[].metadata | select(.name|startswith("vault-token-")).name')
+root@k8s-test-cp:~# TOKEN_REVIEW_JWT=$(kubectl -n vault get secret $VAULT_HELM_SECRET_NAME --output='go-template={{ .data.token }}' | base64 --decode)
+root@k8s-test-cp:~# KUBE_CA_CERT=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.certificate-authority-data}' | base64 --decode)
+root@k8s-test-cp:~# KUBE_HOST=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.server}')
+
+root@k8s-test-cp:~# vault write auth/kubernetes/config \
+token_reviewer_jwt="$TOKEN_REVIEW_JWT" \
+kubernetes_host="$KUBE_HOST" \
+kubernetes_ca_cert="$KUBE_CA_CERT" \
+issuer="https://kubernetes.default.svc.cluster.local"
+```
+
+
+
+
+
+
+
+
+
+
+
+
