@@ -205,7 +205,7 @@ HA Enabled      false
 Verificamos el accceso via web:
 
 * URL: http://172.26.0.235
-* TOKEN: hvs.bbUzLpUPeshAAR6gCCrm5UjU
+* TOKEN: hvs.xBV3t49lOCmaDrXrLQqN4AE6
 
 ![alt text](images/transit-01-unseal.png)
 
