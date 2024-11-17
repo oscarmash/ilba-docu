@@ -36,6 +36,7 @@ Helms avanzados:
 * [Helm - Zabbix](./Helm/Zabbix/README.md)
 * [Helm - Argo CD](./Helm/ArgoCD/README.md)
 * [Helm - Argo Rollout](./Helm/ArgoRollout/README.md) **No acabado**
+* [Helm - Vault](./Helm/Vault/README.md) **Work in progress**
 
 ## Operators
 
@@ -57,4 +58,4 @@ Documentación de productos usando Operators
 
 ## Varios
 
-* [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) **Work in progress**
+* [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) **No acabado**
