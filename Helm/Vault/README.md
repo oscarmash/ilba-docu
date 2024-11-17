@@ -3,6 +3,9 @@
 * [Transit](#id10)
   * [Instalación vault en docker-compose](#id11)
   * [Unseal de Vault](#id12)
+* [kubernetes](#id20)
+  * [Token transit para K8s](#id21)
+  * [Vault en K8s](#id22)
 
 # Transit <div id='id10' />
 
@@ -108,13 +111,13 @@ fcc757fc5331   hashicorp/vault:1.17.5   "docker-entrypoint.s…"   8 seconds ago
 
 ```
 root@vault-transit:~# docker exec -it vault vault operator init
-Unseal Key 1: Zj/Q2S61eJOWXCsc6Tfk0U0sT7ik5vZ5NG+FgNUujX0E
-Unseal Key 2: TVfWLVB2AgYMuu8Zbsi9cKtEbaGRNGUW2G58lkpfmKPR
-Unseal Key 3: 0asMZgvUs+i32TGTkw3/chljI4P+5xkOA+xuKcMqEIfq
-Unseal Key 4: 0OUHexn7D1Td6IeLVHCZC/S+EPcv3v10Ztq5aDDh2O1k
-Unseal Key 5: W8yy5i/N/xffXXjPl0s9//GucSTM/yEzXbMNeTDns2os
+Unseal Key 1: +Y8HDolAfpm/hwrZ72flgrAfj8aH1QwvlP2vf/2UyjaS
+Unseal Key 2: 5id1ig/8u+bgN1HnPJQW8TQvyAT+o5vinTQ2/yUrvilA
+Unseal Key 3: dAMRqHsU491x4bizhrIarYkmeEyqDy42uYGWHPBdlFyZ
+Unseal Key 4: 0PI8LW7DzkUzxhoeOoYPEcSbbcSdTTufzt2iGMbF5Rdc
+Unseal Key 5: i6PknfSwlOFukzmNMKKKoSGDjgLp70qhnBt3efJEh0Fs
 
-Initial Root Token: hvs.bbUzLpUPeshAAR6gCCrm5UjU
+Initial Root Token: hvs.xBV3t49lOCmaDrXrLQqN4AE6
 ```
 
 ```
@@ -124,9 +127,9 @@ root@vault-transit:~# vim /usr/local/sbin/unsealt_vault_script.sh
 VAULT_ADDR='172.26.0.235'
 
 KEY=(
-     'Zj/Q2S61eJOWXCsc6Tfk0U0sT7ik5vZ5NG+FgNUujX0E'
-     'TVfWLVB2AgYMuu8Zbsi9cKtEbaGRNGUW2G58lkpfmKPR'
-     '0asMZgvUs+i32TGTkw3/chljI4P+5xkOA+xuKcMqEIfq'
+     '+Y8HDolAfpm/hwrZ72flgrAfj8aH1QwvlP2vf/2UyjaS'
+     '5id1ig/8u+bgN1HnPJQW8TQvyAT+o5vinTQ2/yUrvilA'
+     'dAMRqHsU491x4bizhrIarYkmeEyqDy42uYGWHPBdlFyZ'
     )
 
 for i in "${KEY[@]}"; do
@@ -205,3 +208,86 @@ Verificamos el accceso via web:
 * TOKEN: hvs.bbUzLpUPeshAAR6gCCrm5UjU
 
 ![alt text](images/transit-01-unseal.png)
+
+# kubernetes <div id='id20' />
+
+## Token transit para K8s <div id='id21' />
+
+```
+root@vault-transit:~# docker exec -it vault sh
+
+/ # vault status | grep Sealed
+Sealed          false
+
+/ # vault login hvs.xBV3t49lOCmaDrXrLQqN4AE6
+/ # vault secrets enable transit
+/ # vault write sys/auth/token/tune default_lease_ttl=87600h
+/ # vault write sys/auth/token/tune max_lease_ttl=87600h
+/ # vault write -f transit/keys/autounseal
+
+/ # cat <<EOF >> autounseal-policy.hcl
+path "transit/encrypt/autounseal" {
+   capabilities = [ "update" ]
+}
+path "transit/decrypt/autounseal" {
+   capabilities = [ "update" ]
+}
+EOF
+
+/ # vault policy write autounseal-k8s autounseal-policy.hcl
+
+/ # vault token create -policy="autounseal-k8s" -wrap-ttl=87600h
+Key                              Value
+---                              -----
+wrapping_token:                  hvs.CAESILloitmOiPIC1a9Pq5atEvKt-T5sy4xD2XNgeiAk90JRGh4KHGh2cy5EV2FVRjN5MDRaVWVjc3FXUmxod2lDWWk
+wrapping_accessor:               hVio5mIgXMfgnIeCXT3TUJvQ
+wrapping_token_ttl:              87600h
+wrapping_token_creation_time:    2024-11-17 09:49:20.560625851 +0100 CET
+wrapping_token_creation_path:    auth/token/create
+wrapped_accessor:                IufZlzoEZZUFDbW7jnyvTy0Q
+
+/ # VAULT_TOKEN="hvs.CAESILloitmOiPIC1a9Pq5atEvKt-T5sy4xD2XNgeiAk90JRGh4KHGh2cy5EV2FVRjN5MDRaVWVjc3FXUmxod2lDWWk" vault unwrap
+Key                  Value
+---                  -----
+token                hvs.CAESIOqhI0JeLQszCg3k7sOMbQmUqujaE6pn5bb0R-YdHRA_Gh4KHGh2cy5aTkhCZFZXeEhFSEw0b2FaNjRySGJtNXU
+token_accessor       IufZlzoEZZUFDbW7jnyvTy0Q
+token_duration       87600h
+token_renewable      true
+token_policies       ["autounseal-k8s" "default"]
+identity_policies    []
+policies             ["autounseal-k8s" "default"]
+```
+
+Este es el Token para el values del vault que desplegaremos en K8s: **hvs.CAESIOqhI0JeLQszCg3k7sOMbQmUqujaE6pn5bb0R-YdHRA_Gh4KHGh2cy5aTkhCZFZXeEhFSEw0b2FaNjRySGJtNXU**
+
+## Vault en K8s <div id='id22' />
+
+```
+root@k8s-test-cp:~# kubectl get nodes
+NAME            STATUS   ROLES           AGE   VERSION
+k8s-test-cp     Ready    control-plane   27d   v1.30.4
+k8s-test-wk01   Ready    <none>          27d   v1.30.4
+k8s-test-wk02   Ready    <none>          27d   v1.30.4
+k8s-test-wk03   Ready    <none>          27d   v1.30.4
+
+root@k8s-test-cp:~# kubectl get sc
+NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   4m45s
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/ $ vault operator raft list-peers
