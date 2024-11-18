@@ -6,6 +6,7 @@
 * [kubernetes](#id20)
   * [Token transit para K8s](#id21)
   * [Vault en K8s](#id22)
+  * [External secrets](#id23)
 
 # Transit <div id='id10' />
 
@@ -335,8 +336,14 @@ root@k8s-test-cp:~# wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dea
 root@k8s-test-cp:~# echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
 root@k8s-test-cp:~# apt update && apt install vault
 
-root@k8s-test-cp:~# export VAULT_ADDR=http://172.26.0.235
-root@k8s-test-cp:~# vault login hvs.xBV3t49lOCmaDrXrLQqN4AE6
+root@k8s-test-cp:~# kubectl -n vault get ingress
+NAME    CLASS   HOSTS                ADDRESS        PORTS   AGE
+vault   nginx   vault-k8s.ilba.cat   172.26.0.101   80      13h
+
+
+
+root@k8s-test-cp:~# export VAULT_ADDR=http://vault-k8s.ilba.cat
+root@k8s-test-cp:~# vault login hvs.AeDsT07sVmujzAvzfzJt0vk7
 root@k8s-test-cp:~# vault auth enable kubernetes
 
 root@k8s-test-cp:~# apt-get update && apt-get install -y jq
@@ -358,6 +365,11 @@ root@k8s-test-cp:~# TOKEN_REVIEW_JWT=$(kubectl -n vault get secret $VAULT_HELM_S
 root@k8s-test-cp:~# KUBE_CA_CERT=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.certificate-authority-data}' | base64 --decode)
 root@k8s-test-cp:~# KUBE_HOST=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.server}')
 
+root@k8s-test-cp:~# echo $VAULT_HELM_SECRET_NAME
+root@k8s-test-cp:~# echo $TOKEN_REVIEW_JWT
+root@k8s-test-cp:~# echo $KUBE_CA_CERT
+root@k8s-test-cp:~# echo $KUBE_HOST
+
 root@k8s-test-cp:~# vault write auth/kubernetes/config \
 token_reviewer_jwt="$TOKEN_REVIEW_JWT" \
 kubernetes_host="$KUBE_HOST" \
@@ -365,14 +377,42 @@ kubernetes_ca_cert="$KUBE_CA_CERT" \
 issuer="https://kubernetes.default.svc.cluster.local"
 ```
 
+```
+root@k8s-test-cp:~# vault secrets enable -version=2 -path=k8s kv
 
+root@k8s-test-cp:~# vault write k8s/config max_versions=10
+root@k8s-test-cp:~# vault read k8s/config
+Key                     Value
+---                     -----
+cas_required            false
+delete_version_after    0s
+max_versions            10
 
+root@k8s-test-cp:~# vault kv put k8s/myapp/config username='oscar' password='super_secret'
 
+root@k8s-test-cp:~# vault kv get -format=json k8s/myapp/config | jq ".data.data"
+{
+  "password": "super_secret",
+  "username": "oscar"
+}
 
+root@k8s-test-cp:~# vault policy write policy-myapp - <<EOF
+path "k8s/myapp/config" {
+    capabilities = ["read"]
+}
+EOF
 
+root@k8s-test-cp:~# vault policy list
+default
+policy-myapp
+root
 
+root@k8s-test-cp:~# vault write auth/kubernetes/role/myapp \
+bound_service_account_names=sa-myapp \
+bound_service_account_namespaces=ns-myapp \
+policies=policy-myapp \
+ttl=4h
+```
 
-
-
-
+# External secrets <div id='id23' />
 
