@@ -1,5 +1,6 @@
 # Index:
 
+* [Start](#id05)
 * [Transit](#id10)
   * [Instalación vault en docker-compose](#id11)
   * [Unseal de Vault](#id12)
@@ -8,9 +9,15 @@
   * [Vault en K8s](#id22)
   * [External secrets](#id23)
 
-# Transit <div id='id10' />
+# Start <div id='id05' />
 
-Necesitamos un equipo con docker-compose, para poder desplegar el transit.
+![alt text](images/esquema.png)
+
+Necesitamos:
+* Un equipo con docker-compose, para poder desplegar el transit.
+* Un cluster de K8s con Storage persistente
+
+# Transit <div id='id10' />
 
 ## Instalación vault en docker-compose <div id='id11' />
 
@@ -331,6 +338,10 @@ vault-2    vault-2.vault-internal:8201    follower    true
 / $ exit
 ```
 
+Verificaremos el acceso:
+* URL: http://vault-k8s.ilba.cat/
+* TOKEN: hvs.AeDsT07sVmujzAvzfzJt0vk7
+
 ```
 root@k8s-test-cp:~# wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 root@k8s-test-cp:~# echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
@@ -414,5 +425,112 @@ policies=policy-myapp \
 ttl=4h
 ```
 
+Verificaremos los datos:
+* URL: http://vault-k8s.ilba.cat/
+* TOKEN: hvs.AeDsT07sVmujzAvzfzJt0vk7
+
+![alt text](images/vault-k8s-secret.png)
+
 # External secrets <div id='id23' />
 
+```
+root@k8s-test-cp:~# helm repo add external-secrets https://charts.external-secrets.io
+root@k8s-test-cp:~# helm repo update
+
+root@k8s-test-cp:~# helm search repo external-secrets/external-secrets
+NAME                                    CHART VERSION   APP VERSION     DESCRIPTION
+external-secrets/external-secrets       0.10.5          v0.10.5         External secret management for Kubernetes
+
+helm upgrade --install \
+external-secrets external-secrets/external-secrets \
+--create-namespace \
+--namespace external-secrets \
+--version=0.10.5
+
+root@k8s-test-cp:~# helm -n external-secrets ls
+NAME                    NAMESPACE               REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
+external-secrets        external-secrets        1               2024-11-18 19:47:59.530258104 +0100 CET deployed        external-secrets-0.10.5 v0.10.5
+
+root@k8s-test-cp:~# kubectl -n external-secrets get pods
+NAME                                                READY   STATUS    RESTARTS   AGE
+external-secrets-58654746b4-dqfcc                   1/1     Running   0          51s
+external-secrets-cert-controller-85fd79c645-bgnts   1/1     Running   0          51s
+external-secrets-webhook-674d7d48ff-zp7vv           1/1     Running   0          51s
+```
+
+```
+root@k8s-test-cp:~# echo -n "hvs.AeDsT07sVmujzAvzfzJt0vk7" | base64
+aHZzLkFlRHNUMDdzVm11anpBdnpmekp0MHZrNw==
+
+root@k8s-test-cp:~# vim secret-store-external-secrets.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: vault-backend
+spec:
+  provider:
+    vault:
+      server: "http://vault-active.vault.svc.cluster.local:8200"
+      path: "k8s"
+      version: "v2"
+      auth:
+        tokenSecretRef:
+          name: "vault-token"
+          key: "token"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vault-token
+data:
+  token: aHZzLkFlRHNUMDdzVm11anpBdnpmekp0MHZrNw==
+
+root@k8s-test-cp:~# vim external-secrets.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: vault-example
+spec:
+  refreshInterval: "10s"
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+  target:
+    name: key-store
+    template:
+      data:
+        username: "{{ .username }}"
+        password: "{{ .password }}"
+  data:
+  - secretKey: username
+    remoteRef:
+      key: k8s/myapp/config
+      property: username
+  - secretKey: password
+    remoteRef:
+      key: k8s/myapp/config
+      property: password
+
+root@k8s-test-cp:~# kubectl apply -f secret-store-external-secrets.yaml
+
+root@k8s-test-cp:~# kubectl get SecretStore
+NAME            AGE   STATUS   CAPABILITIES   READY
+vault-backend   5s    Valid    ReadWrite      True
+
+root@k8s-test-cp:~# kubectl apply -f external-secrets.yaml
+
+root@k8s-test-cp:~# kubectl get ExternalSecret
+NAME            STORE           REFRESH INTERVAL   STATUS         READY
+vault-example   vault-backend   10s                SecretSynced   True
+
+root@k8s-test-cp:~# kubectl get secrets
+NAME          TYPE     DATA   AGE
+key-store     Opaque   2      51s
+vault-token   Opaque   1      20m
+
+root@k8s-test-cp:~# kubectl get secret key-store -o json | jq '.data | map_values(@base64d)'
+{
+  "password": "super_secret",
+  "username": "oscar"
+}
+```
