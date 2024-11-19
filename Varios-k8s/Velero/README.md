@@ -5,6 +5,7 @@
 * [Velero Backup Storage Locations (BSL)](#id82)
 * [Velero Backup Hooks + Restore BBDD en otro NS](#id83)
 * [Clonar una aplicación (modificando ingress)](#id84)
+* [Cambio de storage de Velero (MinIO to MinIO)](#id85)
 
 # Instalación de Velero <div id='id8' />
 
@@ -826,4 +827,145 @@ root@k8s-test-cp:~# curl -s -H "Host: app-ilba-restore.ilba.cat" 172.26.0.101
 ...
 <h1>Welcome to nginx!</h1>
 ...
+```
+
+# Cambio de storage de Velero (MinIO to MinIO) <div id='id85' />
+
+Este es el storage por defecto que hay configurado:
+
+```
+root@ilimit-paas-k8s-test3-cp01:~# kubectl get BackupStorageLocation -A
+NAMESPACE   NAME             PHASE       LAST VALIDATED   AGE   DEFAULT
+velero      velero-backups   Available   59s              26d   true
+
+root@ilimit-paas-k8s-test3-cp01:~# velero backup-location get
+NAME             PROVIDER   BUCKET/PREFIX   PHASE       LAST VALIDATED                  ACCESS MODE   DEFAULT
+velero-backups   aws        velero          Available   2024-11-19 09:32:09 +0100 CET   ReadWrite     true
+```
+
+Verificamos el acceso al MinIO:
+* URL: https://stg-nas02-minio.ilimit.net:9001/
+* Username: admin
+* Password: xxxxxxx
+
+![alt text](images/Migracion_MinIO_to_MinIO_01.png)
+
+Configuración del nuevo storage de MinIO
+
+```
+$ cat <<EOF > credentials-velero-stg-nas02.file
+[default]
+aws_access_key_id=xxxxxxxxxxx
+aws_secret_access_key=yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+EOF
+
+$ kubectl create secret generic -n velero credentials-velero-stg-nas02 --from-file=aws=credentials-velero-stg-nas02.file
+
+$ kubectl -n velero get secret credentials-velero-stg-nas02
+NAME                           TYPE     DATA   AGE
+credentials-velero-stg-nas02   Opaque   1      37s
+
+$ velero backup-location create velero-stg-nas02 \
+--provider aws \
+--bucket velero-test3 \
+--config region=minio,s3ForcePathStyle="true",s3Url=https://stg-nas02-minio.ilimit.net:9000 \
+--credential=credentials-velero-stg-nas02=aws
+
+$ kubectl get BackupStorageLocation -A
+NAMESPACE   NAME               PHASE       LAST VALIDATED   AGE   DEFAULT
+velero      velero-backups     Available   8s               26d   true
+velero      velero-stg-nas02   Available   58s              10m
+
+$ velero backup-location get
+NAME               PROVIDER   BUCKET/PREFIX   PHASE       LAST VALIDATED                  ACCESS MODE   DEFAULT
+velero-backups     aws        velero          Available   2024-11-19 10:42:09 +0100 CET   ReadWrite     true
+velero-stg-nas02   aws        velero-test3    Available   2024-11-19 10:43:02 +0100 CET   ReadWrite
+
+$ kubectl -n velero get backupstoragelocations velero-stg-nas02 -oyaml
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  creationTimestamp: "2024-11-19T09:43:02Z"
+  generation: 2
+  name: velero-stg-nas02
+  namespace: velero
+  resourceVersion: "10192614"
+  uid: aa0de707-ac4c-45d2-b50a-76a13ac015de
+spec:
+  accessMode: ReadWrite
+  config:
+    region: minio
+    s3ForcePathStyle: "true"
+    s3Url: https://stg-nas02-minio.ilimit.net:9000
+  credential:
+    key: aws
+    name: credentials-velero-stg-nas02
+  objectStorage:
+    bucket: velero-test3
+  provider: aws
+status:
+  lastValidationTime: "2024-11-19T09:43:02Z"
+  phase: Available
+```
+
+Verificamos que funciona:
+
+```
+$ velero backup create "backup-$(date +"%H-%M")" \
+--include-namespaces client-advanced-farmacia \
+--storage-location velero-stg-nas02
+
+$ velero backup get |grep 
+NAME                                                  STATUS      ERRORS   WARNINGS   CREATED                         EXPIRES   STORAGE LOCATION   SELECTOR
+backup-10-49                                          Completed   0        0          2024-11-19 10:49:22 +0100 CET   29d       velero-stg-nas02   <none>
+dccomics-basic-stack-schedule-backup-20241119000039   Completed   0        1          2024-11-19 01:02:19 +0100 CET   1d        velero-backups     <none>
+....
+```
+
+![alt text](images/Migracion_MinIO_to_MinIO_02.png)
+
+Antes de cambiar el storage, borraremos todos los backups que estén apuntando a "velero-backups":
+
+```
+$ velero backup get
+NAME                                                  STATUS      ERRORS   WARNINGS   CREATED                         EXPIRES   STORAGE LOCATION   SELECTOR
+backup-10-49                                          Completed   0        0          2024-11-19 10:49:22 +0100 CET   29d       velero-stg-nas02   <none>
+dccomics-basic-stack-schedule-backup-20241119000039   Completed   0        1          2024-11-19 01:02:19 +0100 CET   1d        velero-backups     <none>
+dccomics-basic-stack-schedule-backup-20241118000036   Completed   0        1          2024-11-18 01:00:36 +0100 CET   14h       velero-backups     <none>
+...
+
+$ velero backup delete dccomics-basic-stack-.....
+
+root@ilimit-paas-k8s-test3-cp01:~/velero# velero backup get
+NAME           STATUS      ERRORS   WARNINGS   CREATED                         EXPIRES   STORAGE LOCATION   SELECTOR
+backup-10-49   Completed   0        0          2024-11-19 10:49:22 +0100 CET   29d       velero-stg-nas02   <none>
+```
+
+Ahora cambiaremos el storage por defecto:
+
+```
+$ kubectl -n velero get BackupStorageLocation
+NAME               PHASE       LAST VALIDATED   AGE   DEFAULT
+velero-backups     Available   50s              26d   true
+velero-stg-nas02   Available   40s              10m
+
+$ velero backup-location get
+NAME               PROVIDER   BUCKET/PREFIX   PHASE       LAST VALIDATED                  ACCESS MODE   DEFAULT
+velero-backups     aws        velero          Available   2024-11-19 10:54:09 +0100 CET   ReadWrite     true
+velero-stg-nas02   aws        velero-test3    Available   2024-11-19 10:54:19 +0100 CET   ReadWrite
+```
+
+```
+$ kubectl -n velero delete BackupStorageLocation velero-backups
+$ velero backup-location set velero-stg-nas02 --default
+```
+
+```
+root@ilimit-paas-k8s-test3-cp01:~/velero# kubectl -n velero get BackupStorageLocation
+NAME               PHASE       LAST VALIDATED   AGE   DEFAULT
+velero-stg-nas02   Available   15s              21m   true
+
+root@ilimit-paas-k8s-test3-cp01:~/velero# velero backup-location get
+NAME               PROVIDER   BUCKET/PREFIX   PHASE       LAST VALIDATED                  ACCESS MODE   DEFAULT
+velero-stg-nas02   aws        velero-test3    Available   2024-11-19 11:03:50 +0100 CET   ReadWrite     true
 ```
