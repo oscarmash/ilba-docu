@@ -16,7 +16,8 @@ Documentación de comandos de K8S
 
 Documentación de productos usando docker-compose
 
-* [HashiCorp Consul](./DC-HashiCorp-Consul/README.md)
+* [HashiCorp Consul](./docker-compose/HashiCorp-Consul/README.md)
+* [Ceph all-in-one (AIO)](./docker-compose/Ceph-AIO/README.md)
 
 ## Helm's
 
