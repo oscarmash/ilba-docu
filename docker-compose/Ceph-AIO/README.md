@@ -84,6 +84,10 @@ root@ceph-aio:/# echo "C@dinor1988" > dashboard_password.yml
 root@ceph-aio:/# ceph dashboard ac-user-set-password admin -i dashboard_password.yml
 root@ceph-aio:/# ceph mgr module enable telemetry
 root@ceph-aio:/# ceph telemetry on --license sharing-1-0
+
+root@ceph-aio:/# ceph osd lspools
+1 .mgr
+
 root@ceph-aio:/# ceph config set global mon_allow_pool_size_one true
 root@ceph-aio:/# ceph osd pool set .mgr size 1 --yes-i-really-mean-it
 root@ceph-aio:/# ceph health mute POOL_NO_REDUNDANCY
@@ -92,19 +96,20 @@ root@ceph-aio:/# ceph health mute POOL_NO_REDUNDANCY
 ```
 root@ceph-aio:/# ceph -s
   cluster:
-    id:     0e62a892-a69e-11ef-bae6-bc241146a3a9
+    id:     91ac2cd2-a784-11ef-b15c-bc241146a3a9
     health: HEALTH_OK
+            (muted: POOL_NO_REDUNDANCY)
 
   services:
-    mon: 1 daemons, quorum ceph-aio (age 19m)
-    mgr: ceph-aio.iphepd(active, since 15m)
-    osd: 3 osds: 0 up, 3 in (since 57s)
+    mon: 1 daemons, quorum ceph-aio (age 11m)
+    mgr: ceph-aio.yfbdlq(active, since 6m)
+    osd: 3 osds: 3 up (since 3m), 3 in (since 6m)
 
   data:
-    pools:   0 pools, 0 pgs
-    objects: 0 objects, 0 B
-    usage:   0 B used, 0 B / 0 B avail
-    pgs:
+    pools:   1 pools, 1 pgs
+    objects: 2 objects, 449 KiB
+    usage:   80 MiB used, 65 GiB / 65 GiB avail
+    pgs:     1 active+clean
 ```
 
 Accedemos al Ceph via Web:
