@@ -67,6 +67,19 @@ Configuraciones para all-in-one:
 
 ```
 root@ceph-aio:/# ceph orch apply osd --all-available-devices
+```
+
+Eperamos hasta que veamos todos los discos en up:
+
+```
+root@ceph-aio:/# ceph osd status
+ID  HOST       USED  AVAIL  WR OPS  WR DATA  RD OPS  RD DATA  STATE
+ 0  ceph-aio  26.4M  14.9G      0        0       0        0   exists,up
+ 1  ceph-aio  26.4M  19.9G      0        0       0        0   exists,up
+ 2  ceph-aio  26.4M  29.9G      0        0       0        0   exists,up
+```
+
+```
 root@ceph-aio:/# echo "C@dinor1988" > dashboard_password.yml
 root@ceph-aio:/# ceph dashboard ac-user-set-password admin -i dashboard_password.yml
 root@ceph-aio:/# ceph mgr module enable telemetry
@@ -77,12 +90,6 @@ root@ceph-aio:/# ceph health mute POOL_NO_REDUNDANCY
 ```
 
 ```
-root@ceph-aio:/# ceph osd status
-ID  HOST       USED  AVAIL  WR OPS  WR DATA  RD OPS  RD DATA  STATE
- 0  ceph-aio  26.4M  14.9G      0        0       0        0   exists,up
- 1  ceph-aio  26.4M  19.9G      0        0       0        0   exists,up
- 2  ceph-aio  26.4M  29.9G      0        0       0        0   exists,up
-
 root@ceph-aio:/# ceph -s
   cluster:
     id:     0e62a892-a69e-11ef-bae6-bc241146a3a9
@@ -105,3 +112,6 @@ Accedemos al Ceph via Web:
 * URL: https://172.26.0.239:8443/
 * Username: admin
 * Password: C@dinor1988
+
+
+![alt text](images/Ceph-Dashboard.png)
