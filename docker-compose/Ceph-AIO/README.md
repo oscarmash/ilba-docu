@@ -27,6 +27,7 @@ Dudas:
 root@ceph-aio:~# cat /etc/debian_version
 12.8
 
+root@ceph-aio:~# lsblk
 NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 vda    254:0    0   64G  0 disk
 ├─vda1 254:1    0   63G  0 part /
@@ -62,7 +63,7 @@ cephadm@ceph-aio:/root$ sudo cephadm bootstrap --mon-ip 172.26.0.239
 root@ceph-aio:~# cephadm shell
 ```
 
-tunnings:
+Configuraciones para all-in-one:
 
 ```
 root@ceph-aio:/# ceph orch apply osd --all-available-devices
