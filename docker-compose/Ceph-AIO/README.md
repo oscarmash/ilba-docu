@@ -99,3 +99,9 @@ root@ceph-aio:/# ceph -s
     usage:   0 B used, 0 B / 0 B avail
     pgs:
 ```
+
+Accedemos al Ceph via Web:
+
+* URL: https://172.26.0.239:8443/
+* Username: admin
+* Password: C@dinor1988
