@@ -18,7 +18,7 @@ Documentación de productos usando docker-compose
 
 * [HashiCorp Consul](./docker-compose/HashiCorp-Consul/README.md)
 * [Ceph all-in-one (AIO)](./docker-compose/Ceph-AIO/README.md)
-* [Prometheus Federation](./docker-compose/Prometheus-Federation/README.md) ** working on it **
+* [Prometheus Federation](./docker-compose/Prometheus-Federation/README.md) **Working on it**
 
 ## Helm's
 
