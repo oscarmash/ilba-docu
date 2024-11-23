@@ -223,6 +223,6 @@ Accedemos a Grafana
 Pasos que hemos de hacer dentro de Grafana:
 
 * Añadimos el "Data Source": http://prometheus-a:9090
-* Importamos el dashboard [1860](https://grafana.com/grafana/dashboards/1860-node-exporter-)
+* Importamos el dashboard [1860](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)
 
 
