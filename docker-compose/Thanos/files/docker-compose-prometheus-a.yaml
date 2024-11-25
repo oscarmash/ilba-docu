@@ -1,0 +1,201 @@
+services:
+
+#  prometheus:
+#    image: prom/prometheus:v2.55.1
+#    container_name: prometheus-a
+#    hostname: prometheus-a
+#    restart: unless-stopped
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - /etc/timezone:/etc/timezone:ro
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#      - prometheus_data:/prometheus
+#    command:
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#      - '--storage.tsdb.path=/prometheus'
+#      - '--web.console.libraries=/etc/prometheus/console_libraries'
+#      - '--web.console.templates=/etc/prometheus/consoles'
+#      - '--web.enable-lifecycle'
+#    ports:
+#      - 9090:9090
+#    networks:
+#      - monitoring
+
+  minio:
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z-cpuv1
+    container_name: minio
+    hostname: minio
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: superpassword
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - monitoring
+
+  thanos-query-frontend:
+    image: quay.io/thanos/thanos:v0.36.1
+    container_name: thanos-query-frontend
+    hostname: thanos-query-frontend
+    restart: unless-stopped
+    command:
+      - 'query-frontend'
+      - '--http-address=0.0.0.0:10901'
+      - '--query-frontend.downstream-url=http://thanos-querier:10902'
+    ports:
+      - 10901:10901
+    depends_on:
+      - minio
+      - thanos-querier
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - monitoring
+
+  thanos-querier:
+    image: quay.io/thanos/thanos:v0.36.1
+    container_name: thanos-querier
+    hostname: thanos-querier
+    restart: unless-stopped
+    command:
+      - 'query'
+      - '--grpc-address=0.0.0.0:10091'
+      - '--http-address=0.0.0.0:10902'
+      - '--query.replica-label=replica'
+      - '--store=172.26.0.202:10091'
+      - '--store=172.26.0.203:10091'
+      - '--store=thanos-store-gateway:10091'
+      - '--store=thanos-ruler:10091'
+    ports:
+      - 10902:10902
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    depends_on:
+      - minio
+    networks:
+      - monitoring
+
+  thanos-store-gateway:
+    image: quay.io/thanos/thanos:v0.36.1
+    container_name: thanos-store-gateway
+    hostname: thanos-store-gateway
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./bucket_config.yaml:/etc/thanos/bucket_config.yaml:ro
+    command:
+      - 'store'
+      - '--grpc-address=0.0.0.0:10091'
+      - '--http-address=0.0.0.0:10902'
+      - '--data-dir=/tmp/thanos/store'
+      - '--objstore.config-file=/etc/thanos/bucket_config.yaml'
+    depends_on:
+      - minio
+    networks:
+      - monitoring
+
+  thanos-compactor:
+    image: quay.io/thanos/thanos:v0.36.1
+    container_name: thanos-compactor
+    hostname: thanos-compactor
+    restart: unless-stopped
+    user: root
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - thanos_compactor_data:/data
+      - ./bucket_config.yaml:/etc/thanos/bucket_config.yaml:ro
+    command:
+      - 'compact'
+      - '--log.level=debug'
+      - '--data-dir=/data'
+      - '--objstore.config-file=/etc/thanos/bucket_config.yaml'
+      - '--wait'
+    depends_on:
+      - minio
+    networks:
+      - monitoring
+
+  thanos-ruler:
+    image: quay.io/thanos/thanos:v0.36.1
+    container_name: thanos-ruler
+    hostname: thanos-ruler
+    restart: unless-stopped
+    user: root
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - thanos_ruler_data:/data
+      - ./bucket_config.yaml:/etc/thanos/bucket_config.yaml:ro
+    command:
+      - 'rule'
+      - '--grpc-address=0.0.0.0:10091'
+      - '--http-address=0.0.0.0:10902'
+      - '--log.level=debug'
+      - '--data-dir=/data'
+      - '--eval-interval=15s'
+      - '--rule-file=/etc/thanos/*.rules.yaml'
+      #- '--alertmanagers.url=http://alertmanager:9093'
+      - '--query=thanos-querier:10902'
+      - '--objstore.config-file=/etc/thanos/bucket_config.yaml'
+      - "--label=ruler_cluster=\"vegas\""
+      - "--label=ruler_replica=\"r1\""
+    ports:
+      - 10903:10902
+    depends_on:
+      - minio
+      - thanos-querier
+    networks:
+      - monitoring
+
+  thanos-bucket-web:
+    image: quay.io/thanos/thanos:v0.36.1
+    container_name: thanos-bucket-web
+    hostname: thanos-bucket-web
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./bucket_config.yaml:/etc/thanos/bucket_config.yaml:ro
+    command:
+      - 'tools'
+      - 'bucket'
+      - 'web'
+      - '--http-address=0.0.0.0:10902'
+      - '--log.level=debug'
+      - '--objstore.config-file=/etc/thanos/bucket_config.yaml'
+      - '--refresh=5m'
+      - '--timeout=2m'
+      - '--label=replica'
+    ports:
+      - 10904:10902
+    depends_on:
+      - minio
+    networks:
+      - monitoring
+
+volumes:
+  prometheus_data: {}
+  minio_data: {}
+  thanos_compactor_data: {} 
+  thanos_ruler_data: {} 
+
+networks:
+  monitoring:
+    driver: bridge
