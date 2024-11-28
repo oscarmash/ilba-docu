@@ -157,8 +157,7 @@ Podremos ver que hemos creado dos dashboards nuevos:
 
 ## Kubernetes Event Exporter (KEE) <div id='id40' />
 
-Necesitamos un sistema de almancenamiento de "eventos", ya que K8s por defecto sólo guarda los eventos 1h:
-
+Necesitamos un sistema de almancenamiento de "eventos", [ya que K8s por defecto sólo guarda los eventos 1h](https://github.com/kubernetes-sigs/kubespray/blob/master/roles/kubernetes/control-plane/defaults/main/main.yml#L218):
 ```
 root@k8s-test-cp:~# cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep event-ttl
     - --event-ttl=1h0m0s
