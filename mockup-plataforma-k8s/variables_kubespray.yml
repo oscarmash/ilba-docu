@@ -12,4 +12,3 @@ audit_policy_custom_rules: |
       - patch
       - delete
       - create
-event_ttl_duration: "6h0m0s"
