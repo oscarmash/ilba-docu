@@ -33,6 +33,8 @@ Name: prometheus-b                                 Name: prometheus-c
  IP: 172.26.0.202                                   IP: 172.26.0.203
 ```
 
+![alt text](images/esquema_vm.png)
+
 ## Copiar configuraciones <div id='id10' />
 
 ```
