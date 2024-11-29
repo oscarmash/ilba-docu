@@ -81,6 +81,7 @@ root@prometheus-b:~# docker exec -it prometheus-b ash
 /prometheus $ chmod 777 -R /prometheus
 /prometheus $ exit
 root@prometheus-b:~# docker restart prometheus-b thanos-sidecar
+root@prometheus-b:~# docker ps -a
 ```
 
 Verificaremos el correcto funcionamiento:
@@ -99,6 +100,7 @@ root@prometheus-c:~# docker exec -it prometheus-c ash
 /prometheus $ chmod 777 -R /prometheus
 /prometheus $ exit
 root@prometheus-c:~# docker restart prometheus-c thanos-sidecar
+root@prometheus-c:~# docker ps -a
 ```
 
 Verificaremos el correcto funcionamiento:
@@ -107,6 +109,10 @@ Verificaremos el correcto funcionamiento:
 ![alt text](images/prometheus-c.png)
 
 A partir de aquí (pasado un rato), podremos ver como se va llenando el bucket que hemos creado en el MinIO:
+
+* URL: http://172.26.0.201:9001/
+* Username: admin
+* Password: superpassword
 
 ![alt text](images/MinIO-with-data.png)
 
@@ -118,6 +124,8 @@ root@prometheus-a:~# docker compose -f /etc/docker-compose/docker-compose.yaml u
 ```
 
 Podremos verificar el correcto funcionamiento:
+
+* URL: http://172.26.0.201:10901/targets?search=
 
 ![alt text](images/Thanos-targets.png)
 
