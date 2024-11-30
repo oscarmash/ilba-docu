@@ -1,0 +1,5 @@
+route:
+    receiver: 'inventado'
+
+receivers:
+    - name: 'inventado'

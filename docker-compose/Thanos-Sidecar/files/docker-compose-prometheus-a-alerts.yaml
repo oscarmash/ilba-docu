@@ -1,5 +1,56 @@
 services:
 
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: alertmanager
+    hostname: alertmanager
+    restart: unless-stopped
+    ports:
+      - 9093:9093
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./alertmanager.yml:/etc/alertmanager/config.yaml:ro
+    command:
+      - '--config.file=/etc/alertmanager/config.yaml'
+      - '--storage.path=/alertmanager'
+    depends_on:
+      - thanos-ruler      
+    networks:
+      - monitoring
+
+  thanos-ruler:
+    image: quay.io/thanos/thanos:v0.36.1
+    container_name: thanos-ruler
+    hostname: thanos-ruler
+    restart: unless-stopped
+    user: root
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - thanos_ruler_data:/data
+      - ./bucket_config.yaml:/etc/thanos/bucket_config.yaml:ro
+      - ./thanos-ruler.rules.yaml:/etc/thanos/thanos-ruler.rules.yaml:ro
+    command:
+      - 'rule'
+      - '--grpc-address=0.0.0.0:10091'
+      - '--http-address=0.0.0.0:10902'
+      - '--log.level=debug'
+      - '--data-dir=/data'
+      - '--eval-interval=15s'
+      - '--rule-file=/etc/thanos/thanos-ruler.rules.yaml'
+      - '--alertmanagers.url=http://alertmanager:9093'
+      - '--query=thanos-querier:10902'
+      - '--objstore.config-file=/etc/thanos/bucket_config.yaml'
+      - "--label=server_vm=\"prometheus-b-label\""
+      - "--label=server_vm=\"prometheus-c-label\""
+    ports:
+      - 10903:10902
+    depends_on:
+      - minio
+    networks:
+      - monitoring
+
   minio:
     image: minio/minio:RELEASE.2024-11-07T00-52-20Z-cpuv1
     container_name: minio
@@ -111,37 +162,6 @@ services:
     networks:
       - monitoring
 
-  thanos-ruler:
-    image: quay.io/thanos/thanos:v0.36.1
-    container_name: thanos-ruler
-    hostname: thanos-ruler
-    restart: unless-stopped
-    user: root
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-      - thanos_ruler_data:/data
-      - ./bucket_config.yaml:/etc/thanos/bucket_config.yaml:ro
-    command:
-      - 'rule'
-      - '--grpc-address=0.0.0.0:10091'
-      - '--http-address=0.0.0.0:10902'
-      - '--log.level=debug'
-      - '--data-dir=/data'
-      - '--eval-interval=15s'
-      - '--rule-file=/etc/thanos/*.rules.yaml'
-      #- '--alertmanagers.url=http://alertmanager:9093'
-      - '--query=thanos-querier:10902'
-      - '--objstore.config-file=/etc/thanos/bucket_config.yaml'
-      - "--label=ruler_cluster=\"vegas\""
-      - "--label=ruler_replica=\"r1\""
-    ports:
-      - 10903:10902
-    depends_on:
-      - minio
-      - thanos-querier
-    networks:
-      - monitoring
 
   thanos-bucket-web:
     image: quay.io/thanos/thanos:v0.36.1

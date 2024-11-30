@@ -2,13 +2,22 @@
 
 * [Getting Started](#id1)
 * [Copiar configuraciones](#id10)
-* [Proceso arrancado de contenedores + configs](#id20)
+* [Proceso arrancado de contenedores](#id20)
+* [Alertas](#id30)
 
 ## Getting Started <div id='id1' />
 
+Notas random:
+* Thanos es un sólo binario, que en función de los parámetros que le pasemos puede realizar unas funciones o otras
+* Prometheus por defecto sólo guarda un histórico de [15 días.](https://prometheus.io/docs/prometheus/latest/storage/#operational-aspects)
+
 Instalación base:
 
-* docker-compose
+* 3 equipos con docker-compose
+
+Equipos necesarios:
+
+![alt text](images/esquema_vm.png)
 
 Esquema:
 
@@ -33,7 +42,9 @@ Name: prometheus-b                                 Name: prometheus-c
  IP: 172.26.0.202                                   IP: 172.26.0.203
 ```
 
-![alt text](images/esquema_vm.png)
+Antes de empezar, revisar este esquema:
+
+![alt text](images/esquema-thanos.png)
 
 ## Copiar configuraciones <div id='id10' />
 
@@ -55,7 +66,7 @@ $ scp files/prometheus-prometheus-a.yml 172.26.0.201:/etc/docker-compose/prometh
 $ scp files/bucket_config.yaml 172.26.0.201:/etc/docker-compose/bucket_config.yaml
 ```
 
-## Proceso arrancado de contenedores + configs <div id='id20' />
+## Proceso arrancado de contenedores <div id='id20' />
 
 ### Arrancamos MinIO
 
@@ -125,8 +136,54 @@ root@prometheus-a:~# docker compose -f /etc/docker-compose/docker-compose.yaml u
 
 Podremos verificar el correcto funcionamiento:
 
-* URL: http://172.26.0.201:10901/targets?search=
+* URL: http://172.26.0.201:10902/stores
 
-![alt text](images/Thanos-targets.png)
+![alt text](images/Thanos-stores.png)
 
 ![alt text](images/Thanos-query.png)
+
+## Alertas <div id='id30' />
+
+```
+$ scp files/alertmanager.yml 172.26.0.201:/etc/docker-compose/alertmanager.yml
+$ scp files/docker-compose-prometheus-a-alerts.yaml 172.26.0.201:/etc/docker-compose/docker-compose.yaml
+$ scp files/thanos-ruler.rules.yaml 172.26.0.201:/etc/docker-compose/thanos-ruler.rules.yaml
+```
+
+```
+root@prometheus-a:~# docker compose -f /etc/docker-compose/docker-compose.yaml down
+root@prometheus-a:~# docker compose -f /etc/docker-compose/docker-compose.yaml up -d
+```
+
+Verificamos el correcto funcionamiento: 
+
+http://172.26.0.201:10902/targets
+
+![alt text](images/test-alert-01.png)
+
+http://172.26.0.201:10903/alerts
+
+![alt text](images/test-alert-02.png)
+
+http://172.26.0.201:9093/#/alerts
+
+![alt text](images/test-alert-03.png)
+
+
+Para realizar las pruebas de testing, pararemos el contenedor del *node-exporter* del *prometheus-b*
+
+```
+root@prometheus-b:~# docker stop node-exporter
+```
+
+http://172.26.0.201:10902/targets
+
+![alt text](images/test-alert-11.png)
+
+http://172.26.0.201:10903/alerts
+
+![alt text](images/test-alert-12.png)
+
+http://172.26.0.201:9093/#/alerts
+
+![alt text](images/test-alert-13.png)

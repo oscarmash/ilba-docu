@@ -1,0 +1,37 @@
+groups:
+
+  - name: Instances
+
+    rules:
+
+      - alert: InstanceDown
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance [{{ $labels.instance }}] down"
+          description: "[{{ $labels.instance }}] of job [{{ $labels.job }}] has been down for more than 30 seconds."
+
+      - alert: Node down
+        expr: up{job="monitoring-pi"} == 0
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          title: Node {{ $labels.instance }} is down
+          description: Failed to scrape {{ $labels.job }} on {{ $labels.instance }} for more than 30 seconds. Node seems down.
+
+
+  - name: Services
+
+    rules:
+
+      - alert: ServiceNotRunning - nginx
+        expr: node_systemd_unit_state{state="active",name="nginx.service"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.name }} in instance {{ $labels.instance }} not running"
+          description: "The {{ $labels.name }} service is not running for more than 30 seconds."
