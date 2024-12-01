@@ -11,10 +11,10 @@
 
 Pasos a seguir
 
-* make pre_install
+* make pre_install ENV=k8s-test
 * make install_kubespray ENV=k8s-test KUBE_VERSION=v1.30.4
-* make post_install
-* make install_applications
+* make post_install ENV=k8s-test
+* make install_applications ENV=k8s-test
 
 # Actualización de K8s <div id='id10' />
 
