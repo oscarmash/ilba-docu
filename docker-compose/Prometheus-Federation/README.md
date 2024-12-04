@@ -17,6 +17,7 @@ Notas:
 
 * El equipo: prometheus-a, será el "Prometheus Federation"
 * Los otros dos equipos serán clientes que envian la misma información al equipo prometheus-a
+* La forma de recolección de datos es "pull-based": prometheus-a se conecta a los otros prometheus para recolectar las métricas. Esto implica que en caso de corte de conexión, se perderian datos en el prometheus-a
 
 Esquema:
 
