@@ -28,7 +28,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
+      - /data_prometheus:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -53,7 +53,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       - ./bucket_config.yaml:/etc/thanos/bucket_config.yaml:ro
-      - prometheus_data:/prometheus
+      - /data_prometheus:/prometheus
     command:
       - 'sidecar'
       - '--tsdb.path=/prometheus'
@@ -68,9 +68,6 @@ services:
       - prometheus
     networks:
       - monitoring
-
-volumes:
-  prometheus_data: {}
 
 networks:
   monitoring:

@@ -52,12 +52,14 @@ Antes de empezar, revisar este esquema:
 $ scp files/docker-compose-prometheus-c.yaml 172.26.0.203:/etc/docker-compose/docker-compose.yaml
 $ scp files/prometheus-prometheus-c.yml 172.26.0.203:/etc/docker-compose/prometheus.yml
 $ scp files/bucket_config.yaml 172.26.0.203:/etc/docker-compose/bucket_config.yaml
+$ ssh 172.26.0.203 -C "mkdir /data_prometheus"
 ```
 
 ```
 $ scp files/docker-compose-prometheus-b.yaml 172.26.0.202:/etc/docker-compose/docker-compose.yaml
 $ scp files/prometheus-prometheus-b.yml 172.26.0.202:/etc/docker-compose/prometheus.yml
 $ scp files/bucket_config.yaml 172.26.0.202:/etc/docker-compose/bucket_config.yaml
+$ ssh 172.26.0.202 -C "mkdir /data_prometheus"
 ```
 
 ```
@@ -119,7 +121,7 @@ Verificaremos el correcto funcionamiento:
 
 ![alt text](images/prometheus-c.png)
 
-A partir de aquí (pasado un rato), podremos ver como se va llenando el bucket que hemos creado en el MinIO:
+A partir de aquí, pasado un rato (5m), podremos ver como se va llenando el bucket que hemos creado en el MinIO:
 
 * URL: http://172.26.0.201:9001/
 * Username: admin
