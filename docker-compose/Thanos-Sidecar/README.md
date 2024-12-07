@@ -95,6 +95,7 @@ root@prometheus-b:~# docker exec -it prometheus-b ash
 /prometheus $ exit
 root@prometheus-b:~# docker restart prometheus-b thanos-sidecar
 root@prometheus-b:~# docker ps -a
+root@prometheus-b:~# ls /data_prometheus/
 ```
 
 Verificaremos el correcto funcionamiento:
@@ -114,6 +115,7 @@ root@prometheus-c:~# docker exec -it prometheus-c ash
 /prometheus $ exit
 root@prometheus-c:~# docker restart prometheus-c thanos-sidecar
 root@prometheus-c:~# docker ps -a
+root@prometheus-c:~# ls /data_prometheus/
 ```
 
 Verificaremos el correcto funcionamiento:
