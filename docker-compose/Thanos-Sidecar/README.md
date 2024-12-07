@@ -10,6 +10,7 @@
 Notas random:
 * Thanos es un sólo binario, que en función de los parámetros que le pasemos puede realizar unas funciones o otras
 * Prometheus por defecto sólo guarda un histórico de [15 días.](https://prometheus.io/docs/prometheus/latest/storage/#operational-aspects)
+* Documentación [thanos sidecar](https://thanos.io/tip/components/sidecar.md/)
 
 Instalación base:
 
