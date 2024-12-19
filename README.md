@@ -40,6 +40,7 @@ Helms avanzados:
 * [Helm - Argo CD](./Helm/ArgoCD/README.md)
 * [Helm - Argo Rollout](./Helm/ArgoRollout/README.md) **No acabado**
 * [Helm - Vault](./Helm/Vault/README.md)
+* [Helm - Goldilocks](./Helm/Goldilocks/README.md) (Limits and Requests)
 
 ## Operators
 
