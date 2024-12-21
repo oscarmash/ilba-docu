@@ -1,6 +1,9 @@
 resolvconf_mode: docker_dns
+
 gvisor_enabled: true
+
 calico_apiserver_enabled: true
+
 kubernetes_audit: true
 audit_log_maxage: 0
 audit_log_maxbackups: 0
