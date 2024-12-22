@@ -254,7 +254,7 @@ alertmanager:
 
 grafana:
   defaultDashboardsTimezone: Europe/Madrid
-  adminPassword: 2SchingyeodbekcosBup
+  adminPassword: superpassword
   ingress:
     enabled: true
     ingressClassName: nginx
@@ -268,10 +268,6 @@ grafana:
       editable: false
       type: loki
       url: http://loki-gateway.loki.svc.cluster.local
-      basicAuth: true
-      basicAuthUser: "loki-gateway"
-      secureJsonData:
-        basicAuthPassword: loki-gateway-password
       version: 1
       isDefault: false
 
@@ -344,12 +340,4 @@ kubeEtcd:
    caFile: /etc/prometheus/secrets/etcd-client-cert/ca.pem
    certFile: /etc/prometheus/secrets/etcd-client-cert/node-k8s-test-cp.pem
    keyFile: /etc/prometheus/secrets/etcd-client-cert/node-k8s-test-cp-key.pem
-
-
-# https://github.com/prometheus-community/helm-charts/issues/204
-#
-#kubectl -n kube-prometheus-stack create secret generic etcd-client-cert \
-#--from-file=/etc/ssl/etcd/ssl/ca.pem \
-#--from-file=/etc/ssl/etcd/ssl/node-k8s-test-cp.pem \
-#--from-file=/etc/ssl/etcd/ssl/node-k8s-test-cp-key.pem
 

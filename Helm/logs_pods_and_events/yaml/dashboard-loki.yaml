@@ -271,3 +271,4 @@ data:
       "version": 15,
       "description": "Logs collected from Kubernetes, stored in Loki"
     }
+

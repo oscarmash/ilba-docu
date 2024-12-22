@@ -9,14 +9,14 @@ loki:
     replication_factor: 1
   storage:
     bucketNames:
-      chunks: loki-k8s-kee
-      ruler: loki-k8s-kee
-      admin: loki-k8s-kee
+      chunks: k8s-loki
+      ruler: k8s-loki
+      admin: k8s-loki
     type: s3
     s3:
-      endpoint: http://minio.minio.svc.cluster.local:9000
-      accessKeyId: loki
-      secretAccessKey: We2spertaudO12
+      endpoint: http://172.26.0.35:9000
+      accessKeyId: kxPuYaK4DGXPbl3h3JPL
+      secretAccessKey: v8aWAOyRLCRWpznuDZ0O4yNLLCWy4Onb4RMXf3ck
       s3ForcePathStyle: true
       insecure: false
       http_config:
@@ -68,3 +68,4 @@ test:
 
 lokiCanary:
   enabled: false
+
