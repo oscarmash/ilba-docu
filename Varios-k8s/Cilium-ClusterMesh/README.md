@@ -3,6 +3,12 @@
   * [Equipos a desplegar](#id11)
   * [Procedimiento de instalación](#id12)
   * [Verificaciones](#id13)
+* [Setting up Cluster Mesh](#id20)
+  * [Prepare the contexts](#id21)
+  * [Enable Cluster Mesh](#id22)
+  * [Connect the Clusters](#id23)
+  * [Test connectivity with commands](#id24)
+  * [Test connectivity with x-wing and rebel-base](#id25)
 
 # Instalación de K8s con Cilium via KubeSpray <div id='id10' />
 
@@ -98,11 +104,9 @@ root@k8s-cilium-01-cp:~# curl -H "Host: test-ingress.ilba.cat" "http://172.26.0.
     ...
 ```
 
-# Setting up Cluster Mesh
+# Setting up Cluster Mesh <div id='id20' />
 
-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation !!!!!!!!!!!!!!!!!
+:warning: $ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
 
 
 Instalar la [consola de cilium](https://docs.cilium.io/en/stable/network/clustermesh/clustermesh/#install-the-cilium-cli) en un nodo:
@@ -130,7 +134,7 @@ Image versions         cilium             quay.io/cilium/cilium:v1.16.5@sha256:7
 
 ```
 
-## Prepare the contexts
+## Prepare the contexts <div id='id21' />
 
 Preparación de los contextos de kubernetes:
 
@@ -169,7 +173,7 @@ root@k8s-cilium-01-cp:~# kubectl get svc -A | grep LoadBalancer | awk '{print $5
 root@k8s-cilium-01-cp:~# kubectl config use-context k8s-cilium-01
 ```
 
-## Enable Cluster Mesh
+## Enable Cluster Mesh <div id='id22' />
 
 HAbilitamos el "Cluster Mesh" em cada cluster de kubrernetes
 
@@ -211,7 +215,7 @@ root@k8s-cilium-01-cp:~# cilium clustermesh status --context k8s-cilium-01
 root@k8s-cilium-01-cp:~# cilium clustermesh status --context k8s-cilium-02
 ```
 
-## Connect the Clusters
+## Connect the Clusters <div id='id23' />
 
 Realizamos la conexión de los dos clusters de Kubernetes:
 
@@ -241,7 +245,7 @@ root@k8s-cilium-01-cp:~# kubectl -n kube-system delete pod -l name=cilium-operat
 root@k8s-cilium-01-cp:~# kubectl config use-context k8s-cilium-01
 ```
 
-## Test connectivity with commands
+## Test connectivity with commands <div id='id24' />
 
 ```
 root@k8s-cilium-01-cp:~# NAME_POD=`kubectl -n kube-system get pods | grep cilium | head -n 1 | awk '{print $1}'`
@@ -295,7 +299,7 @@ root@k8s-cilium-01-cp:~# kubectl -n kube-system exec -ti $NAME_POD -- cilium nod
 root@k8s-cilium-01-cp:~# cilium connectivity test --context k8s-cilium-01 --multi-cluster k8s-cilium-02
 ```
 
-## Test connectivity with x-wing and rebel-base
+## Test connectivity with x-wing and rebel-base <div id='id25' />
 
 https://github.com/cilium/cilium/tree/main/examples/kubernetes/clustermesh
 
