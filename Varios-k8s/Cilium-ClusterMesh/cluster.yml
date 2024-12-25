@@ -1,0 +1,9 @@
+---
+- name: Pre Install Cluster
+  ansible.builtin.import_playbook: playbooks_custom/pre_install.yaml
+
+- name: Install Kubespray
+  ansible.builtin.import_playbook: playbooks/cluster.yml
+
+- name: Install Cluster Applications
+  ansible.builtin.import_playbook: playbooks_custom/install_applications.yaml

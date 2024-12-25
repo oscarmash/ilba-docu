@@ -1,0 +1,20 @@
+resolvconf_mode: docker_dns
+
+gvisor_enabled: true
+
+kube_network_plugin: cni
+kube_proxy_remove: true
+kube_owner: root
+
+kubernetes_audit: true
+audit_log_maxage: 0
+audit_log_maxbackups: 0
+audit_log_maxsize: 10000
+audit_log_path: /var/log/kubernetes/audit/kube-apiserver-audit.log
+audit_policy_custom_rules: |
+  - level: Metadata
+    verbs:
+      - update
+      - patch
+      - delete
+      - create

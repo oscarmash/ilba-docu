@@ -1,0 +1,24 @@
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: main
+  namespace: kube-system
+spec:
+  nodeSelector:
+    matchExpressions:
+      - key: node-role.kubernetes.io/control-plane
+        operator: DoesNotExist
+  interfaces:
+  - ens18
+  externalIPs: true
+  loadBalancerIPs: true
+---
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: pool-ilba
+  namespace: kube-system
+spec:
+  blocks:
+  - cidr: "172.26.0.101/32"
+  - cidr: "172.26.0.102/32"

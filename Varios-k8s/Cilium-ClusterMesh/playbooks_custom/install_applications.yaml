@@ -1,0 +1,95 @@
+---
+- name: Install Helm
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+    - name: Create helm temp dir
+      ansible.builtin.file:
+          path: /tmp/helm
+          state: directory
+      tags: install_helm
+
+    - name: Download helm
+      ansible.builtin.get_url:
+              dest: /tmp/
+              url: "https://get.helm.sh/helm-{{ helm_release }}-linux-amd64.tar.gz"
+      tags: install_helm
+
+    - name: Unarchive helm  
+      ansible.builtin.unarchive:
+              src: "/tmp/helm-{{ helm_release }}-linux-amd64.tar.gz"
+              dest: /tmp/helm
+              remote_src: yes
+      tags: install_helm
+
+    - name: Install helm  
+      ansible.builtin.copy:
+              src: /tmp/helm/linux-amd64/helm
+              dest: /usr/local/bin/helm
+              mode: 0755
+              remote_src: yes
+      become: true
+      tags: install_helm
+
+#Dependency needed in order to apply yaml files
+- name: Requirements
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+    - name: Install openshift dependency
+      ansible.builtin.package:
+        name: python3-openshift
+        state: present
+
+#Cilium installation
+- name: Cilium installation and configuration
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+    - name: Install Cilium Chart
+      kubernetes.core.helm:
+        binary_path: /usr/local/bin/helm
+        name: cilium
+        namespace: kube-system
+        chart_repo_url: https://helm.cilium.io/
+        chart_ref: cilium
+        chart_version: "{{ chart_version_cilium }}"
+        values: "{{ lookup('template', '/kubespray/cluster-apps/' + cluster_name + '/charts-values/values-cilium.yaml') | from_yaml }}"
+        release_state: present
+        wait: true
+      tags: cilium_installation
+
+    - name: Apply config LB IPAM
+      k8s:
+        definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/cilium/lb-ipam.yaml') | from_yaml_all }}"
+        state: present
+      tags: cilium_installation, cilium_config
+
+    - name: Apply deploy a simple sample project
+      k8s:
+        definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/test-ingress/app.yaml') | from_yaml_all }}"
+        state: present
+      tags: cilium_installation, cilium_config
+
+#Metrics Server installation
+- name: Metrics server installation and configuration
+  hosts: kube_control_plane
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+    - name: Install Metrics server Chart
+      kubernetes.core.helm:
+        binary_path: /usr/local/bin/helm
+        name: metrics-server
+        namespace: kube-system
+        chart_repo_url: https://kubernetes-sigs.github.io/metrics-server/
+        chart_ref: metrics-server
+        chart_version: "{{ chart_version_metrics_server }}"
+        wait: true
+        values: 
+          args: 
+            - --kubelet-insecure-tls
+      tags: metrics-server_installation
