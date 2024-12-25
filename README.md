@@ -38,7 +38,7 @@ Helms avanzados:
 * [Helm - Kyverno Rules](./Helm/Kyverno-Rules/README.md)
 * [Helm - Zabbix](./Helm/Zabbix/README.md)
 * [Helm - Argo CD](./Helm/ArgoCD/README.md)
-* [Helm - Argo Rollout](./Helm/ArgoRollout/README.md) **No acabado**
+* [Helm - Argo Rollout](./Helm/ArgoRollout/README.md) :construction: **No acabado**
 * [Helm - Vault](./Helm/Vault/README.md)
 * [Helm - Goldilocks](./Helm/Goldilocks/README.md) (Limits and Requests)
 
@@ -51,8 +51,8 @@ Los operators los podemos encontrar aquí:
 Documentación de productos usando Operators
 
 * [Operator - MariaDB](./Operators/MariaDB/README.md)
-* [Operator - Prometheus](./Operators/Prometheus/README.md) **No acabado**
-* [Operator - Loki](./Operators/Loki/README.md) **No acabado**
+* [Operator - Prometheus](./Operators/Prometheus/README.md) :construction: **No acabado**
+* [Operator - Loki](./Operators/Loki/README.md) :construction: **No acabado**
 
 ## Varios Kubernetes
 
@@ -63,4 +63,4 @@ Documentación de productos usando Operators
 
 ## Varios
 
-* [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) **No acabado**
+* [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) :construction: **No acabado**
