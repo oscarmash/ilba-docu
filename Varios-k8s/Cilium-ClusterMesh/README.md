@@ -21,18 +21,21 @@ Los equipos a desplegar son los siguientes:
   * CP: k8s-cilium-01-cp -> 172.26.0.141
   * WK: k8s-cilium-01-wk01 -> 172.26.0.142
   * VIP: 172.26.0.101
+  * VIP: 172.26.0.102
 * Plataforma de Cilium 02
   * CP: k8s-cilium-02-cp -> 172.26.0.145
   * WK: k8s-cilium-02-wk01 -> 172.26.0.146
   * VIP: 172.26.0.105
+  * VIP: 172.26.0.106
 
 ## Procedimiento de instalación <div id='id12' />
 
-Hemos de instalar kubernetes en la dos plataformas:
+Hemos de instalar kubernetes en la dos plataformas ( pero se instalará sin CNI, ya que [instalaremos Cilium via Helm](./playbooks_custom/install_applications.yaml) )
+
 * Plataforma de Cilium 01
 * Plataforma de Cilium 02
 
-Pasos a seguir:
+Pasos a seguir para la instalción de Kubernetes con Kubespray:
 
 ```
 $ make pre_install ENV=k8s-cilium-0x
@@ -46,8 +49,13 @@ k8s-cilium-0x-cp     NotReady   control-plane   2m40s   v1.30.4
 k8s-cilium-0x-wk01   NotReady   <none>          106s    v1.30.4
 ```
 
-Se ha de cambiar el rango (10.1.0.0/16) de cilium en el [values-cilium.yaml](./cluster-apps/k8s-cilium-01/charts-values/values-cilium.yaml), para que cada cluster tenga el suyo propio, por si hacemos [Cluster Mesh](https://cilium.io/use-cases/cluster-mesh/)
-También el cluster name y el ID
+Datos iportantes a mencionar, que se han usado en los values de los Helms de Cilium desplegados en cada custer (aconsejamos revisar los values.yaml de cada cluster) :
+* Se ha cambiado el rango de red de los dos clusters, para que no sean el mismo:
+  * En el cluster k8s-cilium-01 el rango es: 10.1.0.0/16
+  * En el cluster k8s-cilium-02 el rango es: 10.2.0.0/16
+* También el cluster name y el ID, son diferentes en cada cluster
+  * Cluster name: k8s-cilium-01 y el id es: 1
+  * Cluster name: k8s-cilium-02 y el id es: 2
 
 ```
 $ make install_applications ENV=k8s-cilium-0x
@@ -91,7 +99,7 @@ test-ingress   app-ilba-deployment-ffd8c6b4b-st4v2        1/1     Running   0   
 
 root@k8s-cilium-01-cp:~# kubectl get ippools
 NAME        DISABLED   CONFLICTING   IPS AVAILABLE   AGE
-pool-ilba   false      False         0               3m1s
+pool-ilba   false      False         1               3m1s
 
 root@k8s-cilium-01-cp:~# kubectl get ingress -A
 NAMESPACE      NAME               CLASS    HOSTS                   ADDRESS        PORTS   AGE
@@ -110,7 +118,7 @@ root@k8s-cilium-01-cp:~# curl -H "Host: test-ingress.ilba.cat" "http://172.26.0.
 :warning: $ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
 
 
-Instalar la [consola de cilium](https://docs.cilium.io/en/stable/network/clustermesh/clustermesh/#install-the-cilium-cli) en un nodo:
+Instalar la [consola de cilium](https://docs.cilium.io/en/stable/network/clustermesh/clustermesh/#install-the-cilium-cli) en un nodo y verificación del funcionamiento:
 
 ```
 root@k8s-cilium-01-cp:~# cilium status
@@ -137,7 +145,7 @@ Image versions         cilium             quay.io/cilium/cilium:v1.16.5@sha256:7
 
 ## Prepare the contexts <div id='id21' />
 
-Preparación de los contextos de kubernetes:
+Preparación de los contextos de kubernetes, para poder gestionar los dos clusters desde un sólo equipo, en este caso hemos usado el equipo "k8s-cilium-01-cp" :
 
 ```
 root@k8s-cilium-01-cp:~# scp k8s-cilium-02-cp:/root/.kube/config k8s-cilium-02-cp.config
@@ -176,7 +184,7 @@ root@k8s-cilium-01-cp:~# kubectl config use-context k8s-cilium-01
 
 ## Enable Cluster Mesh <div id='id22' />
 
-HAbilitamos el "Cluster Mesh" em cada cluster de kubrernetes
+Habilitamos el "Cluster Mesh" em cada cluster de kubrernetes
 
 ```
 root@k8s-cilium-01-cp:~# cilium clustermesh enable --context k8s-cilium-01 --service-type LoadBalancer
@@ -302,7 +310,7 @@ root@k8s-cilium-01-cp:~# cilium connectivity test --context k8s-cilium-01 --mult
 
 ## Test connectivity with x-wing and rebel-base <div id='id25' />
 
-https://github.com/cilium/cilium/tree/main/examples/kubernetes/clustermesh
+El siguiente ejemplo de Star Wars, es un ejemplo sacado de Cilium: https://github.com/cilium/cilium/tree/main/examples/kubernetes/clustermesh
 
 ```
 root@k8s-cilium-01-cp:~# kubectl config use-context k8s-cilium-01
