@@ -13,7 +13,34 @@
 
 # Instalación de K8s con Cilium via KubeSpray <div id='id10' />
 
-Cilium is an open source, cloud native solution for providing, securing, and observing network connectivity between workloads
+Notas:
+* Cilium is an open source, cloud native solution for providing, securing, and observing network connectivity between workloads
+* No usa iptables, usa eBPF (recuerda que iptable cuesta de escalar)
+* While traditional firewalls operate at Layers 3 and 4, Cilium can also secure modern Layer 7 application protocols such as REST/HTTP, gRPC, and Kafka (in addition to enforcing at Layers 3 and 4)
+  * Allow all HTTP requests with method GET and path /public/.*. Deny all other requests.
+  * Require the HTTP header X-Token: [0-9]+ to be present in all REST calls.
+
+
+Cilium Capabilities:
+* Networking
+  * Overlay (by default)
+  * Native routing
+* Network policies, Cilium can enforce both:
+  * Native Kubernetes NetworkPolicies
+  * Enhanced CiliumNetworkPolicy 
+* Cilium supports simple-to-configure transparent encryption, using IPSec or WireGuard, that when enabled, secures traffic between nodes without requiring reconfiguring any workload
+* Cluster Mesh capabilities make it easy for workloads to communicate with services hosted in different Kubernetes clusters.
+* Load Balancing: implements distributed load balancing for traffic between application containers and external services (fully replace components such as kube-proxy)
+* Network Observability: Cilium includes a dedicated network observability component called Hubble.
+  * Visibility into network traffic at Layer 3/4 (IP address and port) and Layer 7 (API Protocol).
+  * Event monitoring with metadata: When a packet is dropped, the tool reports not only the source and destination IP but also the full label information of both the sender and receiver, among other information.
+  * Configurable Prometheus metrics exports.
+  * A graphical UI to visualize the network traffic flowing through your clusters.
+
+Tenemos dos formas de instalr Cilium:
+
+* Cilium CLI tool
+* Helm chart (esta es la que hemos usado)
 
 ## Equipos a desplegar <div id='id11' />
 
