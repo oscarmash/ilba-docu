@@ -333,6 +333,8 @@ root@k8s-cilium-01-cp:~# NAME_POD=`kubectl -n kube-system get pods | grep cilium
 root@k8s-cilium-01-cp:~# kubectl -n kube-system exec -ti $NAME_POD -- cilium node list
 ```
 
+El siguiente comando **no va a funcionar nunca**, ya que es necesario dos workers para su funcionamiento y sólo hemos desplegado uno:
+
 ```
 root@k8s-cilium-01-cp:~# cilium connectivity test --context k8s-cilium-01 --multi-cluster k8s-cilium-02
 ```
