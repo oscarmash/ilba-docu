@@ -312,8 +312,36 @@ root@k8s-cilium-01-cp:~# kubectl apply -f https://raw.githubusercontent.com/cili
 root@k8s-cilium-01-cp:~# kubectl config use-context k8s-cilium-02
 root@k8s-cilium-01-cp:~# kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/refs/heads/main/examples/kubernetes/clustermesh/cluster2.yaml
 root@k8s-cilium-01-cp:~# kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/refs/heads/main/examples/kubernetes/clustermesh/global-service-example.yaml
+```
 
+```
 root@k8s-cilium-01-cp:~# kubectl config use-context k8s-cilium-01
 
-root@k8s-cilium-01-cp:~# kubectl exec -ti deployment/x-wing -- curl rebel-base
+root@k8s-cilium-01-cp:~# kubectl get svc
+NAME                  TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+kubernetes            ClusterIP   10.233.0.1      <none>        443/TCP   44h
+rebel-base            ClusterIP   10.233.47.191   <none>        80/TCP    19h
+rebel-base-headless   ClusterIP   None            <none>        80/TCP    19h
+
+root@k8s-cilium-01-cp:~# for I in {1..5}; do curl 10.233.47.191 ; done
+{"Galaxy": "Alderaan", "Cluster": "Cluster-1"}
+{"Galaxy": "Alderaan", "Cluster": "Cluster-1"}
+{"Galaxy": "Alderaan", "Cluster": "Cluster-2"}
+{"Galaxy": "Alderaan", "Cluster": "Cluster-2"}
+{"Galaxy": "Alderaan", "Cluster": "Cluster-1"}
+```
+
+```
+root@k8s-cilium-02-cp:~# kubectl get svc
+NAME                  TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+kubernetes            ClusterIP   10.233.0.1     <none>        443/TCP   44h
+rebel-base            ClusterIP   10.233.45.19   <none>        80/TCP    19h
+rebel-base-headless   ClusterIP   None           <none>        80/TCP    19h
+
+root@k8s-cilium-02-cp:~# for I in {1..5}; do curl 10.233.45.19 ; done
+{"Galaxy": "Alderaan", "Cluster": "Cluster-2"}
+{"Galaxy": "Alderaan", "Cluster": "Cluster-1"}
+{"Galaxy": "Alderaan", "Cluster": "Cluster-2"}
+{"Galaxy": "Alderaan", "Cluster": "Cluster-2"}
+{"Galaxy": "Alderaan", "Cluster": "Cluster-1"}
 ```
