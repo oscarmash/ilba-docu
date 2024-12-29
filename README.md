@@ -56,11 +56,16 @@ Documentación de productos usando Operators
 
 ## Varios Kubernetes
 
+### Varios
+
 * [Istio](./Varios-k8s/Istio/README.md) (sin eBPF)
 * [Velero](./Varios-k8s/Velero/README.md)
 * [Calico - NetworkPolicy](./Varios-k8s/Calico-NetworkPolicy/README.md)
-* [Cilium - Cluster Mesh](./Varios-k8s/Cilium-ClusterMesh/README.md) :warning: **Estoy trabajando en esto** :warning:
-
-## Varios
-
 * [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) :construction: **No acabado**
+
+### CNI: Cilium
+
+* [Cilium - Documentación](./Varios-k8s/Cilium-Documentation/README.md)
+* [Cilium - Cluster Mesh](./Varios-k8s/Cilium-ClusterMesh/README.md)
+* [Cilium - Transparent Encryption](./Varios-k8s/Cilium-Transparent-Encryption/README.md)
+
