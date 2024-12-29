@@ -1,5 +1,6 @@
 # Index:
 
+* [Documentación variada](#id09)
 * [Instalación de K8s con Cilium via KubeSpray](#id10)
   * [Equipos a desplegar](#id11)
   * [Procedimiento de instalación](#id12)
@@ -11,15 +12,15 @@
   * [Test connectivity with commands](#id24)
   * [Test connectivity with x-wing and rebel-base](#id25)
 
-# Instalación de K8s con Cilium via KubeSpray <div id='id10' />
+# Documentación variada <div id='id09' />
 
-Notas:
+Notas generales:
+* Por defecto viene con un [ingress](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) y un sistema de asignación de IP's ( [LB IPAM](https://docs.cilium.io/en/stable/network/lb-ipam/) )
 * Cilium is an open source, cloud native solution for providing, securing, and observing network connectivity between workloads
 * No usa iptables, usa eBPF (recuerda que iptable cuesta de escalar)
 * While traditional firewalls operate at Layers 3 and 4, Cilium can also secure modern Layer 7 application protocols such as REST/HTTP, gRPC, and Kafka (in addition to enforcing at Layers 3 and 4)
   * Allow all HTTP requests with method GET and path /public/.*. Deny all other requests.
   * Require the HTTP header X-Token: [0-9]+ to be present in all REST calls.
-
 
 Cilium Capabilities:
 * Networking
@@ -37,10 +38,24 @@ Cilium Capabilities:
   * Configurable Prometheus metrics exports.
   * A graphical UI to visualize the network traffic flowing through your clusters.
 
-Tenemos dos formas de instalr Cilium:
+Notas de Cluster Mesh:
+* Requirements:
+  * All Kubernetes worker nodes must be assigned a unique IP address, and all worker nodes must have IP connectivity between each other
+  * All clusters must be assigned unique PodCIDR ranges to prevent pod IP addresses from overlapping across the mesh.
+* Architecture:
+  * Access to the Cluster Mesh API Servers running in each cluster is protected using TLS certificates.
+  * State from multiple clusters is never mixed. Access from one cluster into another is always read-only. This ensures that the failure domain remains unchanged, i.e. failures in one cluster never propagate into other clusters
+* Global Services:
+  * Establishing service load-balancing between clusters is achieved by defining a Kubernetes service with an identical name and namespace in each cluster and adding the annotation service.cilium.io/global: "true" to declare it as a global service. Cilium agents will watch for this annotation and if it's set to true, will automatically perform load-balancing to the corresponding service endpoint pods located across clusters.
+  * You can control this global load-balancing further by setting the annotation service.cilium.io/shared: to true/false in the service definition in different clusters, to explicitly include or exclude a particular cluster’s service from being included in the multi-cluster load-balancing. By default, setting service.cilium.io/global: "true" implies service.cilium.io/shared: "true" if it's not explicitly set.
+  * In some cases, load-balancing across multiple clusters might not be ideal. The annotation service.cilium.io/affinity: "local|remote|none" can be used to specify the preferred endpoint destination.
+
+Tenemos dos formas de instalar Cilium:
 
 * Cilium CLI tool
-* Helm chart (esta es la que hemos usado)
+* Helm chart (esta es la que hemos usado y es la que recomienda Cilium)
+
+# Instalación de K8s con Cilium via KubeSpray <div id='id10' />
 
 ## Equipos a desplegar <div id='id11' />
 
@@ -342,6 +357,9 @@ root@k8s-cilium-01-cp:~# cilium connectivity test --context k8s-cilium-01 --mult
 ## Test connectivity with x-wing and rebel-base <div id='id25' />
 
 El siguiente ejemplo de Star Wars, es un ejemplo sacado de Cilium: https://github.com/cilium/cilium/tree/main/examples/kubernetes/clustermesh
+
+Porque aplicamos el despliegue en los dos clusters, en vez de aplicarlo en uno y que se replique en el otro:
+* State from multiple clusters is never mixed. Access from one cluster into another is always read-only. This ensures that the failure domain remains unchanged, i.e. failures in one cluster never propagate into other clusters.
 
 ```
 root@k8s-cilium-01-cp:~# kubectl config use-context k8s-cilium-01
