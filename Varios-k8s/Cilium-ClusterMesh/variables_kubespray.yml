@@ -2,9 +2,12 @@ resolvconf_mode: docker_dns
 
 gvisor_enabled: true
 
+### Cilium
 kube_network_plugin: cni
 kube_proxy_remove: true
 kube_owner: root
+nodelocaldns_ip: 10.233.0.3
+### Cilium
 
 kubernetes_audit: true
 audit_log_maxage: 0
