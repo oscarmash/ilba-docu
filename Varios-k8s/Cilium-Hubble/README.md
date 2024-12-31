@@ -40,6 +40,10 @@ Crearemos la [política](./files/allow-empire-in-namespace.yaml), para que sólo
 root@k8s-cilium-01-cp:~# kubectl apply -f allow-empire-in-namespace.yaml
 ```
 
+Ejemplo de política de Cilium:
+
+![alt text](images/CiliumNetworkPolicy.png)
+
 ```
 root@k8s-cilium-01-cp:~# kubectl exec xwing -- curl --connect-timeout 5 -s -XPOST deathstar.default.svc.cluster.local/v1/request-landing
 command terminated with exit code 28

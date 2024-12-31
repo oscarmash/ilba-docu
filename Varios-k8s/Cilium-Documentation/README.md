@@ -18,8 +18,10 @@ Cilium Capabilities:
   * Overlay (by default)
   * Native routing
 * Network policies, Cilium can enforce both:
-  * Native Kubernetes NetworkPolicies
-  * Enhanced CiliumNetworkPolicy 
+  * Native Kubernetes NetworkPolicies (only L3 and L4)
+  * Enhanced CiliumNetworkPolicy (L3, L4 and L7)
+    * CiliumNetworkPolicy
+    * CiliumClusterwideNetworkPolicy
 * Cilium supports simple-to-configure transparent encryption, using IPSec or WireGuard, that when enabled, secures traffic between nodes without requiring reconfiguring any workload
 * Cluster Mesh capabilities make it easy for workloads to communicate with services hosted in different Kubernetes clusters.
 * Load Balancing: implements distributed load balancing for traffic between application containers and external services (fully replace components such as kube-proxy)
