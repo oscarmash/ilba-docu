@@ -12,6 +12,7 @@ Notas generales:
 * While traditional firewalls operate at Layers 3 and 4, Cilium can also secure modern Layer 7 application protocols such as REST/HTTP, gRPC, and Kafka (in addition to enforcing at Layers 3 and 4)
   * Allow all HTTP requests with method GET and path /public/.*. Deny all other requests.
   * Require the HTTP header X-Token: [0-9]+ to be present in all REST calls.
+* For all network processing including protocols such as IP, TCP, and UDP, Cilium uses eBPF as the highly efficient in-kernel datapath. Protocols at the application layer such as HTTP, Kafka, gRPC, and DNS are parsed using a proxy such as Envoy.
 
 Cilium Capabilities:
 * Networking
