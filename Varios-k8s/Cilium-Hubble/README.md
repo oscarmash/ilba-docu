@@ -2,6 +2,10 @@
 
 * [Prerequisites](#id10)
 * [Instalación](#id20)
+* [Visualización](#id30)
+  * [UI](#id31)
+  * [CLI](#id32)
+
 
 
 # Prerequisites <div id='id10' />
@@ -83,6 +87,10 @@ hubble:
         - cilium-hubble.ilba.cat
 ```
 
+# Visualización <div id='id30' />
+
+## UI <div id='id31' />
+
 Haremos un poco de tráfico, para poder ver alguna cosa en el Hubble y accederemos:
 
 ```
@@ -95,3 +103,26 @@ Ship landed
 URL de acceso: http://cilium-hubble.ilba.cat/?namespace=default
 
 ![alt text](images/hubble.png)
+
+## CLI <div id='id32' />
+
+Instalamos el [cliente de hubble](https://docs.cilium.io/en/stable/observability/hubble/setup/#install-the-hubble-client) y también la  [consola de cilium](https://docs.cilium.io/en/stable/network/clustermesh/clustermesh/#install-the-cilium-cli):
+
+```
+root@k8s-cilium-01-cp:~# cilium hubble port-forward
+ℹ️  Hubble Relay is available at 127.0.0.1:4245
+```
+
+```
+root@k8s-cilium-01-cp:~# hubble observe --to-namespace default -f
+Jan  1 08:29:08.016: default/tiefighter:52363 (ID:95879) <- kube-system/coredns-776bb9db5d-4hl4c:53 (ID:112788) to-endpoint FORWARDED (UDP)
+Jan  1 08:29:08.016: kube-system/coredns-776bb9db5d-4hl4c:53 (ID:112788) <> default/tiefighter (ID:95879) pre-xlate-rev TRACED (UDP)
+Jan  1 08:29:08.016: kube-system/coredns:53 (world) <> default/tiefighter (ID:95879) post-xlate-rev TRANSLATED (UDP)
+Jan  1 08:29:08.016: kube-system/coredns-776bb9db5d-4hl4c:53 (ID:112788) <> default/tiefighter (ID:95879) pre-xlate-rev TRACED (UDP)
+Jan  1 08:29:08.016: kube-system/coredns:53 (world) <> default/tiefighter (ID:95879) post-xlate-rev TRANSLATED (UDP)
+Jan  1 08:29:08.017: default/tiefighter:54557 (ID:95879) <- kube-system/coredns-776bb9db5d-7b4jw:53 (ID:112788) to-endpoint FORWARDED (UDP)
+Jan  1 08:29:08.018: kube-system/coredns-776bb9db5d-7b4jw:53 (ID:112788) <> default/tiefighter (ID:95879) pre-xlate-rev TRACED (UDP)
+Jan  1 08:29:08.018: kube-system/coredns:53 (world) <> default/tiefighter (ID:95879) post-xlate-rev TRANSLATED (UDP)
+```
+
+![alt text](images/hubble_cli.png)
