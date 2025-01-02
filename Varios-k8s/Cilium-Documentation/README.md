@@ -1,9 +1,16 @@
 # Index:
 
-* [Documentación](#id10)
+* [Documentación variada](#id1) :shit:
+* [Architecture](#id10)
+* [Network Policy](#id20)
+* [Service Mesh](#id30)
+* [Network Observability](#id40)
+* [Installation and Configuration](#id50)
+* [Cluster Mesh](#id60)
+* [eBPF](#id70)
+* [BGP and External Networking](#id80)
 
-
-# Documentación variada <div id='id10' />
+# Documentación variada <div id='id1' /> :shit:
 
 Notas generales:
 * Por defecto viene con un [ingress](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) y un sistema de asignación de IP's ( [LB IPAM](https://docs.cilium.io/en/stable/network/lb-ipam/) )
@@ -18,13 +25,7 @@ Cilium Capabilities:
 * Networking
   * Overlay (by default)
   * Native routing
-* Network policies, Cilium can enforce both:
-  * Native Kubernetes NetworkPolicies (only L3 and L4)
-  * Enhanced CiliumNetworkPolicy (L3, L4 and L7)
-    * CiliumNetworkPolicy
-    * CiliumClusterwideNetworkPolicy
 * Cilium supports simple-to-configure transparent encryption, using IPSec or WireGuard, that when enabled, secures traffic between nodes without requiring reconfiguring any workload
-* Cluster Mesh capabilities make it easy for workloads to communicate with services hosted in different Kubernetes clusters.
 * Load Balancing: implements distributed load balancing for traffic between application containers and external services (fully replace components such as kube-proxy)
 * Network Observability: Cilium includes a dedicated network observability component called Hubble.
   * Visibility into network traffic at Layer 3/4 (IP address and port) and Layer 7 (API Protocol).
@@ -32,7 +33,51 @@ Cilium Capabilities:
   * Configurable Prometheus metrics exports.
   * A graphical UI to visualize the network traffic flowing through your clusters.
 
-Notas de Cluster Mesh:
+# Network Policy <div id='id20' />
+
+Network policies, Cilium can enforce both:
+
+* Native Kubernetes NetworkPolicies (only L3 and L4)
+* Enhanced CiliumNetworkPolicy (L3, L4 and L7)
+  * CiliumNetworkPolicy
+  * CiliumClusterwideNetworkPolicy
+
+Overview of Network Policy:
+
+* [Layer 3](https://docs.cilium.io/en/latest/security/policy/language/#layer-3-examples)
+  * fromEndpoints
+  * toEndpoints
+  * fromRequires (separation of concern)
+  * toServices
+    * k8sService
+    * k8sServiceSelector
+  * toEntities
+    * kube-apiserver
+    * host
+    * remote-node
+    * world
+  * fromNodes
+  * toCIDR
+  * toFQDNs
+* [Layer 4](https://docs.cilium.io/en/latest/security/policy/language/#layer-4-examples)
+  * toPorts
+  * icmps
+* [Layer 7](https://docs.cilium.io/en/latest/security/policy/language/#layer-7-examples)
+  * HTTP
+  * Kafka
+  * DNS Policy and IP Discovery
+
+# Installation and Configuration <div id='id50' />
+
+Tenemos dos formas de instalar Cilium:
+
+* Cilium CLI tool
+* Helm chart (esta es la que hemos usado y es la que recomienda Cilium)
+
+# Cluster Mesh <div id='id60' />
+
+Cluster Mesh capabilities make it easy for workloads to communicate with services hosted in different Kubernetes clusters.
+
 * Requirements:
   * All Kubernetes worker nodes must be assigned a unique IP address, and all worker nodes must have IP connectivity between each other
   * All clusters must be assigned unique PodCIDR ranges to prevent pod IP addresses from overlapping across the mesh.
@@ -43,8 +88,3 @@ Notas de Cluster Mesh:
   * Establishing service load-balancing between clusters is achieved by defining a Kubernetes service with an identical name and namespace in each cluster and adding the annotation service.cilium.io/global: "true" to declare it as a global service. Cilium agents will watch for this annotation and if it's set to true, will automatically perform load-balancing to the corresponding service endpoint pods located across clusters.
   * You can control this global load-balancing further by setting the annotation service.cilium.io/shared: to true/false in the service definition in different clusters, to explicitly include or exclude a particular cluster’s service from being included in the multi-cluster load-balancing. By default, setting service.cilium.io/global: "true" implies service.cilium.io/shared: "true" if it's not explicitly set.
   * In some cases, load-balancing across multiple clusters might not be ideal. The annotation service.cilium.io/affinity: "local|remote|none" can be used to specify the preferred endpoint destination.
-
-Tenemos dos formas de instalar Cilium:
-
-* Cilium CLI tool
-* Helm chart (esta es la que hemos usado y es la que recomienda Cilium)
