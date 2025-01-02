@@ -33,6 +33,26 @@ Cilium Capabilities:
   * Configurable Prometheus metrics exports.
   * A graphical UI to visualize the network traffic flowing through your clusters.
 
+# Architecture <div id='id10' />
+
+* Components
+  * Cilium Agent
+    * is responsible for managing the network policies in Cilium
+    * enforce network policies and manage networking for pods
+    * runs on every node in the cluster
+  * Cilium Operator
+    * Handles lifecycle management of Cilium components
+    * clusters can generally function when the operator becomes unavailable
+  * Hubble
+    * provides visibility into network traffic and performance metrics in Cilium
+  * Cluster Mesh
+    * Connecting multiple Kubernetes clusters
+  * Service Mesh
+    * Traffic management between services
+    * Layer 7
+  * Datapath
+    * The method of routing packets through the network stack
+
 # Network Policy <div id='id20' />
 
 Network policies, Cilium can enforce both:
