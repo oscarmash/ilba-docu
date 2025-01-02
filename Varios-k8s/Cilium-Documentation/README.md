@@ -10,7 +10,7 @@
 * [eBPF](#id70)
 * [BGP and External Networking](#id80)
 
-# Documentación variada <div id='id1' /> :shit:
+# Documentación variada :shit: <div id='id1' />
 
 Notas generales:
 * Por defecto viene con un [ingress](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) y un sistema de asignación de IP's ( [LB IPAM](https://docs.cilium.io/en/stable/network/lb-ipam/) )
