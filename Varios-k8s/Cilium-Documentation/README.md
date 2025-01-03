@@ -1,14 +1,14 @@
 # Index:
 
 * [Documentación variada](#id1) :shit:
-* [Architecture](#id10) :two::zero:
-* [Network Policy](#id20) :one: :eight:
-* [Service Mesh](#id30) :one: :six:
-* [Network Observability](#id40) :one: :zero:
-* [Installation and Configuration](#id50) :one: :zero:
-* [Cluster Mesh](#id60) :one: :zero:
-* [eBPF](#id70) :one: :zero:
-* [BGP and External Networking](#id80) :six:
+* [Architecture](#id10) :two::zero:%
+* [Network Policy](#id20) :one::eight:%
+* [Service Mesh](#id30) :one::six:%
+* [Network Observability](#id40) :one::zero:%
+* [Installation and Configuration](#id50) :one::zero:%
+* [Cluster Mesh](#id60) :one::zero:%
+* [eBPF](#id70) :one::zero:%
+* [BGP and External Networking](#id80) :zero::six:%
 
 # Documentación variada :shit: <div id='id1' />
 
