@@ -87,6 +87,24 @@ Overview of Network Policy:
   * Kafka
   * DNS Policy and IP Discovery
 
+Example NetworkPolicy:
+
+![alt text](images/NetwrokPolicy.png)
+
+# Service Mesh <div id='id30' />
+
+* Kubernetes Ingress
+  * Cilium Ingress
+  * Gateway API
+    * Replacement for Kubernetes Ingress
+* Encryption in transit
+  * IPSec
+  * WireGuard
+    * Faster than IPSec
+* Mutual Authentication (mTLS)
+* L7-Aware traffic management
+* Que es el SPIRE ¿?
+
 # Installation and Configuration <div id='id50' />
 
 Tenemos dos formas de instalar Cilium:
@@ -98,6 +116,13 @@ Tenemos dos formas de instalar Cilium:
 
 Cluster Mesh capabilities make it easy for workloads to communicate with services hosted in different Kubernetes clusters.
 
+* Setup
+  * Specify Cluster Name and ID
+  * Shared CA
+  * Enable Cluster Mesh
+  * Connect Clusters
+  * Test pod connectivity between clusters
+
 * Requirements:
   * All Kubernetes worker nodes must be assigned a unique IP address, and all worker nodes must have IP connectivity between each other
   * All clusters must be assigned unique PodCIDR ranges to prevent pod IP addresses from overlapping across the mesh.
@@ -108,3 +133,24 @@ Cluster Mesh capabilities make it easy for workloads to communicate with service
   * Establishing service load-balancing between clusters is achieved by defining a Kubernetes service with an identical name and namespace in each cluster and adding the annotation service.cilium.io/global: "true" to declare it as a global service. Cilium agents will watch for this annotation and if it's set to true, will automatically perform load-balancing to the corresponding service endpoint pods located across clusters.
   * You can control this global load-balancing further by setting the annotation service.cilium.io/shared: to true/false in the service definition in different clusters, to explicitly include or exclude a particular cluster’s service from being included in the multi-cluster load-balancing. By default, setting service.cilium.io/global: "true" implies service.cilium.io/shared: "true" if it's not explicitly set.
   * In some cases, load-balancing across multiple clusters might not be ideal. The annotation service.cilium.io/affinity: "local|remote|none" can be used to specify the preferred endpoint destination.
+
+# BGP and External Networking <div id='id80' />
+
+## BGP
+
+* BGP
+  * iBGP vs eBGP
+  * TCP 179
+  * bgpControlPlane: enabled: true
+  * Graceful restart
+
+Example CiliumBGPPeeringPolicy:
+
+![alt text](images/CiliumBGPPeeringPolicy.png)
+
+## External Networking
+
+* External Networking ¿?
+* External Networking - VTEP Integration ¿?
+  * Use VXLAN
+* Egress Networking ¿?
