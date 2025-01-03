@@ -1,14 +1,14 @@
 # Index:
 
 * [Documentación variada](#id1) :shit:
-* [Architecture](#id10)
-* [Network Policy](#id20)
-* [Service Mesh](#id30)
-* [Network Observability](#id40)
-* [Installation and Configuration](#id50)
-* [Cluster Mesh](#id60)
-* [eBPF](#id70)
-* [BGP and External Networking](#id80)
+* [Architecture](#id10) :two::zero:
+* [Network Policy](#id20) :one: :eight:
+* [Service Mesh](#id30) :one: :six:
+* [Network Observability](#id40) :one: :zero:
+* [Installation and Configuration](#id50) :one: :zero:
+* [Cluster Mesh](#id60) :one: :zero:
+* [eBPF](#id70) :one: :zero:
+* [BGP and External Networking](#id80) :six:
 
 # Documentación variada :shit: <div id='id1' />
 
@@ -143,6 +143,8 @@ Cluster Mesh capabilities make it easy for workloads to communicate with service
   * TCP 179
   * bgpControlPlane: enabled: true
   * Graceful restart
+  * BGP use OSPF for establishing egress connectivity
+  * Command used to verify BGP peer status in a router: *show ip bgp summary*
 
 Example CiliumBGPPeeringPolicy:
 
@@ -154,3 +156,4 @@ Example CiliumBGPPeeringPolicy:
 * External Networking - VTEP Integration ¿?
   * Use VXLAN
 * Egress Networking ¿?
+* Cilium-managed clusters ¿?
