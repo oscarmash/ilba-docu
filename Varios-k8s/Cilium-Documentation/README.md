@@ -13,6 +13,7 @@
 # Documentación variada :shit: <div id='id1' />
 
 Notas generales:
+* URL de LABS: https://isovalent.com/resource-library/labs/
 * Por defecto viene con un [ingress](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) y un sistema de asignación de IP's ( [LB IPAM](https://docs.cilium.io/en/stable/network/lb-ipam/) )
 * Cilium is an open source, cloud native solution for providing, securing, and observing network connectivity between workloads
 * No usa iptables, usa eBPF (recuerda que iptable cuesta de escalar)
@@ -32,6 +33,87 @@ Cilium Capabilities:
   * Event monitoring with metadata: When a packet is dropped, the tool reports not only the source and destination IP but also the full label information of both the sender and receiver, among other information.
   * Configurable Prometheus metrics exports.
   * A graphical UI to visualize the network traffic flowing through your clusters.
+
+Test:
+* You are configuring CIDR-based policies in Cilium and need to assign a minimum valid security identity for a CIDR identity. What is the minimum value you should use?
+  * 16777217 -> Represents 2^24 +1, which is the minimum valid value for CIDR-based security identities.
+* What is the valid range for security identities in Cilium?
+  * 1 to 2^32 -1
+* What mechanism does the Cilium Operator use to garbage collect stale security identities in CRD Identity allocation mode?
+  * The operator periodically scans its local cache for identities that haven't received recent heartbeats and deletes them to free up resources.
+* What advantage does Cilium Cluster Mesh provide by enabling shared services across multiple clusters?
+  * It enables sharing of services like secrets management, logging, monitoring, or DNS between all clusters
+* Which advantage does routing outbound traffic through a Cilium egress gateway node provide?
+  * Routing outbound traffic through an egress gateway node ensures that the traffic appears from a stable and predictable IP address, which is beneficial for external systems.
+* What are the prerequisites for enabling Cilium's egress gateway feature in a Kubernetes cluster?
+  * Operators must provision network-facing interfaces and IP addresses on gateway nodes for the egress gateway to function correctly.
+* Which of the following data stores is used by default in Cilium to propagate state between agents?
+  * Kubernetes CRDs are the default data store for state propagation in Cilium.
+* What type of metrics can Hubble provide regarding HTTP response codes in a Kubernetes cluster?
+  * Hubble can provide the rate of 5xx or 4xx HTTP response codes for individual services or across clusters.
+* After enabling IPsec encryption using the Cilium CLI, you observe that some traffic is not being encrypted. What could be a possible reason based on the configuration guidelines?
+  * Traffic destined to the same node is not encrypted by design, as there is no benefit in encrypting local traffic.
+* Your organization is transitioning from using the Kubernetes Ingress API to the Gateway API with Cilium to manage ingress traffic. You currently have Ingress resources with vendor-specific annotations. Which tool can assist in migrating these Ingress configurations to the Gateway API, and what is its current status?
+  * The Ingress2Gateway tool is experimental and can accurately convert simple Ingress resources to Gateway API resources.
+* You are deploying Cilium in a private cloud and want to reserve the first and last IP addresses of each CIDR block in your IP Pools to prevent potential network conflicts. Which configuration change should you make to your IP Pool specification?
+  * If you wish to reserve the first and last IPs of CIDRs, you can set the .spec.allowFirstLastIPs field to No
+* After successfully installing Cilium using the Cilium CLI, you want to run only the network performance tests between specific nodes labeled for performance testing. Which command and options should you use?
+  * Using 'cilium connectivity perf' with the '--node-selector perf-test=true' correctly targets specific labeled nodes.
+* You have an existing Kubernetes cluster using Calico as its default CNI plugin. You want to leverage Hubble for enhanced network observability without replacing Calico. Which Cilium installation option should you use?
+  * --set cni.chainingMode=generic-veth correctly specifies the generic veth chaining mode compatible with Calico.
+* How does eBPF ensure that injected programs do not compromise the stability and security of the Linux kernel?
+  * eBPF programs are verified by the kernel to ensure they are safe and do not contain unsafe operations before they are executed.
+* How can Hubble assist in proactively addressing issues before they impact users by utilizing performance data?
+  * Generating performance metrics and setting up alerts allows teams to monitor key indicators like latency and error rates, and address issues before they affect users.
+* After enabling Hubble redaction in your Cilium setup, you notice that HTTP query parameters are no longer visible in your observability reports. Which configuration option is responsible for this behavior?
+  * --hubble-redact-http-urlquery
+* How does the Gateway API improve the portability of configurations compared to the traditional Ingress API?
+  * Removing vendor-specific annotations allows Gateway API resources to be more portable across different implementations.
+* Which eBPF programs are used by Constellation’s solution to filter unencrypted pod-to-pod traffic for VXLAN and direct routing, respectively?
+  * bpf_overlay is used for VXLAN, and bpf_host is used for direct routing.
+* How does Cilium’s Gateway API implementation enhance protocol support beyond the traditional Ingress API?
+  * Cilium enhances protocol support by extending beyond HTTP and HTTPS to include TCP, UDP, and gRPC, allowing for more versatile traffic management.
+* You are managing a multi-team Kubernetes cluster and want to migrate from Ingress to Gateway API to allow different teams to manage their routes without affecting each other. Which Gateway API feature best supports this requirement?
+  * Role-based personas with specific access to Gateway API objects allow different teams to manage their routes independently without interfering with each other.
+* Which cilium-dbg subcommand is used to manage and retrieve information about network endpoints?
+  * cilium-dbg endpoint
+* Which flag would you use with a cilium-dbg command to output the results in JSONPath format?
+  * '-o jsonpath='{...}'' correctly uses the '-o' flag to specify JSONPath output.
+* How does the Endpoint Policy object in Cilium enforce network policies?
+  * By using a map to lookup packet identities and applying corresponding L3/L4 policies.
+* You have added an external workload named 'runtime' to your Cilium-managed Kubernetes cluster and executed the installation script on the external VM. However, when you check the CEW status, the IP address for 'runtime' is still showing as N/A. What is the most likely reason?
+  * If the hostname does not match the CEW resource name, the workload may not successfully join the cluster, resulting in an IP of N/A.
+* What capability of Hubble enables teams to identify potential security threats by monitoring unusual traffic patterns and detecting anomalies in real-time?
+  * Security-focused observability
+* How does eBPF enhance system performance in comparison to traditional kernel modules?
+  * eBPF runs programs directly in the kernel, minimizing the need to move data between user space and kernel space, which enhances performance.
+  * By avoiding the overhead of transferring data between user space and kernel space.
+* Your organization is transitioning from using multiple Ingress Controllers with vendor-specific annotations to the Gateway API with Cilium. The current setup causes inconsistencies and management challenges. What is a key advantage of adopting the Gateway API in this scenario?
+  * It centralizes traffic management and reduces dependency on annotations.
+* What limitation is associated with using DNS-based Layer 3 policies in Cilium?
+  * DNS-based policies require a proxy to handle DNS traffic.
+  * DNS-based policies rely on a proxy to convert DNS names to IPs and respect DNS TTLs.
+* Which IPAM mode in Cilium supports dynamic CIDR/IP allocation?
+  * Multi-Pool
+* What is a prerequisite for external workloads to have IP connectivity with the nodes in a Cilium-managed Kubernetes cluster?
+  * External workloads must run in the same cloud provider virtual network or establish peering/VPN tunnels with the cluster nodes.
+* You have a Pod selected by multiple policies in Cilium, including both Allow and Deny policies. A traffic attempt is made on a port where both an Allow and a Deny policy are present. What will be the outcome of this traffic attempt?
+  * The traffic will be denied due to the Deny policy.
+  * Deny policies take precedence and will block the traffic regardless of Allow policies.
+* You have deployed Cilium's egress gateway in your Kubernetes cluster on AWS. However, some pod-to-pod traffic is exiting the cluster with the pod's own IP instead of the egress gateway's IP. What is the most likely cause based on Cilium's configuration guidelines?
+  * There is a known delay before egress gateway policies are applied to newly created pods, causing some traffic to bypass the gateway initially.
+  * There is a delay before egress gateway policies are enforced on new pods.
+* How does Cilium enhance standard Kubernetes network policies?
+  * By adding support for Layer 7 policies, allowing application-level controls.
+* How does the Cilium Operator achieve high availability (HA) within a Kubernetes cluster?
+  * By running multiple replicas and using Kubernetes leader election with lease locks.
+* If you encounter IP allocation errors in Cilium's Cluster Scope IPAM mode, which Kubernetes command can you use to check the operator status?
+  * kubectl get ciliumnodes -o jsonpath='{range .items[*]}{.metadata.name} {.status.ipam.operator-status} {end}'
+  * This command retrieves the operator status field in the CiliumNode resources, which is essential for diagnosing IP allocation errors.
+* Which of the following fields can be used to match HTTP requests in Cilium's Layer 7 policies?
+  * Path, Method, Host, Headers
+* Which of the following best describes the structure of a Cilium network policy rule?
+  * Each rule can contain both ingress and egress sections.
 
 # Architecture <div id='id10' />
 
