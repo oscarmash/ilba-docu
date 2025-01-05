@@ -1,6 +1,9 @@
 # Index:
 
-* [Documentación variada](#id1) :shit:
+* [Documentación personal](#id1)
+  * [Cosas molonas de Cilium](#id2)
+  * [Notas generales](#id3)
+  * [Test](#id4)
 * [Architecture](#id10) :two::zero:%
 * [Network Policy](#id20) :one::eight:%
 * [Service Mesh](#id30) :one::six:%
@@ -10,31 +13,35 @@
 * [eBPF](#id70) :one::zero:%
 * [BGP and External Networking](#id80) :zero::six:%
 
-# Documentación variada :shit: <div id='id1' />
+# Documentación personal <div id='id1' />
 
-Notas generales:
-* URL de LABS: https://isovalent.com/resource-library/labs/
-* Por defecto viene con un [ingress](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) y un sistema de asignación de IP's ( [LB IPAM](https://docs.cilium.io/en/stable/network/lb-ipam/) )
-* Cilium is an open source, cloud native solution for providing, securing, and observing network connectivity between workloads
-* No usa iptables, usa eBPF (recuerda que iptable cuesta de escalar)
-* While traditional firewalls operate at Layers 3 and 4, Cilium can also secure modern Layer 7 application protocols such as REST/HTTP, gRPC, and Kafka (in addition to enforcing at Layers 3 and 4)
-  * Allow all HTTP requests with method GET and path /public/.*. Deny all other requests.
-  * Require the HTTP header X-Token: [0-9]+ to be present in all REST calls.
-* For all network processing including protocols such as IP, TCP, and UDP, Cilium uses eBPF as the highly efficient in-kernel datapath. Protocols at the application layer such as HTTP, Kafka, gRPC, and DNS are parsed using a proxy such as Envoy.
+## Cosas molonas de Cilium <div id='id2' />
 
-Cilium Capabilities:
-* Networking
-  * Overlay (by default)
-  * Native routing
-* Cilium supports simple-to-configure transparent encryption, using IPSec or WireGuard, that when enabled, secures traffic between nodes without requiring reconfiguring any workload
-* Load Balancing: implements distributed load balancing for traffic between application containers and external services (fully replace components such as kube-proxy)
-* Network Observability: Cilium includes a dedicated network observability component called Hubble.
-  * Visibility into network traffic at Layer 3/4 (IP address and port) and Layer 7 (API Protocol).
-  * Event monitoring with metadata: When a packet is dropped, the tool reports not only the source and destination IP but also the full label information of both the sender and receiver, among other information.
-  * Configurable Prometheus metrics exports.
-  * A graphical UI to visualize the network traffic flowing through your clusters.
+Cosas importantes a destacra de Cilium:
 
-Test:
+* First: eBPF based
+* L3, L4 and L7
+* [Ingress](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) and [LB IPAM](https://docs.cilium.io/en/stable/network/lb-ipam/)
+* Egress gateway
+* Cluster Mesh
+* External workloads
+* Hubble
+* Transparent Encryption (WireGuard / IPSec)
+
+## Notas generales <div id='id3' />
+
+Documentación, videos y labs:
+
+* [Isovalent library: LABS](https://isovalent.com/resource-library/labs/)
+* Cilium Week:
+  * [Session 1: Architecture and Installation](https://www.youtube.com/watch?v=kI1kpDrVw5I)
+  * [Session 2: Network policy and observability](https://www.youtube.com/watch?v=lUxI_7iWPXo)
+  * [Session 3: BGP, Service mesh & Cluster mesh](https://www.youtube.com/watch?v=eNx2wqSB7rY)
+* [Test Online](https://cca.purutuladhar.com/)
+* [Useful Questions for Success](https://www.youtube.com/watch?v=cOq7CaMD1FQ)
+
+## Test <div id='id4' />
+
 * You are configuring CIDR-based policies in Cilium and need to assign a minimum valid security identity for a CIDR identity. What is the minimum value you should use?
   * 16777217 -> Represents 2^24 +1, which is the minimum valid value for CIDR-based security identities.
 * What is the valid range for security identities in Cilium?
@@ -79,6 +86,10 @@ Test:
   * cilium-dbg endpoint
 * Which flag would you use with a cilium-dbg command to output the results in JSONPath format?
   * '-o jsonpath='{...}'' correctly uses the '-o' flag to specify JSONPath output.
+* You need to retrieve a list of all local endpoints in JSON format using the Cilium CLI. Which command should you use?
+  * cilium-dbg endpoint list -o json
+* Which cilium-dbg subcommand is used to add a new load balancer with specified frontend and backend addresses?
+  * 'cilium-dbg service update' is used to add or update load balancer services by specifying frontend and backend addresses.
 * How does the Endpoint Policy object in Cilium enforce network policies?
   * By using a map to lookup packet identities and applying corresponding L3/L4 policies.
 * You have added an external workload named 'runtime' to your Cilium-managed Kubernetes cluster and executed the installation script on the external VM. However, when you check the CEW status, the IP address for 'runtime' is still showing as N/A. What is the most likely reason?
@@ -95,6 +106,10 @@ Test:
   * DNS-based policies rely on a proxy to convert DNS names to IPs and respect DNS TTLs.
 * Which IPAM mode in Cilium supports dynamic CIDR/IP allocation?
   * Multi-Pool
+* In which IPAM mode does Cilium support multiple CIDRs per node?
+  * Multi-Pool
+* Which of the following IPAM modes in Cilium does not support multiple CIDRs per cluster?
+  * Cluster Scope (default)
 * What is a prerequisite for external workloads to have IP connectivity with the nodes in a Cilium-managed Kubernetes cluster?
   * External workloads must run in the same cloud provider virtual network or establish peering/VPN tunnels with the cluster nodes.
 * You have a Pod selected by multiple policies in Cilium, including both Allow and Deny policies. A traffic attempt is made on a port where both an Allow and a Deny policy are present. What will be the outcome of this traffic attempt?
@@ -114,6 +129,72 @@ Test:
   * Path, Method, Host, Headers
 * Which of the following best describes the structure of a Cilium network policy rule?
   * Each rule can contain both ingress and egress sections.
+---
+* When deploying a global service in Cilium's Cluster Mesh, what type should the Kubernetes Service be defined as?
+  * ClusterIP is used as per the example for defining global services.
+* Which of the following is a security concern associated with sidecarless service meshes?
+  * Using shared proxies in sidecarless architectures can introduce potential vulnerabilities and reduce the isolation between services.
+* An administrator applies a Cilium network policy that intercepts all DNS traffic but does not set 'EnableDefaultDeny' for egress and ingress. What is the effect of this policy on network traffic?
+  * DNS traffic is intercepted and allowed while other traffic remains unrestricted.
+* Which control plane option in Cilium Service Mesh allows for the full capability of the Envoy proxy?
+  * Envoy CRD
+* You have enabled Cilium's Mutual Authentication Support in your Kubernetes cluster. What responsibility does the Cilium Operator have in this configuration?
+  * Ensuring that each Cilium Identity has an associated identity in the certificate management system.
+* What feature of Cilium’s Gateway API implementation allows different operational roles to manage traffic engineering without interfering with each other?
+  * Role-specific Gateway API objects with decomposed responsibilities
+  * Decomposing the Ingress API into multiple Gateway API objects allows different roles such as Infrastructure Providers, Cluster Operators, and Application Developers to manage traffic engineering according to their responsibilities.
+* During IPsec key rotation in Cilium, what should be avoided to prevent cluster instability?
+  * Performing key rotation during Cilium agent upgrades or downgrades
+* What is the primary purpose of the Hubble Relay component in a Hubble observability setup?
+  * To provide a cluster-wide API for querying Hubble flow data.
+* In Cilium, what does security identity 0 represent in the eBPF datapath?
+  * Any identity, acting as a wildcard allow
+* You want to set up a policy in Cilium that enforces that endpoints labeled with `env=prod` can only be accessed by other endpoints that also have `env=prod`. Which Cilium policy field would you use to define this base requirement?
+  * fromRequires
+* What is a primary limitation of the Kubernetes Ingress API in handling advanced traffic routing?
+  * The Ingress API supports basic routing but lacks (carece) native support for advanced features like traffic splitting and header modification.
+* How does Cilium's Cluster Mesh contribute to high availability in a multi-region Kubernetes deployment?
+  * By enabling automatic failover to other clusters if one cluster becomes unavailable.
+* After deploying Constellation with Cilium, an admin notices that some pod-to-pod traffic remains unencrypted despite the network encryption settings. The firewall logs indicate traffic is being routed through eth0 and not the WireGuard interface. What is a likely cause based on Constellation’s implementation?
+  * The IPCache has not yet been updated with the new endpoint’s identity.
+  * The IPCache map in Cilium is responsible for determining whether traffic between pods should be encrypted. If a new endpoint's identity has not yet been updated in the IPCache, Cilium may route the traffic through eth0 without encryption, bypassing the WireGuard interface
+* What is an advantage of using Endpoints Based Layer 3 policies in Cilium?
+  * Policies are defined based on endpoint labels, removing the dependency on IP addresses.
+  * It decouples policies from IP addressing.
+* Which command is used to enable support for external workloads in a Cilium-managed Kubernetes cluster using the Cilium CLI?
+  * cilium clustermesh enable --service-type LoadBalancer --enable-external-workloads
+* What is the minimum recommended mask size for each CIDR block in Cilium's Cluster Scope IPAM clusterPoolIPv4PodCIDRList?
+  * /30
+* What is a possible consequence if the Cilium operator is temporarily unavailable in a cluster?
+  * Delays in IP address management affecting the scheduling of new workloads.
+* Which of the following best describes the connectivity model used by Cilium's Cluster Mesh to join multiple Kubernetes clusters into a unified network?
+  * Cluster Mesh connects clusters regardless of their Pod CIDRs through eBPF-based routing.
+* Which Cilium feature is incompatible with the egress gateway, as highlighted in the provided knowledge content?
+  * CiliumEndpointSlice is directly stated as incompatible with the egress gateway feature.
+  * While Cluster Mesh is incompatible, there is another feature specifically highlighted.
+* Which script simplifies creating a Kubernetes cluster with Kind for running Cilium connectivity tests?
+  * ./contrib/scripts/kind.sh
+* How does Hubble facilitate a holistic view of a Kubernetes system's health by connecting network events with other system logs and metrics?
+  * Cross-stack correlation
+* Which Cilium feature utilizes XDP-based edge load-balancing to steer traffic into Kubernetes clusters or operate independently of Kubernetes?
+  * Edge Load-Balancing
+* Which Cilium CLI command is used to generate an installation script for external workloads?
+  * 'cilium clustermesh vm install' is the correct command to generate an installation script for external workloads.
+* What is the current recommended method to enable Layer 7 protocol visibility in Cilium?
+  * Creating a CiliumNetworkPolicy that specifies L7 rules
+* After migrating to a sidecarless service mesh, your team notices that implementing fine-grained security policies has become more challenging. What is a likely reason for this issue?
+  * Shared proxies in sidecarless service meshes reduce the granularity of security controls
+* What is an advantage of installing Cilium using the Cilium CLI over using Helm?
+  * The Cilium CLI automatically manages Cilium operator replicas based on cluster configuration.
+* In Cilium's Layer 7 policy rules, which of the following is true about the L7Rules structure?
+  * Only one protocol-specific field (HTTP, Kafka, DNS) can be set per port.
+* What is the minimum required version of the Cilium CLI to enable Cluster Mesh features as per the provided knowledge content?
+  * v0.15.0 or later is required to enable Cluster Mesh features.
+* In Cilium Layer 4 policies, which protocols can be specified in the PortProtocol structure?
+  * TCP, UDP, and ANY
+* Which personas are specifically addressed by the Gateway API to enhance role-based access in Kubernetes clusters?
+  * Infrastructure Provider, Cluster Operator, and Application Developer.
+* 
 
 # Architecture <div id='id10' />
 
