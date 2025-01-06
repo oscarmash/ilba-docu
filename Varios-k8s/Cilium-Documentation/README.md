@@ -17,11 +17,11 @@
 
 ## Cosas molonas de Cilium <div id='id2' />
 
-Cosas importantes a destacra de Cilium:
+Cosas importantes a destacar de Cilium:
 
 * First: eBPF based
-* L3, L4 and L7
-* [Ingress](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) and [LB IPAM](https://docs.cilium.io/en/stable/network/lb-ipam/)
+* L3, L4 and L7 (envoy)
+* [Ingress](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) / [Gateway](https://docs.cilium.io/en/v1.15/network/servicemesh/gateway-api/gateway-api/) and [LB IPAM](https://docs.cilium.io/en/stable/network/lb-ipam/)
 * Egress gateway
 * Cluster Mesh
 * External workloads
