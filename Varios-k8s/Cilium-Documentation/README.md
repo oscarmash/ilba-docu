@@ -34,7 +34,9 @@ Cosas importantes a destacar de Cilium:
 
 Documentación, videos y labs:
 
-* [Isovalent library: LABS](https://isovalent.com/resource-library/labs/)
+* Labs:
+  * [Isovalent library: LABS](https://isovalent.com/resource-library/labs/)
+  * [Cilium interactive courses](https://cilium.io/labs/)
 * Cilium Week:
   * [Session 1: Architecture and Installation](https://www.youtube.com/watch?v=kI1kpDrVw5I)
   * [Session 2: Network policy and observability](https://www.youtube.com/watch?v=lUxI_7iWPXo)
