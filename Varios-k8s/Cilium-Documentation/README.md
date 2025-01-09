@@ -50,6 +50,8 @@ Documentación, videos y labs:
   * 16777217 -> Represents 2^24 +1, which is the minimum valid value for CIDR-based security identities.
 * What is the valid range for security identities in Cilium?
   * 1 to 2^32 -1
+* What is the range of cluster-local security identities in Cilium?
+  * 1 to 2^16 -1
 * What mechanism does the Cilium Operator use to garbage collect stale security identities in CRD Identity allocation mode?
   * The operator periodically scans its local cache for identities that haven't received recent heartbeats and deletes them to free up resources.
 * What advantage does Cilium Cluster Mesh provide by enabling shared services across multiple clusters?
@@ -154,7 +156,7 @@ Documentación, videos y labs:
 * In Cilium, what does security identity 0 represent in the eBPF datapath?
   * Any identity, acting as a wildcard allow
 * You want to set up a policy in Cilium that enforces that endpoints labeled with `env=prod` can only be accessed by other endpoints that also have `env=prod`. Which Cilium policy field would you use to define this base requirement?
-  * fromRequires
+  * fromRequires (labels)
 * What is a primary limitation of the Kubernetes Ingress API in handling advanced traffic routing?
   * The Ingress API supports basic routing but lacks (carece) native support for advanced features like traffic splitting and header modification.
 * How does Cilium's Cluster Mesh contribute to high availability in a multi-region Kubernetes deployment?
@@ -194,11 +196,67 @@ Documentación, videos y labs:
   * Only one protocol-specific field (HTTP, Kafka, DNS) can be set per port.
 * What is the minimum required version of the Cilium CLI to enable Cluster Mesh features as per the provided knowledge content?
   * v0.15.0 or later is required to enable Cluster Mesh features.
+* What is the minimum required version of the Cilium CLI to run end-to-end connectivity tests for Cilium?
+  * v0.15.0 meets the minimum required version for running end-to-end connectivity tests.
 * In Cilium Layer 4 policies, which protocols can be specified in the PortProtocol structure?
   * TCP, UDP, and ANY
 * Which personas are specifically addressed by the Gateway API to enhance role-based access in Kubernetes clusters?
   * Infrastructure Provider, Cluster Operator, and Application Developer.
-* 
+---
+* Which annotation is required to declare a Kubernetes service as global for load balancing across multiple Cilium-enabled Kubernetes clusters?
+  * service.cilium.io/global: "true"
+* After installing Cilium with CNI chaining mode on your Kubernetes cluster, you run the connectivity tests and notice that all L7 policy tests have failed. What is the most likely reason?
+  * CNI chaining mode is incompatible with Cilium's L7 policy enforcement.
+  * CNI chaining allows to use Cilium in combination with other CNI plugins.
+* After deploying Cilium to replace iptables with eBPF in your Kubernetes cluster, you notice a significant reduction in network latency as the number of microservices increases. What is the most likely reason for this improvement?
+  * eBPF employs efficient hash tables allowing for near O(log n) time complexity.
+* You have deployed multiple ingress and deny policies to manage traffic to a server Pod in Cilium. When a client attempts to ping the server, which of the following outcomes is expected if there is a Deny policy on Layer 3 for the client Pod?
+  * Ping will be denied because Deny policies on Layer 3 override allow policies.
+* What aspect of Hubble ensures that it can handle the growth of Kubernetes clusters without causing significant performance overhead or increased costs?
+  * Scalability ensures that Hubble can grow with Kubernetes clusters without performance degradation or cost increases.
+* What is the primary advantage of using the XDP BPF hook in the Cilium datapath?
+  * It achieves the highest packet processing performance by running BPF programs at the earliest point in the networking driver.
+* Which of the following statements is true regarding the deprecation of Pod annotations for enabling Layer 7 visibility in Cilium?
+  * Pod annotations have been replaced by CiliumNetworkPolicy for enabling L7 visibility.
+  * Pod annotations were historically used for enabling L7 visibility but are now replaced by CiliumNetworkPolicy.
+* You have deployed a Cilium network policy that includes only egress rules for endpoints labeled 'app=backend'. The 'EnableDefaultDeny' field is not specified in the policy. What is the behavior for ingress traffic to these backend endpoints?
+  * Ingress traffic remains allowed by default for the selected endpoints.
+* You have two Layer 7 rules for the same port: one for HTTP and another for DNS. What will happen when these rules are applied in Cilium?
+  * The policy will be rejected due to mixing different Layer 7 rule types.
+* Which command is used to create the 'cilium-ipsec-keys' secret in the 'kube-system' namespace with a generated PSK?
+  * kubectl create -n kube-system secret generic cilium-ipsec-keys --from-literal=keys="3+ rfc4106(gcm(aes)) $(echo $(dd if=/dev/urandom count=20 bs=1 2> /dev/null | xxd -p -c 64)) 128"
+* How does Cilium Service Mesh support both cloud and on-premises deployments for enterprises?
+  * Through multi-cluster connectivity and security across different infrastructures
+* You are planning to migrate your Kubernetes cluster to use a different IPAM mode in Cilium. What is the recommended approach to change the IPAM mode without causing connectivity disruptions?
+  * Install a fresh Kubernetes cluster with the new IPAM configuration.
+* Why is Cilium's egress gateway feature incompatible with the Cluster Mesh feature?
+  * The egress gateway needs to reside within the same cluster as the pods it manages, making it incompatible with Cluster Mesh which spans multiple clusters.
+* How does LB IPAM integrate with Cilium's BGP Control Plane and L2 Aware LB features?
+  * LB IPAM handles IP allocation, while BGP Control Plane and L2 Aware LB manage load balancing and advertisement of these IPs
+* You have two Kubernetes clusters, Cluster1 and Cluster2, which you plan to connect using Cilium's Cluster Mesh. During installation, you assign both clusters the same cluster ID. What is the likely outcome of this configuration?
+  * Connection disruption and possible incorrect enforcement of network policies.
+* You have deployed a global service named 'rebel-base' in two Kubernetes clusters using Cilium's Cluster Mesh. Initially, accessing the service from either cluster returns responses from both clusters. However, after setting the annotation 'service.cilium.io/shared: "false"' on the service in Cluster 1, what change occurs when accessing the service from Cluster 2?
+  * Responses from Cluster 1 pods are no longer received when accessing the service from Cluster 2.
+* Which Cilium component interacts with Kubernetes when a pod is scheduled or terminated, triggering necessary datapath configurations?
+  * Cilium CNI Plugin
+* After installing Cilium, you want to enable shell tab-completion for bash. Which command should you execute?
+  * source <(cilium completion)
+* What advantage does Cilium's policy-driven SSL termination & injection provide in a Kubernetes environment?
+  * Allows SSL connections to be terminated on behalf of applications without sharing secrets directly with workloads
+* You have multiple services in your Kubernetes cluster, but you want only services labeled with `env=production` to receive IPs from the `production-pool` IP Pool. How should you configure the `production-pool` IP Pool to achieve this?
+  * Set `.spec.serviceSelector` to `{ "env": "production" }` in the `production-pool` specification.
+* You have deployed Cilium with the policy enforcement mode set to 'always'. However, you observe that the health endpoint is unable to communicate with other services in the cluster. What configuration change should you consider to resolve this issue?
+  * Enable communications to and from the health endpoint in the policies.
+* Why did Constellation choose not to isolate the entire Kubernetes cluster in a VPN at the host level?
+  * It would have made communication with the outside world cumbersome and impractical.
+* What limitation is present when setting up support for external workloads in Cilium?
+  * Transparent encryption of traffic to and from external workloads is currently not supported in this beta feature.
+  * External workloads must have a kernel version of 4.19.57 or newer, not older.
+  * External workloads must have Docker 20.10 or newer, not older versions.
+* When configuring IPsec Transparent Encryption in Cilium, which Kubernetes namespace should the 'cilium-ipsec-keys' secret be deployed in?
+  * kube-system
+* What mechanism allows eBPF programs to be safely executed within the Linux kernel?
+  * They run in a secure, sandboxed environment after being verified by the kernel.
 
 # Architecture <div id='id10' />
 
