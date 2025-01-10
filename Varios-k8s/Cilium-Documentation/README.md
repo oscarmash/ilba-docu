@@ -90,6 +90,8 @@ Documentación, videos y labs:
   * Role-based personas with specific access to Gateway API objects allow different teams to manage their routes independently without interfering with each other.
 * Which cilium-dbg subcommand is used to manage and retrieve information about network endpoints?
   * cilium-dbg endpoint
+* Which cilium-dbg subcommand allows you to directly access and manipulate local eBPF maps?
+  * cilium-dbg bpf
 * Which flag would you use with a cilium-dbg command to output the results in JSONPath format?
   * '-o jsonpath='{...}'' correctly uses the '-o' flag to specify JSONPath output.
 * You need to retrieve a list of all local endpoints in JSON format using the Cilium CLI. Which command should you use?
@@ -155,6 +157,8 @@ Documentación, videos y labs:
   * To provide a cluster-wide API for querying Hubble flow data.
 * In Cilium, what does security identity 0 represent in the eBPF datapath?
   * Any identity, acting as a wildcard allow
+* You observe that a security identity appears as 0 in the Hubble output. What does this indicate?
+  * The identity is invalid or not found.
 * You want to set up a policy in Cilium that enforces that endpoints labeled with `env=prod` can only be accessed by other endpoints that also have `env=prod`. Which Cilium policy field would you use to define this base requirement?
   * fromRequires (labels)
 * What is a primary limitation of the Kubernetes Ingress API in handling advanced traffic routing?
@@ -257,6 +261,58 @@ Documentación, videos y labs:
   * kube-system
 * What mechanism allows eBPF programs to be safely executed within the Linux kernel?
   * They run in a secure, sandboxed environment after being verified by the kernel.
+---
+* What is a primary limitation of standard Kubernetes Network Policies (KNP) compared to Cilium Network Policies (CNP)?
+  * KNP lacks support for application-layer (Layer 7) controls.
+* After removing the 'service.cilium.io/shared' annotation from a global service 'rebel-base' in Cluster 1, what is the expected behavior when accessing 'rebel-base' from any cluster?
+  * Replies from both clusters' pods will be seen again.
+  * Removing 'shared: "false"' re-enables sharing, allowing responses from both clusters.
+* Which IPAM mode in Cilium is the default and supports direct routing?
+  * Cluster Scope is the default IPAM mode in Cilium and supports direct routing.
+* In Cilium network policies, which selector type should be used to apply rules based on labels assigned to Kubernetes nodes rather than to endpoints?
+  * NodeSelector
+* What happens when you add the first IP Pool to a Cilium cluster with LB IPAM enabled?
+  * The LB IPAM controller becomes active and begins managing IP allocations from the added pool.
+* Which command is used to run all available connectivity tests using the Cilium CLI?
+  * cilium connectivity test
+* How can you prevent local service backends from being shared with other clusters in a Cilium Cluster Mesh setup?
+  * Set 'service.cilium.io/shared: "false"' on the service.
+* Which step is necessary to enable mutual TLS (mTLS) across clusters when running Hubble Relay with Cilium's Cluster Mesh?
+  * Share the certificate authority (CA) between the clusters.
+* Which of the following is a limitation of Cilium Deny policies?
+  * Do not support policy enforcement at Layer 7
+* Which eBPF datapath mode is currently supported and tested for adding external workloads in Cilium?
+  * vxlan
+* What is a primary scalability limitation of traditional IP-based security enforcement architectures in Kubernetes container management systems?
+  * They necessitate managing a large number of IP addresses and updating security rules across all nodes as pods are added or removed.
+* Which command is used to access the Hubble CLI after configuring it with the Cilium CLI?
+  * cilium hubble port-forward
+* You notice that new workloads in your Kubernetes cluster are experiencing delays in scheduling and suspect it's related to Cilium. Which component's unavailability might be causing this issue?
+  * The Cilium Operator handles IP address management and its unavailability can delay scheduling of new workloads.
+* Which method in Cilium Layer 3 policies should be used when you need to define access to external services without controlling their IPs?
+  * Services based policies leverage Kubernetes service concepts to manage backend IPs automatically, avoiding the need to control IPs.
+* What is the primary purpose of CNI chaining in Kubernetes networking?
+  * To connect together multiple CNI plugins to perform different tasks during pod creation.
+* You have deployed Cilium in your Kubernetes cluster and want to ensure that any changes to network policies can be tested without affecting live traffic. Which Cilium feature should you utilize?
+  * Policy Simulation & Audit
+* Which of the following entities in Cilium's Layer 3 policies represents the collection of all endpoints outside of the cluster?
+  * The 'world' entity encompasses all endpoints outside of the local cluster.
+* What is the default maximum number of clusters that can be connected using Cilium's Cluster Mesh?
+  * 255
+* After deploying a new network security policy, you want to ensure that it is applied consistently across all nodes in your Kubernetes cluster. Which Cilium component ensures the consistent enforcement of this policy throughout the cluster?
+  * The Cilium Daemon runs on each node and is responsible for enforcing network security policies consistently across the entire cluster.
+* How can port ranges be specified in a Cilium Layer 4 policy?
+  * By setting the endPort field alongside the port field in the PortProtocol structure
+* At which point in the networking stack does the Traffic Control Ingress hook operate in Cilium?
+  * After the networking stack has performed initial processing but before the L3 layer.
+* What is the primary advantage of implementing network encryption at the CNI level in Kubernetes, as chosen by Constellation?
+  * It simplifies the configuration of LoadBalancer and NodePort services.
+* What happens when a Layer 7 rule in Cilium is violated by a network request?
+  * An application protocol specific access denied message is sent back.
+  * Violation results in a protocol-specific access denied message like HTTP 403.
+* What design aspect of eBPF allows it to scale efficiently in modern Kubernetes environments compared to iptables?
+  * Utilization of hash tables
+
 
 # Architecture <div id='id10' />
 
