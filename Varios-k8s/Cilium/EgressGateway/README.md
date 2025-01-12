@@ -142,7 +142,7 @@ spec:
     egressIP: 172.26.0.19
 ```
 
-Añadimos la IP del "egressIP" en el equipo k8s-cilium-01-wk01m, el cual ha de tener la IP:
+Añadimos la IP del "egressIP" en el equipo k8s-cilium-01-wk01, el cual ha de tener la IP:
 
 ```
 root@k8s-cilium-01-wk01:~# ip link add veth0 type dummy
