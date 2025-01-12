@@ -69,4 +69,4 @@ Documentación de productos usando Operators
 * [Cilium - Cluster Mesh](./Varios-k8s/Cilium/ClusterMesh/README.md) + instalación
 * [Cilium - Transparent Encryption](./Varios-k8s/Cilium/Transparent-Encryption/README.md)
 * [Cilium - Hubble](./Varios-k8s/Cilium/Hubble/README.md)
-
+* [Cilium - Egress Gateway](./Varios-k8s/Cilium/EgressGateway/README.md)

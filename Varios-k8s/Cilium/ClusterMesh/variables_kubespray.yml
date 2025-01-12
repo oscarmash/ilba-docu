@@ -1,7 +1,5 @@
 resolvconf_mode: docker_dns
 
-gvisor_enabled: true
-
 ### Cilium
 kube_network_plugin: cni
 kube_proxy_remove: true

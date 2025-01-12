@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumEgressGatewayPolicy
+metadata:
+  name: egress-gateway-policy
+  namespace: test-egress-gateway
+spec:
+  destinationCIDRs:
+  - "0.0.0.0/0"
+  selectors:
+  - podSelector:
+      matchLabels:
+        io.kubernetes.pod.namespace: test-egress-gateway
+  egressGateway:
+    nodeSelector:
+      matchLabels:
+        kubernetes.io/hostname: k8s-cilium-01-wk01
+    egressIP: 172.26.0.19
