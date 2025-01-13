@@ -113,6 +113,10 @@ cilium cilium/cilium \
 --version=1.16.5 \
 -f values-cilium.yaml
 
+root@k8s-cilium-01-cp:~# helm ls -A
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
+cilium          kube-system     2               2025-01-13 07:14:27.22397532 +0100 CET  deployed        cilium-1.16.5           1.16.5
+
 root@k8s-cilium-01-cp:~# kubectl rollout restart ds cilium -n kube-system
 root@k8s-cilium-01-cp:~# kubectl rollout restart deploy cilium-operator -n kube-system
 ```
@@ -159,12 +163,12 @@ Podemos observar que se ha creado la ruta de la IP del contenerdor dentro del eB
 
 ```
 root@k8s-cilium-01-cp:~# kubectl -n test-egress-gateway get pods -o wide
-NAME                                              READY   STATUS    RESTARTS      AGE   IP          NODE                 NOMINATED NODE   READINESS GATES
-test-egress-gateway-deployment-5d6cb584cb-7h7vz   1/1     Running   4 (20m ago)   72m   10.1.0.77   k8s-cilium-01-wk01   <none>           <none>
+NAME                                              READY   STATUS    RESTARTS   AGE     IP           NODE                 NOMINATED NODE   READINESS GATES
+test-egress-gateway-deployment-5d6cb584cb-twwht   1/1     Running   0          3m14s   10.1.0.154   k8s-cilium-01-wk01   <none>           <none>
 
 root@k8s-cilium-01-cp:~# kubectl -n kube-system exec ds/cilium -- cilium-dbg bpf egress list
-Source IP   Destination CIDR   Egress IP   Gateway IP
-10.1.0.77   0.0.0.0/0          0.0.0.0     172.26.0.142
+Source IP    Destination CIDR   Egress IP     Gateway IP
+10.1.0.154   0.0.0.0/0          172.26.0.19   172.26.0.142
 ```
 
 Nos meteremos dentro del pod que hemos creado anteriormente, para ver que la IP que recibe el servidor de mldonkey (172.26.0.68), es la IP indicada en el Egress Gateway (172.26.0.19)
