@@ -129,6 +129,7 @@ Hacer limpieza de pods:
 
 ```
 $ kubectl delete pod -A --field-selector=status.phase==Succeeded
+$ kubectl delete pod -A --field-selector=status.phase==Failed
 ```
 
 ## Cosas específicas <div id='id20' />
