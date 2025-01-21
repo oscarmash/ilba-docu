@@ -123,6 +123,14 @@ $ kubectl -n default run debug -it --image=debian
 root@debug:/# apt-get update && apt install -y iputils-ping net-tools dnsutils curl telnet nmap
 ```
 
+---
+
+Hacer limpieza de pods:
+
+```
+$ kubectl delete pod -A --field-selector=status.phase==Succeeded
+```
+
 ## Cosas específicas <div id='id20' />
 
 Change SC to default
