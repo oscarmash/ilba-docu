@@ -32,6 +32,7 @@ Helms avanzados:
 
 * [Helm - Storage - NFS](./Helm/Storage-NFS/README.md)
 * [Helm - Storage - Ceph (RBD)](./Helm/Storage-Ceph-RBD/README.md)
+* [Helm - Storage - CephFS](./Helm/Storage-CephFS/README.md)
 * [Helm - Promtail / Loki / MinIO](./Helm/Promtail-Loki-MinIO/README.md)
 * [Helm - Logs de pods y eventos](./Helm/logs_pods_and_events/README.md)
 * [Helm - Kyverno](./Helm/Kyverno/README.md)
