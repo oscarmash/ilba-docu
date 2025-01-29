@@ -137,7 +137,7 @@ $ kubectl delete pod -A --field-selector=status.phase==Failed
 Ver el estado de los Requests y Limits de nuestro cluster:
 
 ```
-$ kubectl get nodes --no-headers | awk '{print $1}' | xargs -I {} sh -c 'echo {}; kubectl describe node {} | grep Allocated -A 5 | grep -ve Event -ve Allocated -ve percent -ve -- ; echo'
+$ clear && kubectl get nodes --no-headers | awk '{print $1}' | xargs -I {} sh -c 'echo {}; kubectl describe node {} | grep Allocated -A 5 | grep -ve Event -ve Allocated -ve percent -ve -- ; echo'
 
 ilimit-k8s-pro-master01
   Resource           Requests        Limits
