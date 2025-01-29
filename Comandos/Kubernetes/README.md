@@ -132,6 +132,34 @@ $ kubectl delete pod -A --field-selector=status.phase==Succeeded
 $ kubectl delete pod -A --field-selector=status.phase==Failed
 ```
 
+---
+
+Ver el estado de los Requests y Limits de nuestro cluster:
+
+```
+$ kubectl get nodes --no-headers | awk '{print $1}' | xargs -I {} sh -c 'echo {}; kubectl describe node {} | grep Allocated -A 5 | grep -ve Event -ve Allocated -ve percent -ve -- ; echo'
+
+ilimit-k8s-pro-master01
+  Resource           Requests        Limits
+  cpu                920m (65%)      300m (21%)
+  memory             221286400 (6%)  1024288k (32%)
+
+ilimit-k8s-pro-worker01
+  Resource           Requests          Limits
+  cpu                3355m (45%)       4650m (62%)
+  memory             10084954Ki (65%)  14760781056 (93%)
+
+ilimit-k8s-pro-worker02
+  Resource           Requests         Limits
+  cpu                4792m (64%)      4500m (60%)
+  memory             7329334Ki (47%)  12869002496 (81%)
+
+ilimit-k8s-pro-worker03
+  Resource           Requests         Limits
+  cpu                1512m (20%)      3253m (43%)
+  memory             3710518Ki (23%)  8670504192 (54%)
+```
+
 ## Cosas específicas <div id='id20' />
 
 Change SC to default
