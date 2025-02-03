@@ -89,7 +89,8 @@ root@vrt-hv01:~# ceph auth get client.ilimit-paas-k8s-pre-cephfs
 ```
 
 ```
-root@vrt-hv01:~# ceph auth caps client.ilimit-paas-k8s-pre-cephfs mon "allow r" mgr "allow rw" mds "allow rw, allow rw path=/"
+root@vrt-hv01:~# ceph auth caps client.ilimit-paas-k8s-pre-cephfs mon "allow r" mgr "allow rw" mds "allow rw, allow rw path=/" osd "allow rw"
+updated caps for client.ilimit-paas-k8s-pre-cephfs
 ```
 
 ```
@@ -99,6 +100,7 @@ root@vrt-hv01:~# ceph auth get client.ilimit-paas-k8s-pre-cephfs
         caps mds = "allow rw, allow rw path=/"
         caps mgr = "allow rw"
         caps mon = "allow r"
+        caps osd = "allow rw"
 ```
 
 ## CephFS Path Restriction <div id='id10' />
