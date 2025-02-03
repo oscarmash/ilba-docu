@@ -77,30 +77,40 @@ ceph-fuse on /mnt type fuse.ceph-fuse (rw,nosuid,nodev,relatime,user_id=0,group_
 
 ### Problema de permisos <div id='id1' />
 
-Nos hemos encontrado con la UPC, que les ha dado el siguiente error: "Operation not permitted", lo hemos solucionado cambiando los permisos
+Nos hemos encontrado con la UPC, que les ha dado el siguiente error: **Operation not permitted**, lo hemos solucionado cambiando los permisos
+
+```
+root@vrt-hv01:~# ceph auth caps client.ilimit-paas-k8s-pre-cephfs \
+mon "allow r" \
+mgr "allow rw" \
+mds "allow rw, allow rw path=/, allow rw fsname=ilimit-paas-k8s-pre-cephfs" \
+osd "allow rw"
+```
+
+```
+root@vrt-hv01:~# ceph fs subvolumegroup create ilimit-paas-k8s-pre-cephfs csi
+```
+
+Podremos verificar de la siguiente manera:
 
 ```
 root@vrt-hv01:~# ceph auth get client.ilimit-paas-k8s-pre-cephfs
 [client.ilimit-paas-k8s-pre-cephfs]
         key = AQCaIJJnDT0YAhAA7Yy0p+WsdTYeInKNMNsodg==
-        caps mds = "allow rw fsname=ilimit-paas-k8s-pre-cephfs"
-        caps mon = "allow r fsname=ilimit-paas-k8s-pre-cephfs"
-        caps osd = "allow rw tag cephfs data=ilimit-paas-k8s-pre-cephfs"
-```
-
-```
-root@vrt-hv01:~# ceph auth caps client.ilimit-paas-k8s-pre-cephfs mon "allow r" mgr "allow rw" mds "allow rw, allow rw path=/" osd "allow rw"
-updated caps for client.ilimit-paas-k8s-pre-cephfs
-```
-
-```
-root@vrt-hv01:~# ceph auth get client.ilimit-paas-k8s-pre-cephfs
-[client.ilimit-paas-k8s-pre-cephfs]
-        key = AQCaIJJnDT0YAhAA7Yy0p+WsdTYeInKNMNsodg==
-        caps mds = "allow rw, allow rw path=/"
+        caps mds = "allow rw, allow rw path=/, allow rw fsname=ilimit-paas-k8s-pre-cephfs"
         caps mgr = "allow rw"
         caps mon = "allow r"
         caps osd = "allow rw"
+```
+
+```
+root@vrt-hv01:~# ceph fs subvolumegroup ls ilimit-paas-k8s-pre-cephfs
+[
+    {
+        "name": "csi"
+    }
+]
+
 ```
 
 ## CephFS Path Restriction <div id='id10' />
