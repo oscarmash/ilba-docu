@@ -1,9 +1,10 @@
 # Ceph Storage FileSystem
 
-* [Creación de un CpehFS](#id0)
+* [Creación de un CephFS](#id0)
+  * [Problema de permisos](#id1)
 * [CephFS Path Restriction](#id10)
 
-## Creación de un CpehFS <div id='id0' />
+## Creación de un CephFS <div id='id0' />
 
 ```
 root@ceph-01:~# ceph version
@@ -72,6 +73,32 @@ root@packer:~# ceph-fuse /mnt -n client.usuario-01 -k ceph.client.usuario-01.key
 
 root@packer:~# mount | grep ceph-fuse
 ceph-fuse on /mnt type fuse.ceph-fuse (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)
+```
+
+### Problema de permisos <div id='id1' />
+
+Nos hemos encontrado con la UPC, que les ha dado el siguiente error: "Operation not permitted", lo hemos solucionado cambiando los permisos
+
+```
+root@vrt-hv01:~# ceph auth get client.ilimit-paas-k8s-pre-cephfs
+[client.ilimit-paas-k8s-pre-cephfs]
+        key = AQCaIJJnDT0YAhAA7Yy0p+WsdTYeInKNMNsodg==
+        caps mds = "allow rw fsname=ilimit-paas-k8s-pre-cephfs"
+        caps mon = "allow r fsname=ilimit-paas-k8s-pre-cephfs"
+        caps osd = "allow rw tag cephfs data=ilimit-paas-k8s-pre-cephfs"
+```
+
+```
+root@vrt-hv01:~# ceph auth caps client.ilimit-paas-k8s-pre-cephfs mon "allow r" mgr "allow rw" mds "allow rw, allow rw path=/"
+```
+
+```
+root@vrt-hv01:~# ceph auth get client.ilimit-paas-k8s-pre-cephfs
+[client.ilimit-paas-k8s-pre-cephfs]
+        key = AQCaIJJnDT0YAhAA7Yy0p+WsdTYeInKNMNsodg==
+        caps mds = "allow rw, allow rw path=/"
+        caps mgr = "allow rw"
+        caps mon = "allow r"
 ```
 
 ## CephFS Path Restriction <div id='id10' />
