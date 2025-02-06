@@ -111,8 +111,6 @@ root@ilimit-paas-k8s-test2-cp01:~# kubectl -n ceph-csi-rbd get secret csi-rbd-se
 }
 ```
 
----
-
 ### Pod para debug <div id='id18' />
 
 ```
