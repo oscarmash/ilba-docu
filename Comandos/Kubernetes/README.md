@@ -33,7 +33,7 @@ kubectl get pods -A | grep -Ev 'Running|Completed'
 ### Eliminar un pod de manera agresiva <div id='id12' />
 
 ```
-kubectl delete pod --grace-period=0 --force
+kubectl delete pod --grace-period=0 --force nombre_pod
 ```
 
 ### Cambiar el NS por defecto en el que estamos trabajando <div id='id13' />
