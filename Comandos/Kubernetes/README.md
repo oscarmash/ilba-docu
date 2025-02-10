@@ -11,8 +11,9 @@
   * [Ver un secret](#id17)
   * [Pod para debug](#id18)
   * [Hacer limpieza de pods](#id19)
-  * [Ver el estado de los Requests y Limits de nuestro cluster](#id20)
+  * [Ver el estado de los Requests y Limits](#id20)
   * [Change SC to default](#id21)
+  * [Verificaciones ETCD](#id22)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -125,7 +126,9 @@ $ kubectl delete pod -A --field-selector=status.phase==Succeeded
 $ kubectl delete pod -A --field-selector=status.phase==Failed
 ```
 
-### Ver el estado de los Requests y Limits de nuestro cluster  <div id='id20' />
+### Ver el estado de los Requests y Limits <div id='id20' />
+
+A nivel de cluster:
 
 ```
 $ clear && kubectl get nodes --no-headers | awk '{print $1}' | xargs -I {} sh -c 'echo {}; kubectl describe node {} | grep Allocated -A 5 | grep -ve Event -ve Allocated -ve percent -ve -- ; echo'
@@ -151,6 +154,22 @@ ilimit-k8s-pro-worker03
   memory             3710518Ki (23%)  8670504192 (54%)
 ```
 
+A nivel de contenedor:
+
+```
+root@kubespray-aio:~# kubectl -n kube-system get pods calico-kube-controllers-68485cbf9c-q9g2p -o jsonpath='{range .spec.containers[*]}{"Container Name: "}{.name}{"\n"}{"Requests:"}{.resources.requests}{"\n"}{"Limits:"}{.resources.limits}{"\n"}{end}'
+
+Container Name: calico-kube-controllers
+Requests:{"cpu":"30m","memory":"64M"}
+Limits:{"cpu":"1","memory":"256M"}
+```
+
+```
+root@kubespray-aio:~# kubectl top pods -n kube-system calico-kube-controllers-68485cbf9c-q9g2p
+NAME                                       CPU(cores)   MEMORY(bytes)
+calico-kube-controllers-68485cbf9c-q9g2p   5m           113Mi
+```
+
 ### Change SC to default <div id='id21' />
 
 ```
@@ -163,6 +182,31 @@ root@kubespray-aio:~# kubectl patch storageclass csi-rbd-sc -p '{"metadata": {"a
 root@kubespray-aio:~# kubectl get sc
 NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
 csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   4m59s
+```
+
+### Verificaciones ETCD  <div id='id22' />
+
+```
+[root@su0679 kubernetes]# /usr/local/bin/etcdctl --cacert /etc/ssl/etcd/ssl/ca.pem --cert /etc/ssl/etcd/ssl/node-su0679.pem --key /etc/ssl/etcd/ssl/node-su0679-key.pem  endpoint status -w table --cluster
++------------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|           ENDPOINT           |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++------------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| https://192.168.160.172:2379 | f370ba11fb781b7d |  3.5.12 |   44 MB |      true |      false |        35 |  199742046 |          199742046 |        |
++------------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+```
+
+```
+[root@su0679 kubernetes]# /usr/local/bin/etcdctl --cacert /etc/ssl/etcd/ssl/ca.pem --cert /etc/ssl/etcd/ssl/node-su0679.pem --key /etc/ssl/etcd/ssl/node-su0679-key.pem get /registry --prefix --keys-only | grep -v ^$ | awk -F '/'  '{ h[$3]++ } END {for (k in h) print h[k], k}' | sort -nr
+103 secrets
+84 clusterroles
+72 services
+71 clusterrolebindings
+69 pods
+68 serviceaccounts
+66 replicasets
+60 controllerrevisions
+57 configmaps
+....
 ```
 
 ## Alias <div id='id999' />
