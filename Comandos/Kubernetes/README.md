@@ -14,6 +14,7 @@
   * [Ver el estado de los Requests y Limits](#id20)
   * [Change SC to default](#id21)
   * [Verificaciones ETCD](#id22)
+  * [Revisión de certificados](#id23)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -207,6 +208,37 @@ csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           tr
 60 controllerrevisions
 57 configmaps
 ....
+```
+
+### Revisión de certificados <div id='id23' />
+
+```
+ilimit-k8s-pro-master01:~# openssl x509 -enddate -noout -in /etc/ssl/etcd/ssl/ca.pem
+notAfter=Jan 25 08:07:02 2122 GMT
+ilimit-k8s-pro-master01:~# openssl x509 -enddate -noout -in /etc/ssl/etcd/ssl/node-ilimit-k8s-pro-master01.pem
+notAfter=Jan  5 08:06:10 2125 GMT
+```
+
+```
+ilimit-k8s-pro-master01:~# cat .kube/config | grep client-certificate-data | cut -f2 -d : | tr -d ' ' | base64 -d | openssl x509 -text -out - | grep "Not After"
+            Not After : Jan 29 08:08:51 2026 GMT
+```
+
+```
+ilimit-k8s-pro-master01:~# kubeadm certs check-expiration
+
+CERTIFICATE                EXPIRES                  RESIDUAL TIME   CERTIFICATE AUTHORITY   EXTERNALLY MANAGED
+admin.conf                 Feb 18, 2026 15:00 UTC   364d            ca                      no
+apiserver                  Feb 18, 2026 15:00 UTC   364d            ca                      no
+apiserver-kubelet-client   Feb 18, 2026 15:00 UTC   364d            ca                      no
+controller-manager.conf    Feb 18, 2026 15:00 UTC   364d            ca                      no
+front-proxy-client         Feb 18, 2026 15:00 UTC   364d            front-proxy-ca          no
+scheduler.conf             Feb 18, 2026 15:00 UTC   364d            ca                      no
+super-admin.conf           Feb 18, 2026 15:00 UTC   364d            ca                      no
+
+CERTIFICATE AUTHORITY   EXPIRES                  RESIDUAL TIME   EXTERNALLY MANAGED
+ca                      Feb 16, 2032 08:08 UTC   6y362d          no
+front-proxy-ca          Feb 16, 2032 08:08 UTC   6y362d          no
 ```
 
 ## Alias <div id='id999' />
