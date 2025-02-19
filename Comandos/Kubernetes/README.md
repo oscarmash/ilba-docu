@@ -225,6 +225,10 @@ ilimit-k8s-pro-master01:~# cat .kube/config | grep client-certificate-data | cut
 ```
 
 ```
+ilimit-k8s-pro-master01:~# find /etc/kubernetes/pki/ -type f -name "*.crt" -print|egrep -v 'ca.crt$'|xargs -L 1 -t  -i bash -c 'openssl x509  -noout -text -in {}|grep After'
+```
+
+```
 ilimit-k8s-pro-master01:~# kubeadm certs check-expiration
 
 CERTIFICATE                EXPIRES                  RESIDUAL TIME   CERTIFICATE AUTHORITY   EXTERNALLY MANAGED
