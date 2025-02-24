@@ -63,7 +63,7 @@ Documentación de productos usando Operators
 * [Velero](./Varios-k8s/Velero/README.md)
 * [Calico - NetworkPolicy](./Varios-k8s/Calico-NetworkPolicy/README.md)
 * [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) :construction: **No acabado**
-* [Ceph - Baja de Ceph RBD + CephFS](./Varios/baja-CephRBD-CephFS/README.md)
+* [Ceph - Baja de Ceph RBD + CephFS + Usuarios](./Varios/baja-CephRBD-CephFS-Usuarios/README.md)
 
 ### CNI: Cilium
 
