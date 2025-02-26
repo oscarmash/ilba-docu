@@ -11,6 +11,7 @@
   * [calico_apiserver_enabled: true](#id42)
   * [resolvconf_mode: docker_dns](#id43)
   * [etcd_deployment_type: host](#id44)
+  * [dns_etchosts](#id45)
 
 # Instalación de K8s <div id='id10' />
 
@@ -161,3 +162,15 @@ Como se [instalará la BBDD de ETCD en el cluster](https://kubespray.io/#/docs/o
 
 * etcd_deployment_type: host  - esto lo instalará tipo "apt-get"
 * etcd_deployment_type: kubeadm - esto lo instala en un ["static pod"](https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/)
+
+## dns_etchosts <div id='id45' />
+
+Añadir entradas en los ficheros de ["/etc/hosts"](https://kubespray.io/#/docs/advanced/dns-stack?id=dns_etchosts-coredns) de los equipos:
+
+```
+dns_etchosts: |
+  10.101.1.16 ilimit-paas-k8s-pre-cp01
+  10.101.1.17 ilimit-paas-k8s-pre-nd01 
+  10.101.1.18 ilimit-paas-k8s-pre-nd02 
+  10.101.1.19 ilimit-paas-k8s-pre-nd03 
+```
