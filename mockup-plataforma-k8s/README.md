@@ -6,6 +6,11 @@
 * [Dudas](#id20) 
 * [Errores](#id30) 
   * [Kubelet client certificate rotation fails](#id31)
+* [Cosas de KubeSpray](#id40)
+  * [etcd_events_cluster_setup: true](#id41) :construction: **No probado**
+  * [calico_apiserver_enabled: true](#id42)
+  * [resolvconf_mode: docker_dns](#id43)
+  * [etcd_deployment_type: host](#id44)
 
 # Instalación de K8s <div id='id10' />
 
@@ -116,3 +121,43 @@ debian-node3   Ready                      <none>          2y133d   v1.29.5
 debian-node4   Ready                      <none>          481d     v1.29.5
 ```
 
+# Cosas de KubeSpray <div id='id40' />
+
+Casi toda la documentación la podemos encontrar [aquí](https://kubespray.io/)
+
+## etcd_events_cluster_setup: true <div id='id41' />
+
+Es aconsejable (no lo he hecho nunca) poner los "events" del cluster en otra BBDD que no sea la que usa K8s. Segirá siendo ETCD:
+
+```
+etcd_events_cluster_setup: true
+```
+
+## calico_apiserver_enabled: true <div id='id42' />
+
+Hacemos que se cree un contenedor para poder trabajar con calico y no tener que ir instalar el "calicoctl"
+
+```
+calico_apiserver_enabled: true
+```
+
+```
+root@ilimit-paas-k8s-provi-cp01:~# kubectl -n calico-apiserver get pods
+NAME                               READY   STATUS    RESTARTS   AGE
+calico-apiserver-c744cd8bb-6ktwc   1/1     Running   0          2d4h
+```
+
+## resolvconf_mode: docker_dns <div id='id43' />
+
+Como gestiona las [DNS](https://kubespray.io/#/docs/advanced/dns-stack?id=resolvconf_mode):
+
+```
+resolvconf_mode: docker_dns
+```
+
+## etcd_deployment_type: host <div id='id44' />
+
+Como se [instalará la BBDD de ETCD en el cluster](https://kubespray.io/#/docs/operations/etcd?id=deployment-types):
+
+* etcd_deployment_type: host  - esto lo instalará tipo "apt-get"
+* etcd_deployment_type: kubeadm - esto lo instala en un ["static pod"](https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/)
