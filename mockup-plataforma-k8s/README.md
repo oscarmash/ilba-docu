@@ -12,6 +12,7 @@
   * [resolvconf_mode: docker_dns](#id43)
   * [etcd_deployment_type: host](#id44)
   * [dns_etchosts](#id45)
+  * [gvisor_enabled: true](#id46)
 
 # Instalación de K8s <div id='id10' />
 
@@ -173,4 +174,12 @@ dns_etchosts: |
   10.101.1.17 ilimit-paas-k8s-pre-nd01 
   10.101.1.18 ilimit-paas-k8s-pre-nd02 
   10.101.1.19 ilimit-paas-k8s-pre-nd03 
+```
+
+## gvisor_enabled: true <div id='id46' />
+
+Poco que comentar, instala [gVisor](https://gvisor.dev/)
+
+```
+gvisor_enabled: true
 ```
