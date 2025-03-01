@@ -25,6 +25,9 @@ install_all:
 upgrade_kubespray:
 	$(BIN) ansible-playbook -i inventory/$(ENV)/inventory.ini playbooks/upgrade_cluster.yml --skip-tags=multus -e kube_version=$(KUBE_VERSION) -e upgrade_cluster_setup=true -e "@variables_kubespray.yml" -b -l $(NODE)
 
+add_host:
+	$(BIN) ansible-playbook -i inventory/$(ENV)/inventory.ini cluster.yml --skip-tags=multus -e kube_version=$(KUBE_VERSION) -e upgrade_cluster_setup=true -e "@variables_kubespray.yml" -l $(NODE) -b
+
 ########################
 
 pre_install:

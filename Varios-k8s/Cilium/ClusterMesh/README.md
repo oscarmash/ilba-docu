@@ -3,7 +3,8 @@
 * [Instalación de K8s con Cilium via KubeSpray](#id10)
   * [Equipos a desplegar](#id11)
   * [Procedimiento de instalación](#id12)
-  * [Verificaciones](#id13)
+  * [Añadir un host](#id13)
+  * [Verificaciones](#id14)
 * [Setting up Cluster Mesh](#id20)
   * [Prepare the contexts](#id21)
   * [Enable Cluster Mesh](#id22)
@@ -61,7 +62,13 @@ Datos iportantes a mencionar, que se han usado en los values de los Helms de Cil
 $ make install_applications ENV=k8s-cilium-0x
 ```
 
-## Verificaciones <div id='id13' />
+## Añadir un host <div id='id13' />
+
+```
+$ make add_host ENV=k8s-cilium-0x KUBE_VERSION=vx.xx.x NODE=k8s-cilium-0x-wk0x
+```
+
+## Verificaciones <div id='id14' />
 
 Relizaremos las siguientes verificaciones:
 
