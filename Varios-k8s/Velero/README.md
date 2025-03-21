@@ -6,6 +6,8 @@
 * [Velero Backup Hooks + Restore BBDD en otro NS](#id83)
 * [Clonar una aplicación (modificando ingress)](#id84)
 * [Cambio de storage de Velero (MinIO to MinIO)](#id85)
+* [Comandos útiles](#id200)
+  * [show backup-location](#id201)
 
 # Instalación de Velero <div id='id8' />
 
@@ -968,4 +970,55 @@ velero-stg-nas02   Available   15s              21m   true
 root@ilimit-paas-k8s-test3-cp01:~/velero# velero backup-location get
 NAME               PROVIDER   BUCKET/PREFIX   PHASE       LAST VALIDATED                  ACCESS MODE   DEFAULT
 velero-stg-nas02   aws        velero-test3    Available   2024-11-19 11:03:50 +0100 CET   ReadWrite     true
+```
+# Comandos útiles <div id='id200' />
+
+## show backup-location <div id='id201' />
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# velero backup-location get
+NAME             PROVIDER   BUCKET/PREFIX   PHASE       LAST VALIDATED                  ACCESS MODE   DEFAULT
+velero-backups   aws        velero          Available   2025-03-21 09:31:59 +0100 CET   ReadWrite     true
+```
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero get backupstoragelocations -oyaml
+apiVersion: v1
+items:
+- apiVersion: velero.io/v1
+  kind: BackupStorageLocation
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: velero
+      meta.helm.sh/release-namespace: velero
+    creationTimestamp: "2025-01-24T08:03:55Z"
+    generation: 142334
+    labels:
+      app.kubernetes.io/instance: velero
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: velero
+      helm.sh/chart: velero-7.2.1
+    name: velero-backups
+    namespace: velero
+    resourceVersion: "25868716"
+    uid: 235aa8ab-f16e-4013-9189-5d4910a68e30
+  spec:
+    accessMode: ReadWrite
+    config:
+      publicUrl: https://stg-nas02-minio.ilimit.net:9000
+      region: default
+      s3ForcePathStyle: "true"
+      s3Url: https://stg-nas02-minio.ilimit.net:9000
+    default: true
+    objectStorage:
+      bucket: velero
+    provider: aws
+  status:
+    lastSyncedTime: "2025-03-21T08:32:08Z"
+    lastValidationTime: "2025-03-21T08:31:59Z"
+    phase: Available
+kind: List
+metadata:
+  resourceVersion: ""
+
 ```
