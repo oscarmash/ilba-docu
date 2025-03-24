@@ -8,6 +8,7 @@
 * [Cambio de storage de Velero (MinIO to MinIO)](#id85)
 * [Comandos útiles](#id200)
   * [show backup-location](#id201)
+  * [delete backup](#id202)
 
 # Instalación de Velero <div id='id8' />
 
@@ -1020,5 +1021,30 @@ items:
 kind: List
 metadata:
   resourceVersion: ""
+```
 
+## delete backup <div id='id202' />
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# velero backup get
+NAME                                                                STATUS      ERRORS   WARNINGS   CREATED                         EXPIRES   STORAGE LOCATION   SELECTOR
+...
+prueba-basic-stack-schedule-backup-20250321000008                   Deleting    0        1          2025-03-21 01:01:15 +0100 CET   1d        velero-backups     <none>
+...
+```
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# velero backup describe prueba-basic-stack-schedule-backup-20250321000008
+..
+Deletion Attempts (1 failed):
+  2025-03-21 13:36:20 +0100 CET: Processed
+  Errors:
+    error getting backup's volume snapshots: rpc error: code = Unknown desc = operation error S3: HeadObject, https response error StatusCode: 403, RequestID: 182ED19D969D5805, HostID: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, api error Forbidden: Forbidden
+    error to connect backup repo: error to connect to storage: error retrieving storage config from bucket "velero": The Access Key Id you provided does not exist in our records.
+    rpc error: code = Unknown desc = operation error S3: ListObjectsV2, https response error StatusCode: 403, RequestID: 182ED19D97729776, HostID: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, api error InvalidAccessKeyId: The Access Key Id you provided does not exist in our records.
+```
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero delete backups.velero.io prueba-basic-stack-schedule-backup-20250321000008
+backup.velero.io "prueba-basic-stack-schedule-backup-20250321000008" deleted
 ```
