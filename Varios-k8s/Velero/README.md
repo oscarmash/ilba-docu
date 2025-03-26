@@ -9,6 +9,7 @@
 * [Comandos útiles](#id200)
   * [show backup-location](#id201)
   * [delete backup](#id202)
+  * [Install velero cli](#id203)
 
 # Instalación de Velero <div id='id8' />
 
@@ -1047,4 +1048,31 @@ Deletion Attempts (1 failed):
 ```
 root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero delete backups.velero.io prueba-basic-stack-schedule-backup-20250321000008
 backup.velero.io "prueba-basic-stack-schedule-backup-20250321000008" deleted
+```
+
+## Install velero cli <div id='id203' />
+
+Primero hemos de saber la versión que hay en el servidor:
+
+```
+root@ilimit-paas-k8s-provi-cp01:~# velero version
+Client:
+        Version: v1.14.1
+        Git commit: 8afe3cea8b7058f7baaf447b9fb407312c40d2da
+Server:
+        Version: v1.14.1
+```
+
+Instalaremos localmente la misma versión:
+
+```
+$ VELERO_VERSION="v1.14.1"
+
+$ curl -LO https://github.com/vmware-tanzu/velero/releases/download/$VELERO_VERSION/velero-$VELERO_VERSION-linux-amd64.tar.gz
+$ tar xzvf velero-$VELERO_VERSION-linux-amd64.tar.gz
+$ sudo mv velero-$VELERO_VERSION-linux-amd64/velero /usr/local/bin
+$ rm -rf velero-$VELERO_VERSION-linux-*
+
+$ velero version
+$ velero get backups
 ```
