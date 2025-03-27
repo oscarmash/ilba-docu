@@ -10,6 +10,7 @@
   * [show backup-location](#id201)
   * [delete backup](#id202)
   * [Install velero cli](#id203)
+  * [Check access S3](#id204)
 
 # Instalación de Velero <div id='id8' />
 
@@ -1075,4 +1076,49 @@ $ rm -rf velero-$VELERO_VERSION-linux-*
 
 $ velero version
 $ velero get backups
+```
+
+## Check access S3 <div id='id204' />
+
+```
+$ curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc_minio
+$ chmod +x mc_minio
+```
+
+```
+$ EDPOINT="https://stg-nas02-minio.ilimit.net:9000"
+$ KEY="XpbNOKyboihj4Ks1Za1gUMqcunycfwqsDDJXMPA4"
+$ KEY_ID="UH6WIG2x1w5rB40NJytC"
+
+$ ./mc_minio alias set StorageS3 $EDPOINT $KEY_ID $KEY
+
+$ ./mc_minio alias ls StorageS3
+StorageS3
+  URL       : https://stg-nas02-minio.ilimit.net:9000
+  AccessKey : UH6WIG2x1w5rB40NJytC
+  SecretKey : XpbNOKyboihj4Ks1Za1gUMqcunycfwqsDDJXMPA4
+  API       : s3v4
+  Path      : auto
+  Src       : /home/oscar/.mc_minio/config.json
+
+$ ./mc_minio ls StorageS3
+[2025-03-21 09:46:40 CET]     0B ilimit-paas-k8s-pre-velero/
+[2025-03-21 09:46:31 CET]     0B ilimit-paas-k8s-provi-velero/
+```
+
+```
+$ dd if=/dev/zero of=file_10M.data  bs=10M  count=1
+
+$ ./mc_minio put file_10M.data StorageS3/ilimit-paas-k8s-pre-velero
+
+$ ./mc_minio ls StorageS3/ilimit-paas-k8s-pre-velero/
+[2025-03-27 08:53:02 CET]  10MiB STANDARD file_10M.data
+
+$ ./mc_minio rm StorageS3/ilimit-paas-k8s-pre-velero/file_10M.data
+Removed `StorageS3/ilimit-paas-k8s-pre-velero/file_10M.data`.
+```
+
+```
+$ ./mc_minio alias rm StorageS3
+$ rm -rf mc_minio
 ```
