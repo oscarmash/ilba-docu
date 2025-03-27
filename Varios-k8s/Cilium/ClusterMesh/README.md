@@ -21,11 +21,15 @@ Los equipos a desplegar son los siguientes:
 * Plataforma de Cilium 01
   * CP: k8s-cilium-01-cp -> 172.26.0.141
   * WK: k8s-cilium-01-wk01 -> 172.26.0.142
+  * WK: k8s-cilium-01-wk02 -> 172.26.0.143
+  * WK: k8s-cilium-01-wk03 -> 172.26.0.144
   * VIP: 172.26.0.101
   * VIP: 172.26.0.102
 * Plataforma de Cilium 02
   * CP: k8s-cilium-02-cp -> 172.26.0.145
   * WK: k8s-cilium-02-wk01 -> 172.26.0.146
+  * WK: k8s-cilium-02-wk02 -> 172.26.0.147
+  * WK: k8s-cilium-02-wk03 -> 172.26.0.148
   * VIP: 172.26.0.105
   * VIP: 172.26.0.106
 
