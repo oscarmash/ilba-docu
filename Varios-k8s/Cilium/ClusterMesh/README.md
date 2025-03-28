@@ -48,10 +48,12 @@ $ make install_kubespray ENV=k8s-cilium-0x
 ```
 
 ```
-root@k8s-cilium-0x-cp:~# kubectl get nodes
-NAME                 STATUS     ROLES           AGE     VERSION
-k8s-cilium-0x-cp     NotReady   control-plane   2m40s   v1.30.4
-k8s-cilium-0x-wk01   NotReady   <none>          106s    v1.30.4
+root@k8s-cilium-01-cp:~# kubectl get nodes
+NAME                 STATUS     ROLES           AGE   VERSION
+k8s-cilium-01-cp     NotReady   control-plane   24m   v1.30.4
+k8s-cilium-01-wk01   NotReady   <none>          23m   v1.30.4
+k8s-cilium-01-wk02   NotReady   <none>          23m   v1.30.4
+k8s-cilium-01-wk03   NotReady   <none>          23m   v1.30.4
 ```
 
 Datos iportantes a mencionar, que se han usado en los values de los Helms de Cilium desplegados en cada custer (aconsejamos revisar los values.yaml de cada cluster) :
