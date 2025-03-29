@@ -15,6 +15,7 @@
   * [Change SC to default](#id21)
   * [Verificaciones ETCD](#id22)
   * [Revisión de certificados](#id23)
+  * [Saber rango IP's de cada nodo](#id24)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -245,6 +246,16 @@ ca                      Feb 16, 2032 08:08 UTC   6y362d          no
 front-proxy-ca          Feb 16, 2032 08:08 UTC   6y362d          no
 ```
 
+### Saber rango IP's de cada nodo <div id='id24' />
+
+```
+root@k8s-cilium-01-cp:~# kubectl get node -o jsonpath='{range .items[*]}{.metadata.name} {.spec.podCIDR}{"\n"}{end}'
+k8s-cilium-01-cp 10.233.64.0/24
+k8s-cilium-01-wk01 10.233.65.0/24
+k8s-cilium-01-wk02 10.233.66.0/24
+k8s-cilium-01-wk03 10.233.67.0/24
+```
+
 ## Alias <div id='id999' />
 
 Alias básicos:
@@ -257,3 +268,4 @@ alias kcdp='kubectl delete pod --grace-period=0 --force'
 ```
 
 Todos los alias, los mpuedes encontrar [aquí](https://github.com/ahmetb/kubectl-aliases/blob/master/.kubectl_aliases)
+
