@@ -16,6 +16,7 @@
   * [Verificaciones ETCD](#id22)
   * [Revisión de certificados](#id23)
   * [Saber rango IP's de cada nodo](#id24)
+  * [Curl (testing ingress)](#id25)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -254,6 +255,13 @@ k8s-cilium-01-cp 10.233.64.0/24
 k8s-cilium-01-wk01 10.233.65.0/24
 k8s-cilium-01-wk02 10.233.66.0/24
 k8s-cilium-01-wk03 10.233.67.0/24
+```
+
+### Curl - Testing ingress <div id='id25' />
+
+```
+$ $INGRESS_IP="exmple.com/xx.xx.xx.xx."
+$ curl -so /dev/null -w "%{http_code}\n" http://$INGRESS_IP/
 ```
 
 ## Alias <div id='id999' />
