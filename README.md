@@ -61,9 +61,13 @@ Documentación de productos usando Operators
 
 * [Istio](./Varios-k8s/Istio/README.md) (sin eBPF)
 * [Velero](./Varios-k8s/Velero/README.md)
-* [Calico - NetworkPolicy](./Varios-k8s/Calico-NetworkPolicy/README.md)
 * [Ceph - Object Storage](./Varios/Ceph-Object-Storage/README.md) :construction: **No acabado**
 * [Ceph - Baja de Ceph RBD + CephFS + Usuarios](./Varios/baja-CephRBD-CephFS-Usuarios/README.md)
+
+### CNI: Calico
+
+* [Calico - Comandos básicos](./Varios-k8s/Calico/Documentation/README.md)
+* [Calico - NetworkPolicy](./Varios-k8s/Calico/NetworkPolicy/README.md)
 
 ### CNI: Cilium
 
