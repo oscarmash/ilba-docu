@@ -1,19 +1,27 @@
 # Index:
 
-* [Eliminar una política](#id10)
+* [Show network policies](#id10)
+* [Delete a network policy](#id20)
+* [View details for a network policy](#id30)
 
-# Eliminar una política <div id='id10' />
-
+# Show network policies <div id='id10' />
 
 ```
-root@ilimit-paas-k8s-pre-cp01:~# calicoctl get NetworkPolicy -A
-NAMESPACE              NAME
+root@ilimit-paas-k8s-pre-cp01:~# calicoctl get NetworkPolicy -A -o wide
+NAMESPACE              NAME                                                  ORDER   SELECTOR
+ca-carrefour-website   ca-carrefour-website-advanced-stack-netpolicy-allow   10
+ca-carrefour-website   ca-carrefour-website-advanced-stack-netpolicy-deny    20
 ...
-cb-mercadona-website   cb-mercadona-website-basic-stack-netpolicy-allow
-...
 ```
 
+# Delete a network policy <div id='id20' />
+
 ```
-root@ilimit-paas-k8s-pre-cp01:~# calicoctl delete policy cb-mercadona-website-basic-stack-netpolicy-allow --namespace=cb-mercadona-website
-Successfully deleted 1 'NetworkPolicy' resource(s)
+root@ilimit-paas-k8s-pre-cp01:~# calicoctl delete policy $POLICY_NAME --namespace=$NAMESPACE
+```
+
+# View details for a network policy <div id='id20' />
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# calicoctl get NetworkPolicy -o yaml $POLICY_NAME --namespace $NAMESPACE
 ```
