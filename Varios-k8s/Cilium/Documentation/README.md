@@ -28,6 +28,7 @@ Cosas importantes a destacar de Cilium:
 * External workloads
 * Hubble
 * Transparent Encryption (WireGuard / IPSec)
+  * Selectively encrypt traffic between workloads rather than the whole cluster traffic using Isovalent Enterprise for Cilium
 * [Tetragon ](https://youtu.be/EA-uBCVoFaM)
 * Integración con [Constellation](https://cilium.io/blog/2022/10/17/constellation-network-encryption/)
 
