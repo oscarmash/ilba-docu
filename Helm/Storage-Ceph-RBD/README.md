@@ -5,7 +5,10 @@
 * [Config Ceph](#id2)
 * [Change SC to default](#id3)
 * [Testing](#id4)
-* [Enlace PV/PVC a Ceph](#id5)
+* [Errores](#id5)
+  * [Enlace PV/PVC a Ceph](#id6)
+  * [fsck de Ceph](#id7)
+
 
 ## Getting Started <div id='id0' />
 
@@ -293,8 +296,9 @@ PING 172.26.0.239 (172.26.0.239) 56(84) bytes of data.
 2 packets transmitted, 2 received, 0% packet loss, time 1001ms
 rtt min/avg/max/mdev = 0.691/2.103/3.516/1.413 ms
 ```
+## Errores <div id='id5' />
 
-## Enlace PV/PVC a Ceph <div id='id5' />
+## Enlace PV/PVC a Ceph <div id='id6' />
 
 Como saber el enlace que hay entre los diferentes nombres que usa K8S y Ceph
 
@@ -332,4 +336,103 @@ rbd image 'csi-vol-24998e36-3844-4571-a4ce-6a667ae72851':
         create_timestamp: Sun Jun 30 15:36:04 2024
         access_timestamp: Sun Jun 30 15:36:04 2024
         modify_timestamp: Sun Jun 30 15:36:04 2024
+```
+
+## fsck de Ceph <div id='id7' />
+
+Mensaje de error:
+
+```
+$ k describe pod loki-write-0
+Events:
+  Type     Reason       Age                       From     Message
+  ----     ------       ----                      ----     -------
+  Warning  FailedMount  5m33s (x1997 over 2d21h)  kubelet  MountVolume.MountDevice failed for volume "pvc-117685da-76d0-4f22-87b5-e2f4833d1720" : rpc error: code = Internal desc = 'fsck' found errors on device /dev/rbd12 but could not correct them: fsck from util-linux 2.37.4
+/dev/rbd12 contains a file system with errors, check forced.
+/dev/rbd12: Unattached inode 393227
+```
+
+Instalación de Ceph:
+
+```
+root@ilimit-paas-k8s-provi-cp01:~# apt-get update
+root@ilimit-paas-k8s-provi-cp01:~# apt-get install -y ceph-common
+```
+
+Recopilaciónde datos para posterior configuración del cliente de Ceph:
+
+```
+root@vrt-hv01:~# ceph auth get client.ilimit-paas-k8s-provi
+[client.ilimit-paas-k8s-provi]
+        key = AQAIPYVnYTcRExAALDQf1sZ12ym+v83kFF+U1g==
+        caps mon = "allow r"
+        caps osd = "allow rwx pool=ilimit-paas-k8s-provi"
+
+root@vrt-hv01:~# ceph mon dump | grep 6789
+dumped monmap epoch 75
+0: [v2:10.61.2.209:3300/0,v1:10.61.2.209:6789/0] mon.vrt-hv09
+1: [v2:10.61.2.203:3300/0,v1:10.61.2.203:6789/0] mon.vrt-hv03
+2: [v2:10.61.2.201:3300/0,v1:10.61.2.201:6789/0] mon.vrt-hv01
+3: [v2:10.61.2.208:3300/0,v1:10.61.2.208:6789/0] mon.vrt-hv08
+4: [v2:10.61.2.211:3300/0,v1:10.61.2.211:6789/0] mon.vrt-hv11
+
+root@vrt-hv01:~# ceph mon dump | grep "fsid "
+dumped monmap epoch 75
+fsid dbe78947-5443-4cb3-b14c-aced62e0920c
+
+root@vrt-hv01:~# rbd ls ilimit-paas-k8s-provi
+csi-vol-15bc543e-abed-4a43-b7ba-e607ee7f5e19
+...
+```
+
+Configuración del cliente de Ceph
+
+```
+root@ilimit-paas-k8s-provi-cp01:~# vim /etc/ceph/ceph.conf
+[global]
+        fsid = dbe78947-5443-4cb3-b14c-aced62e0920c
+        mon_host = 10.61.2.209 10.61.2.203 10.61.2.201 10.61.2.208 10.61.2.211
+
+[client]
+        keyring = /etc/ceph/ceph.client.ilimit-paas-k8s-provi.keyring
+
+root@ilimit-paas-k8s-provi-cp01:~# vim /etc/ceph/ceph.client.ilimit-paas-k8s-provi.keyring
+[client.ilimit-paas-k8s-provi]
+        key = AQAIPYVnYTcRExAALDQf1sZ12ym+v83kFF+U1g==
+```
+
+Verificación del acceso:
+
+```
+root@ilimit-paas-k8s-provi-cp01:~# rbd ls ilimit-paas-k8s-provi -n client.ilimit-paas-k8s-provi
+csi-vol-15bc543e-abed-4a43-b7ba-e607ee7f5e19
+...
+```
+
+Enlazar PVC con RBD:
+
+```
+root@ilimit-paas-k8s-provi-cp01:~# kubectl -n core get pvc | grep loki-write-0 | awk '{print $3}'
+pvc-117685da-76d0-4f22-87b5-e2f4833d1720
+
+root@ilimit-paas-k8s-provi-cp01:~# kubectl -n core describe pv pvc-117685da-76d0-4f22-87b5-e2f4833d1720 | grep VolumeHandle
+    VolumeHandle:      0001-0024-dbe78947-5443-4cb3-b14c-aced62e0920c-0000000000000019-1f5d604f-1207-4667-a649-1cbb41e982a8
+
+root@ilimit-paas-k8s-provi-cp01:~# rbd ls ilimit-paas-k8s-provi -n client.ilimit-paas-k8s-provi | grep 1cbb41e982a8
+csi-vol-1f5d604f-1207-4667-a649-1cbb41e982a8
+```
+
+Chequeamos el disco:
+
+```
+root@ilimit-paas-k8s-provi-cp01:/etc/ceph# rbd map csi-vol-1f5d604f-1207-4667-a649-1cbb41e982a8 --pool ilimit-paas-k8s-provi -n client.ilimit-paas-k8s-provi
+/dev/rbd0
+
+root@ilimit-paas-k8s-provi-cp01:/etc/ceph# rbd showmapped
+id  pool                   namespace  image                                         snap  device
+0   ilimit-paas-k8s-provi             csi-vol-1f5d604f-1207-4667-a649-1cbb41e982a8  -     /dev/rbd0
+
+root@ilimit-paas-k8s-provi-cp01:/etc/ceph# fsck -fvy /dev/rbd0
+
+root@ilimit-paas-k8s-provi-cp01:~# rbd unmap /dev/rbd0
 ```
