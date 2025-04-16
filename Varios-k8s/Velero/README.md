@@ -11,6 +11,7 @@
   * [delete backup](#id202)
   * [Install velero cli](#id203)
   * [Check access S3](#id204)
+  * [Backups ad-hoc](#id205)
 
 # Instalación de Velero <div id='id8' />
 
@@ -1077,7 +1078,6 @@ $ rm -rf velero-$VELERO_VERSION-linux-*
 $ velero version
 $ velero get backups
 ```
-
 ## Check access S3 <div id='id204' />
 
 ```
@@ -1121,4 +1121,13 @@ Removed `StorageS3/ilimit-paas-k8s-pre-velero/file_10M.data`.
 ```
 $ ./mc_minio alias rm StorageS3
 $ rm -rf mc_minio
+```
+
+## Backups ad-hoc <div id='id205' />
+
+Lanzar un backup que coja las configuraciones de un _schedule_:
+
+```
+$ velero get schedule
+$ velero backup create backup-client1-pre-update --from-schedule=nom-recurs-schedule 
 ```
