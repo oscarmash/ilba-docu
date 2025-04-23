@@ -119,7 +119,7 @@ root@ilimit-paas-k8s-test2-cp01:~# kubectl -n ceph-csi-rbd get secret csi-rbd-se
 
 ```
 $ kubectl -n default run debug -it --image=debian
-root@debug:/# apt-get update && apt install -y iputils-ping net-tools dnsutils curl telnet nmap default-mysql-client
+root@debug:/# apt-get update && apt install -y iputils-ping net-tools dnsutils curl telnet nmap default-mysql-client gpg
 ```
 
 ### Hacer limpieza de pods <div id='id19' />
