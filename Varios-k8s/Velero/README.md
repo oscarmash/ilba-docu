@@ -12,6 +12,11 @@
   * [Install velero cli](#id203)
   * [Check access S3](#id204)
   * [Backups ad-hoc](#id205)
+* [Kopia](#id300)
+  * [Contenedor con cliente de Kopia](#id301)
+  * [Comandos random de copia](#id302)
+  * [Limpieza](#id303)
+  * [Saber lo que ocupa un cliente](#id304)
 
 # Instalación de Velero <div id='id8' />
 
@@ -1130,4 +1135,102 @@ Lanzar un backup que coja las configuraciones de un _schedule_:
 ```
 $ velero get schedule
 $ velero backup create backup-client1-pre-update --from-schedule=nom-recurs-schedule 
+```
+
+# Kopia <div id='id300' />
+
+## Contenedor con cliente de Kopia <div id='id301' />
+
+```
+$ k ctx ilimit-paas-k8s-pre && k ns core
+$ k -n velero get secret velero-repo-credentials -o json | jq '.data | map_values(@base64d)'
+$ k run debug-container -it --image=debian
+```
+
+```
+root@debug-container:/# apt update && apt install -y gpg curl
+root@debug-container:/# echo "deb [signed-by=/etc/apt/keyrings/kopia-keyring.gpg] http://packages.kopia.io/apt/ stable main" | tee /etc/apt/sources.list.d/kopia.list
+root@debug-container:/# curl -s https://kopia.io/signing-key | gpg --dearmor -o /etc/apt/keyrings/kopia-keyring.gpg
+root@debug-container:/# apt update && apt install -y kopia
+```
+
+```
+kopia repository connect s3 \
+--endpoint stg-nas02-minio.ilimit.net:9000 \
+--bucket ilimit-paas-k8s-provi-velero \
+--access-key LR1hknuwWRRISHEpfwow \
+--secret-access-key ijqXJ6ymsZ82XCE1M43bFV2kgMWxDFaSbTMqrMQQ \
+--disable-tls-verification \
+--prefix kopia/core/ \
+--password 'static-passw0rd'
+```
+
+## Comandos random de copia <div id='id302' />
+
+```
+root@debug-container:/# kopia repository status kopia repository status
+root@debug-container:/# kopia manifest list
+root@debug-container:/# kopia content stats
+root@debug-container:/# kopia snapshot list --all
+root@debug-container:/# kopia snapshot expire core --all
+root@debug-container:/# kopia snapshot verify
+root@debug-container:/# kopia snapshot fix invalid-files --commit
+```
+## Limpieza <div id='id303' />
+
+```
+root@debug-container:/# kopia maintenance set --owner=me
+root@debug-container:/# kopia maintenance run --full --safety=none
+Running full maintenance...
+Looking for active contents...
+Looking for unreferenced contents...
+GC found 6998 unused contents (12.6 GB)
+GC found 0 unused contents that are too recent to delete (0 B)
+GC found 9198 in-use contents (17.8 GB)
+GC found 1097 in-use system-contents (3.7 MB)
+Rewriting contents from short packs...
+Total bytes rewritten 56.3 MB
+Found safe time to drop indexes: 2025-04-24 09:08:00.191189242 +0000 UTC
+Dropping contents deleted before 2025-04-24 09:08:00.191189242 +0000 UTC
+Looking for unreferenced blobs...
+  deleted 100 unreferenced blobs (2.3 GB)
+  deleted 200 unreferenced blobs (4.2 GB)
+  deleted 300 unreferenced blobs (6.1 GB)
+  deleted 400 unreferenced blobs (7.8 GB)
+  deleted 500 unreferenced blobs (9.3 GB)
+  deleted 600 unreferenced blobs (10.5 GB)
+Deleted total 685 unreferenced blobs (11.4 GB)
+Compacting an eligible uncompacted epoch...
+Cleaning up no-longer-needed epoch markers...
+Attempting to compact a range of epoch indexes ...
+Cleaning up unneeded epoch markers...
+Cleaning up old index blobs which have already been compacted...
+Cleaned up 0 logs.
+Finished full maintenance.
+```
+
+## Saber lo que ocupa un cliente <div id='id304' />
+
+Se ha de tener en cuenta que al conectarnos al S3 de Kopia, hemos parametrizado el "--prefix kopia/core/", eso quiere decir que los datos que se muestran a continuación son del NS "core"
+
+```
+root@debug-container:/# kopia content stats
+
+Count: 7358
+Total Bytes: 16.3 GB
+Total Packed: 16.3 GB (compression 0.0%)
+By Method:
+  (uncompressed)         count: 6124 size: 16.3 GB
+  zstd-fastest           count: 1234 size: 1.6 MB packed: 589.7 KB compression: 62.9%
+Average: 2.2 MB
+Histogram:
+
+        0 between 0 B and 10 B (total 0 B)
+       90 between 10 B and 100 B (total 7.9 KB)
+     1556 between 100 B and 1 KB (total 489.1 KB)
+     1227 between 1 KB and 10 KB (total 9.5 MB)
+      901 between 10 KB and 100 KB (total 21.5 MB)
+      188 between 100 KB and 1 MB (total 79.6 MB)
+     3396 between 1 MB and 10 MB (total 16.2 GB)
+        0 between 10 MB and 100 MB (total 0 B)
 ```
