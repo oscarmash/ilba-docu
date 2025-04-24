@@ -15,7 +15,7 @@
 * [Kopia](#id300)
   * [Contenedor con cliente de Kopia](#id301)
   * [Comandos random de copia](#id302)
-  * [Limpieza](#id303)
+  * [Limpieza (Maintenance Safety)](#id303)
   * [Saber lo que ocupa un cliente](#id304)
 
 # Instalación de Velero <div id='id8' />
@@ -1176,7 +1176,9 @@ root@debug-container:/# kopia snapshot expire core --all
 root@debug-container:/# kopia snapshot verify
 root@debug-container:/# kopia snapshot fix invalid-files --commit
 ```
-## Limpieza <div id='id303' />
+## Limpieza (Maintenance Safety) <div id='id303' />
+
+Explicación del comando: [kopia maintenance run --full --safety=none](https://kopia.io/docs/advanced/maintenance/#maintenance-safety)
 
 ```
 root@debug-container:/# kopia maintenance set --owner=me
