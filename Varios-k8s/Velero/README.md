@@ -1,14 +1,18 @@
 # Index:
 
-* [Instalación de Velero](#id8)
-* [Instalación de CEPH RBD (Velero)](#id81)
-* [Velero Backup Storage Locations (BSL)](#id82)
-* [Velero Backup Hooks + Restore BBDD en otro NS](#id83)
-* [Clonar una aplicación (modificando ingress)](#id84)
-* [Cambio de storage de Velero (MinIO to MinIO)](#id85)
+* [Documentación inicial](#id1)
+  * [Prerequisites](#id2)
+  * [Documentación](#id3)
+* [Montaje de MinIO (por si no lo tenemos)](#id10)
+* [Instalación de Velero (via binario)](#id20)
+* [Instalación de CEPH RBD (por si no lo tenemos)](#id30)
+* [Velero Backup Storage Locations (BSL)](#id40)
+* [Velero Backup Hooks + Restore BBDD en otro NS](#id50)
+* [Clonar una aplicación (modificando ingress)](#id60)
+* [Cambio de storage de Velero (MinIO to MinIO)](#id70)
 * [Comandos útiles](#id200)
   * [show backup-location](#id201)
-  * [delete backup](#id202)
+  * [delete backup (kubectl vs velero)](#id202)
   * [Install velero cli](#id203)
   * [Check access S3](#id204)
   * [Backups ad-hoc](#id205)
@@ -18,9 +22,9 @@
   * [Limpieza (Maintenance Safety)](#id303)
   * [Saber lo que ocupa un cliente](#id304)
 
-# Instalación de Velero <div id='id8' />
+# Documentación inicial <div id='id1' />
 
-## Prerequisites
+## Prerequisites <div id='id2' />
 
 Necesidades:
 
@@ -28,7 +32,7 @@ Necesidades:
 * Sistema de Object Storage (MinIO/Ceph/etc...)
 * Sistema de CSI (Ceph/NFS/etc...)
 
-## Documentación
+## Documentación <div id='id3' /> 
 
 Documentación encontrada:
 
@@ -43,7 +47,7 @@ Notas importantes  de Velero:
 * No es application-aware, por eso se usa los Backup Hooks
 * Para instalar se puede usar un HELM, pero la documentación oficial indica usar el binario
 
-Nuestro CSI ha de tener esto:
+:warning: No estoy seguro de esto, pero nuestro CSI ha de tener esto:
 
 * External Snapshotter
 * VolumeSnapshotClass CRD
@@ -77,7 +81,7 @@ snapshot-controller piraeus-charts/snapshot-controller \
 --version=3.0.6
 ```
 
-## Montaje de MinIO (por si no lo tenemos)
+# Montaje de MinIO (por si no lo tenemos)  <div id='id10' /> 
 
 Recordemos que en Proxmox, la CPU ha de ser: "x86-64-v2-AES"
 
@@ -115,7 +119,7 @@ Crearemos el bucket:
 
 ![alt text](images/MinIO-external-create-bucket.png)
 
-## Instalación de Velero
+# Instalación de Velero (via binario) <div id='id20' />
 
 Descargamos el [binario de velero](https://github.com/vmware-tanzu/velero/releases):
 
@@ -273,7 +277,7 @@ Accedemos a la consola
 * Username: admin
 * Password: superpassword
 
-# Instalación de CEPH RBD (Velero) <div id='id81' />
+# Instalación de CEPH RBD (por si no lo tenemos) <div id='id30' />
 
 
 Partimos de la base que tenemos un Ceph (AllInOne) montado y funcionando:
@@ -448,7 +452,7 @@ backup-10-04   Completed   0        0          2024-06-15 10:04:10 +0200 CEST   
 backup-10-05   Completed   0        0          2024-06-15 10:05:05 +0200 CEST   29d       default            <none>
 ```
 
-# Velero Backup Storage Locations (BSL) <div id='id82' />
+# Velero Backup Storage Locations (BSL) <div id='id40' />
 
 Es este apartado realizaremos un backup en un storage diferente del "default", que es el que creamos cuando desplegamos Velero.
 Cabe destacar que todos los buckets están hechos en el mismo MinIO.... vamos que sólo hay un MinIO
@@ -513,7 +517,7 @@ backup-09-20   Completed   0        0          2024-06-16 09:20:29 +0200 CEST   
 
 ![alt text](images/MinIO-batman.png)
 
-# Velero Backup Hooks + Restore BBDD en otro NS <div id='id83' />
+# Velero Backup Hooks + Restore BBDD en otro NS <div id='id50' />
 
 ## Velero Backup Hooks
 
@@ -701,7 +705,7 @@ mysql> SELECT * FROM agenda.datos;
 mysql> quit
 ```
 
-# Clonar una aplicación (modificando ingress) <div id='id84' />
+# Clonar una aplicación (modificando ingress) <div id='id60' />
 
 ## La aplicación
 
@@ -840,7 +844,7 @@ root@k8s-test-cp:~# curl -s -H "Host: app-ilba-restore.ilba.cat" 172.26.0.101
 ...
 ```
 
-# Cambio de storage de Velero (MinIO to MinIO) <div id='id85' />
+# Cambio de storage de Velero (MinIO to MinIO) <div id='id70' />
 
 Este es el storage por defecto que hay configurado:
 
@@ -1031,7 +1035,7 @@ metadata:
   resourceVersion: ""
 ```
 
-## delete backup <div id='id202' />
+## delete backup (kubectl vs velero) <div id='id202' />
 
 ```
 root@ilimit-paas-k8s-pre-cp01:~# velero backup get
@@ -1052,9 +1056,15 @@ Deletion Attempts (1 failed):
     rpc error: code = Unknown desc = operation error S3: ListObjectsV2, https response error StatusCode: 403, RequestID: 182ED19D97729776, HostID: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, api error InvalidAccessKeyId: The Access Key Id you provided does not exist in our records.
 ```
 
+Use the following commands to delete Velero backups and data:
+
+* "kubectl delete backup <backupName> -n <veleroNamespace>" -> will delete the backup custom resource only and will not delete any associated data from object/block storage
+* "velero backup delete <backupName>" -> will delete the backup resource including all data in object/block storage
+
 ```
-root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero delete backups.velero.io prueba-basic-stack-schedule-backup-20250321000008
-backup.velero.io "prueba-basic-stack-schedule-backup-20250321000008" deleted
+root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero delete backups.velero.io xxxxxxx
+root@ilimit-paas-k8s-pre-cp01:~# velero backup delete xxxxxxx
+
 ```
 
 ## Install velero cli <div id='id203' />
