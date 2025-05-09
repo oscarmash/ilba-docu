@@ -31,6 +31,7 @@ kubespray-aio-w3   Ready    <none>          161d   v1.27.5
 ```
 
 ```
+root@ceph-aio:~# cephadm shell
 root@ceph-aio:~# ceph -s
   cluster:
     id:     7d2b3cca-f1eb-11ee-a886-593bc87d3824
@@ -103,14 +104,14 @@ root@ceph-aio:~# ceph -s
 
 ```
 root@ceph-aio:~# ceph auth add client.k8s mon 'allow r' osd 'allow rwx pool=pool-k8s'
-root@ceph-aio:~# ceph auth get-key client.k8s
+root@ceph-aio:/# ceph auth get-key client.k8s && echo
 AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
 ```
 
 Verificar "cosas" del usuario:
 
 ```
-root@ceph-aio:~# ceph auth get-key client.k8s
+root@ceph-aio:/# ceph auth get-key client.k8s && echo
 AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
 
 root@ceph-aio:~# ceph auth get client.k8s
