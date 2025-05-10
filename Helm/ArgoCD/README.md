@@ -1,149 +1,75 @@
-# Base de conocimientos
+# Index:
 
-Antes de empezar con ArgoCD hay que tener claro estos conceptos:
+* [Instalación de ArgoCD](#id10)
 
-![alt text](images/proyectos.png)
+# Instalación de ArgoCD <div id='id10' />
 
-![alt text](images/aplicaciones.png)
-
-![alt text](images/repositorios.png)
-
-# Instalación
+Instalación de ArgoCD con Helm
 
 ```
-oscar@PRT-OMAS:~/ilba/argocd$ ./instalar_argocd.sh
-```
+root@k8s-test-cp:~# helm repo add argo https://argoproj.github.io/argo-helm
+root@k8s-test-cp:~# helm repo update
 
-Una vez instalado acceder via GUI y cambiar el password del admin
-Saber el password del admin:
-
-```
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-```
-
-# Notas
-
-## Hacer consultas a ArgoCD
-
-Primero nos hemos de loginar, pero antes nos hgemos de instalar el binario en nuestro sistema
-
-```
-$ ARGOCD_VERSION=$(curl --silent "https://api.github.com/repos/argoproj/argo-cd/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-$ curl -sSL -o /tmp/argocd-${ARGOCD_VERSION} https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-amd64
-$ chmod +x /tmp/argocd-${ARGOCD_VERSION}
-$ mv /tmp/argocd-${ARGOCD_VERSION} /usr/local/bin/argocd 
-
-$argocd version --client
-argocd: v2.12.2+560953c
-  BuildDate: 2024-08-23T03:49:50Z
-  GitCommit: 560953c37b343c956f3a18f3db7d006e694c0dc4
-  GitTreeState: clean
-  GoVersion: go1.22.6
-  Compiler: gc
-  Platform: linux/amd64
+root@k8s-test-cp:~# helm search repo argo-cd -l | head -n 5
+NAME            CHART VERSION   APP VERSION     DESCRIPTION
+argo/argo-cd    8.0.0           v3.0.0          A Helm chart for Argo CD, a declarative, GitOps...
+argo/argo-cd    7.9.1           v2.14.11        A Helm chart for Argo CD, a declarative, GitOps...
+argo/argo-cd    7.9.0           v2.14.11        A Helm chart for Argo CD, a declarative, GitOps...
+argo/argo-cd    7.8.28          v2.14.11        A Helm chart for Argo CD, a declarative, GitOps...
 ```
 
 ```
-oscar@PRT-OMAS:~$ argocd --insecure login 172.26.0.102:443
-Username: admin
-Password:
-'admin:login' logged in successfully
-Context '172.26.0.102:443' updated
+$ cat >> values-argocd.yaml<< EOF
+global:
+  domain: argocd.ilba.cat
+configs:  
+  params:  
+    server.insecure: true
+server:
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"    
+EOF
 ```
 
-## Claves SSH
-
-Ver las los know_hosts
-
 ```
-oscar@PRT-OMAS:~$ argocd cert list --cert-type ssh
-HOSTNAME         TYPE  SUBTYPE              INFO
-gitlab.ilba.cat  ssh   ssh-rsa              SHA256:xT/6Qpk+HM8ozezun6ELLyP70OVRYzAy8LR9qnBfU5w
-gitlab.ilba.cat  ssh   ssh-ed25519          SHA256:7pjr5J5aI4Le/B39xYjDlNYMm1t2POhh3qgnKnMtVQw
-gitlab.ilba.cat  ssh   ecdsa-sha2-nistp256  SHA256:1w4+pxAXlzQhTppVf96DYeeVYniN5P1YbQnrrlah0ws
+$ helm upgrade --install \
+argocd argo/argo-cd \
+--create-namespace \
+--namespace argocd \
+--version=7.9.1 \
+-f values-argocd.yaml
 ```
 
-Añadir  SSH public host key
+Verificaciones:
 
 ```
-oscar@PRT-OMAS:~$ ssh-keyscan gitlab.ilba.cat | argocd cert add-ssh --batch
+root@k8s-test-cp:~# helm -n argocd ls
+NAME    NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
+argocd  argocd          1               2025-05-10 22:40:33.585081904 +0200 CEST        deployed        argo-cd-7.9.1   v2.14.11
+
+root@k8s-test-cp:~# kubectl -n argocd get pods
+NAME                                                READY   STATUS    RESTARTS   AGE
+argocd-application-controller-0                     1/1     Running   0          86s
+argocd-applicationset-controller-576d4f4789-hjbjf   1/1     Running   0          86s
+argocd-dex-server-5969bdf86c-mtsww                  1/1     Running   0          86s
+argocd-notifications-controller-57bd9c6665-wl59t    1/1     Running   0          86s
+argocd-redis-67c8779476-hjrwh                       1/1     Running   0          86s
+argocd-repo-server-75d87c494c-jxb9q                 1/1     Running   0          86s
+argocd-server-7f6d88b9fd-22qsd                      1/1     Running   0          86s
+
+
+root@k8s-test-cp:~# kubectl -n argocd get ingress
+NAME                    CLASS   HOSTS             ADDRESS        PORTS   AGE
+argocd-server-ingress   nginx   argocd.ilba.cat   172.26.0.101   80      18s
 ```
 
-Posible error:
+Verificación via web:
 
+* Saber el password que nos ha puesto por defecto
 ```
-oscar@PRT-OMAS:~$ ssh-keyscan gitlab.ilba.cat | argocd cert add-ssh --batch
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-Enter SSH known hosts entries, one per line. Press CTRL-D when finished.
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-FATA[0000] rpc error: code = Unauthenticated desc = invalid session: signature is invalid
+root@k8s-test-cp:~# kubectl -n argocd \
+get secret argocd-initial-admin-secret \
+-o jsonpath="{.data.password}" | base64 -d; echo
 ```
-
-Solución:
-
-```
-oscar@PRT-OMAS:~$ argocd --insecure login 172.26.0.102:443
-Username: admin
-Password:
-'admin:login' logged in successfully
-Context '172.26.0.102:443' updated
-
-oscar@PRT-OMAS:~$  ssh-keyscan gitlab.ilba.cat | argocd cert add-ssh --batch
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-# gitlab.ilba.cat:22 SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.4
-Enter SSH known hosts entries, one per line. Press CTRL-D when finished.
-Successfully created 3 SSH known host entries
-```
-
-## Sync
-
-### Force Sync
-
-```
-oscar@PRT-OMAS:~$ argocd app sync app-homer
-```
-### Sync Window
-
-```
-oscar@PRT-OMAS:~$ argocd proj windows list app-homer
-ID  STATUS  KIND   SCHEDULE    DURATION  APPLICATIONS  NAMESPACES  CLUSTERS  MANUALSYNC
-0   Active  allow  10 0 * * *  22h       *             -           -         Enabled
-```
-
-## Crear usuarios
-
-```
-oscar@PRT-OMAS:~$ argocd account list
-NAME   ENABLED  CAPABILITIES
-admin  true     login
-
-oscar@PRT-OMAS:~$ kubectl get configmap argocd-cm -n argocd -o yaml > argocd-cm.yml
-...
-data:
-  accounts.oscar: apiKey, login
-  ...
-
-oscar@PRT-OMAS:~$ kcaf argocd-cm.yml
-
-oscar@PRT-OMAS:~$ argocd account list
-NAME   ENABLED  CAPABILITIES
-admin  true     login
-oscar  true     apiKey, login
-
-oscar@PRT-OMAS:~$ argocd account update-password --account oscar --new-password 'C@dinor1988' --current-password 'C@dinor1988'
-```
-
-# Añadir app
-
-## app: ilba-guacamole
-
-```
-oscar@PRT-OMAS:~/ilba/argocd$ kubectl apply -f declarative/app-xxxx.yaml
-```
-
+* Verificación [via web](https://argocd.ilba.cat/)
