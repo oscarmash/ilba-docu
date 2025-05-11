@@ -1,10 +1,34 @@
 # Index:
 
+* [Prerrequisitos](#id00)
 * [Instalación de ArgoCD](#id10)
 * [Instalación del binario de ArgoCD](#id20)
 * [Creación token en GitLab](#id30)
 * [Estructuca básica (create NS)](#id40)
 * [Estructuca básica (ArgoCD)](#id50)
+
+# Prerrequisitos <div id='id00' />
+
+Antes de desplegar nada, hemos de cumplir los siguientes prerrequisitos:
+
+* Tener un cluster desplegado:
+
+```
+root@k8s-test-cp:~# kubectl get nodes
+NAME            STATUS   ROLES           AGE   VERSION
+k8s-test-cp     Ready    control-plane   64d   v1.30.4
+k8s-test-wk01   Ready    <none>          64d   v1.30.4
+k8s-test-wk02   Ready    <none>          64d   v1.30.4
+k8s-test-wk03   Ready    <none>          64d   v1.30.4
+```
+
+* Tener un storage:
+
+```
+root@k8s-test-cp:~# kubectl get sc
+NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   44h
+```
 
 # Instalación de ArgoCD <div id='id10' />
 
