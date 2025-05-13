@@ -6,6 +6,8 @@
 * [Creación token en GitLab](#id30)
 * [Estructuca básica (create NS)](#id40)
 * [Estructuca básica (ArgoCD)](#id50)
+* [Working daily](#id900)
+  * [LAST SYNC se queda SYNC](#id901)
 
 # Prerrequisitos <div id='id00' />
 
@@ -228,4 +230,13 @@ root@k8s-test-cp:~# kubectl get ns
 NAME                    STATUS   AGE
 app-1                   Active   18s
 ...                     ...      ...
+```
+
+# Working daily <div id='id900' />
+
+## LAST SYNC se queda SYNC <div id='id901' />
+
+```
+$ argocd --grpc-web --insecure --username admin login gitops.pre.paas.ilimit.com
+$ argocd app terminate-op helm-picto-advanced-stack
 ```
