@@ -245,6 +245,8 @@ $ argocd app terminate-op helm-picto-advanced-stack
 
 ## SYNC STATUS vs LAST SYNC <div id='id902' />
 
+![alt text](images/sync_status.png)
+
 ```
 Repo <- SYNC STATUS <- ArgoCD -> LAST SYNC -> Cluster
 ```
