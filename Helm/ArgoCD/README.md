@@ -8,6 +8,7 @@
 * [Estructuca básica (ArgoCD)](#id50)
 * [Working daily](#id900)
   * [LAST SYNC se queda SYNC](#id901)
+  * [SYNC STATUS vs LAST SYNC](#id902)
 
 # Prerrequisitos <div id='id00' />
 
@@ -239,4 +240,10 @@ app-1                   Active   18s
 ```
 $ argocd --grpc-web --insecure --username admin login gitops.pre.paas.ilimit.com
 $ argocd app terminate-op helm-picto-advanced-stack
+```
+
+## SYNC STATUS vs LAST SYNC <div id='id902' />
+
+```
+Repo <- SYNC STATUS <- ArgoCD -> LAST SYNC -> Cluster
 ```
