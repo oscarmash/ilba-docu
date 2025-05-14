@@ -10,6 +10,7 @@
   * [LAST SYNC se queda SYNC](#id901)
   * [SYNC STATUS vs LAST SYNC](#id902)
   * [Delete resources from ArgoCD](#id903)
+  * [Synchronize options from ArgoCD](#id904)
 
 # Prerrequisitos <div id='id00' />
 
@@ -277,3 +278,59 @@ Deployment (Parent)
    * Deletes the parent resource but leaves the child resources untouched.
    *  Use when you want to retain child resources even after the parent resource is deleted, for example, to analyze their state or repurpose them.
    * Deployment is deleted, but the ReplicaSet and Pods remain in the cluster.
+
+## Synchronize options from ArgoCD <div id='id904' />
+
+![alt text](images/synchronize_options.png)
+
+Sync Options:
+
+* PRUNE
+  * Enables automatic deletion of resources that are no longer defined in Git
+  * Common use cases:
+    * Cleaning up deprecated resources
+    * Maintaining environment consistency
+* DRY RUN
+  * In some cases the CRD is not part of the sync, but it could be created in another way, e.g. by a controller in the cluster. An example is gatekeeper (Policy Controller for Kubernetes), which creates CRDs in response to user defined ConstraintTemplates. ArgoCD cannot find the CRD in the sync and will fail with the error: *the server could not find the requested resource*
+* APPLY ONLY
+  * Argo CD is going to skip pre/post sync hooks and just run kubectl apply for application resources.
+* FORCE
+  * For certain resources you might want to delete and recreate. e.g. job resources that should run every time when syncing.
+  * **Warning:** This sync option has a destructive action, which could cause an outage for your application
+
+Sync Options:
+
+* SKIP SCHEMA VALIDATION
+  * Bypasses Kubernetes schema validation
+  * **Warning:** Can lead to invalid resource states
+* PRUNE LAST
+  * Deletes resources only after all other sync operations complete
+  * Crucial for:
+    * Database migrations
+    * Stateful application updates
+* RESPECT IGNORE DIFFERENCES
+  * Honors the ignoreDifferences configuration
+  * Useful for:
+    * Fields managed by controllers
+    * Dynamic or auto-generated values
+* AUTO-CREATE NAMESPACE
+  * Automatically creates target namespace if it doesn't exist
+* APPLY OUT OF SYNC ONLY
+  * Only syncs resources that differ from desired state
+  * Advantages:
+    * Reduced API server load
+    * Faster sync operations
+    * Minimized disruption
+* SERVER-SIDE APPLY
+  * No la entiendo: https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#server-side-apply
+
+Sync Options:
+
+* REPLACE
+  * Forces complete resource replacement instead of patching
+  * Important for:
+    * Breaking out of invalid states
+    * Complete resource recreation
+  * **Warning:** Can cause downtime
+* RETRY
+  * Tiempo de intentos
