@@ -334,3 +334,4 @@ Sync Options:
   * **Warning:** Can cause downtime
 * RETRY
   * Tiempo de intentos
+  * https://kubernetes-tutorial.schoolofdevops.com/articles/argo_retry_options/
