@@ -9,6 +9,7 @@
 * [Working daily](#id900)
   * [LAST SYNC se queda SYNC](#id901)
   * [SYNC STATUS vs LAST SYNC](#id902)
+  * [Delete resources from ArgoCD](#id903)
 
 # Prerrequisitos <div id='id00' />
 
@@ -247,3 +248,30 @@ $ argocd app terminate-op helm-picto-advanced-stack
 ```
 Repo <- SYNC STATUS <- ArgoCD -> LAST SYNC -> Cluster
 ```
+
+## Delete resources from ArgoCD <div id='id903' />
+
+Cuando borramos resources con ArgoCD, podemos ver las siguientes opciones:
+
+![alt text](images/delete_resources.png)
+
+```
+Deployment (Parent)
+  |
+  |-- ReplicaSet (Child)
+       |
+       |-- Pods (Child) 
+```
+
+* Foreground: 
+   * Waits for all child resources to be deleted before deleting the parent resource.
+   * Use when you have complex applications with dependencies, and you want to ensure a clean and orderly deletion process.
+   * Pods are deleted first, then the ReplicaSet, and finally the Deployment.
+*  Background
+   * Deletes the parent resource immediately, and the garbage collector then deletes the child resources.
+   *  Use when you need to delete parent resources quickly and can tolerate asynchronous cleanup of child resources
+   * Deployment is deleted immediately, and the garbage collector takes care of deleting the ReplicaSet and Pods in the background.
+* Orphan
+   * Deletes the parent resource but leaves the child resources untouched.
+   *  Use when you want to retain child resources even after the parent resource is deleted, for example, to analyze their state or repurpose them.
+   * Deployment is deleted, but the ReplicaSet and Pods remain in the cluster.
