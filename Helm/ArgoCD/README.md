@@ -322,7 +322,7 @@ Sync Options:
     * Faster sync operations
     * Minimized disruption
 * SERVER-SIDE APPLY
-  * No la entiendo: https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#server-side-apply
+  * Equipos que gestionan un mismo deployment -> https://kubernetes-tutorial.schoolofdevops.com/articles/argo_serversideapply/
 
 Sync Options:
 
