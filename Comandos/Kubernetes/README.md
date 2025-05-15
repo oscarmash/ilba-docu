@@ -17,6 +17,7 @@
   * [Revisión de certificados](#id23)
   * [Saber rango IP's de cada nodo](#id24)
   * [Curl (testing ingress)](#id25)
+  * [Rollout de resources (reinicio de resources)](#id26)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -264,6 +265,12 @@ $ $INGRESS_IP="exmple.com/xx.xx.xx.xx."
 $ curl -so /dev/null -w "%{http_code}\n" http://$INGRESS_IP/
 ```
 
+### Rollout de resources (reinicio de resources) <div id='id26' />
+
+```
+$ kubectl rollout restart daemonset/ingress-nginx-private-controller -n ingress-nginx
+```
+
 ## Alias <div id='id999' />
 
 Alias básicos:
@@ -276,4 +283,3 @@ alias kcdp='kubectl delete pod --grace-period=0 --force'
 ```
 
 Todos los alias, los mpuedes encontrar [aquí](https://github.com/ahmetb/kubectl-aliases/blob/master/.kubectl_aliases)
-
