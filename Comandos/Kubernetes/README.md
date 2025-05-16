@@ -275,6 +275,18 @@ $ kubectl rollout restart daemonset/ingress-nginx-private-controller -n ingress-
 ### Show resources (limits/resources) by pod <div id='id27' />
 
 ```
+$ kubectl describe ResourceQuota
+Name:            cb-blas-website-basic-stack-quota
+Namespace:       cb-blas-website
+Resource         Used    Hard
+--------         ----    ----
+limits.cpu       16      6
+limits.memory    2148Mi  12Gi
+requests.cpu     410m    20m
+requests.memory  618Mi   256Mi
+```
+
+```
 $ kubectl get pods --all-namespaces -o custom-columns='NAME:.metadata.name,CPU_REQ:spec.containers[].resources.requests.cpu,CPU_LIM:spec.containers[].resources.limits.cpu,MEMORY_REQ:spec.containers[].resources.requests.memory,MEM_LIM:spec.containers[].resources.limits.memory' | grep -E "NAME|blas"
 NAME                                                              CPU_REQ   CPU_LIM   MEMORY_REQ   MEM_LIM
 cb-blas-website-basic-stack-adminer-99b5dd44f-rcjh6               50m       1         32Mi         256Mi
