@@ -18,6 +18,7 @@
   * [Saber rango IP's de cada nodo](#id24)
   * [Curl (testing ingress)](#id25)
   * [Rollout de resources (reinicio de resources)](#id26)
+  * [Show resources (limits/resources) by pod](#id27)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -270,6 +271,19 @@ $ curl -so /dev/null -w "%{http_code}\n" http://$INGRESS_IP/
 ```
 $ kubectl rollout restart daemonset/ingress-nginx-private-controller -n ingress-nginx
 ```
+
+### Show resources (limits/resources) by pod <div id='id27' />
+
+```
+$ kubectl get pods --all-namespaces -o custom-columns='NAME:.metadata.name,CPU_REQ:spec.containers[].resources.requests.cpu,CPU_LIM:spec.containers[].resources.limits.cpu,MEMORY_REQ:spec.containers[].resources.requests.memory,MEM_LIM:spec.containers[].resources.limits.memory' | grep -E "NAME|blas"
+NAME                                                              CPU_REQ   CPU_LIM   MEMORY_REQ   MEM_LIM
+cb-blas-website-basic-stack-adminer-99b5dd44f-rcjh6               50m       1         32Mi         256Mi
+cb-blas-website-basic-stack-apache-89f889885-r6fjm                100m      7         128Mi        256Mi
+cb-blas-website-basic-stack-php-6b6ddd88c7-6mz5z                  100m      7         128Mi        256Mi
+cb-blas-website-bastion-clients-fc4c76944-p982p                   50m       <none>    64Mi         256Mi
+cb-blas-website-grafana-deployment-559468657c-g2mn7               100m      <none>    256Mi        1Gi
+```
+
 
 ## Alias <div id='id999' />
 
