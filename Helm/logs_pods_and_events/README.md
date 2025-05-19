@@ -7,6 +7,8 @@
 * [KPS](#id50) (Kube Prometheus Stack)
 * [KEE](#id60) (Kubernetes Event Exporter)
 * [End](#id70)
+* [Cosas de Grafana](#id100)
+  * [Alta de usuarios](#id101)
 
 ## Requisitos previos <div id='id10' />
 
@@ -229,3 +231,61 @@ Al final, podrémos ver lo siguiente:
 ![alt text](images/end_loki.png)
 
 ![alt text](images/end_kee.png)
+
+## Cosas de Grafana <div id='id100' />
+
+### Alta de usuarios <div id='id101' />
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-user-init-script
+  namespace: kube-prometheus-stack
+data:
+  create-user.sh: |
+    #!/bin/bash
+    echo "Waiting for Grafana to be ready..." 
+    until curl -s http://172.26.0.101/api/health -H 'Host:kps-grafana.ilba.cat'; do sleep 5; done
+
+    echo "Creating user..." 
+    curl -X POST http://admin:superpassword@172.26.0.101/api/admin/users -H "Content-Type: application/json" -H 'Host:kps-grafana.ilba.cat' -d '{
+        "name": "arquitectura",
+        "email": "arquitectura@localhost",
+        "login": "arquitectura",
+        "password": "SuperPassword",
+        "role": "User" 
+      }'
+    curl -X POST http://admin:superpassword@172.26.0.101/api/admin/users -H "Content-Type: application/json" -H 'Host:kps-grafana.ilba.cat' -d '{
+        "name": "webmun",
+        "email": "webmun@localhost",
+        "login": "webmun",
+        "password": "SuperPassword",
+        "role": "User" 
+      }'
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: grafana-create-user
+  namespace: kube-prometheus-stack
+spec:
+  schedule: "*/30 * * * *" 
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: create-user
+            image: curlimages/curl:8.13.0
+            command: ["/bin/sh", "/scripts/create-user.sh"]
+            volumeMounts:
+              - name: script-volume
+                mountPath: /scripts
+          restartPolicy: OnFailure
+          volumes:
+          - name: script-volume
+            configMap:
+              name: grafana-user-init-script
+              defaultMode: 0755
+```
