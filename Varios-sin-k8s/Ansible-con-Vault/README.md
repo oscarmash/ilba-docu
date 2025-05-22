@@ -84,7 +84,7 @@ root@cli-ansible-vault:~# vault login -method=userpass username=oscar.mas passwo
 ```
 
 Que sucede al hacer login:
-* Nos da un token: hvs.CAESIHa0nr_fihCrHo_X4NByDzCFF0F-K-QWmxyezxSMiAHnGh4KHGh2cy53TGZrNXhLdGl4b3dWS3NJc3huYXkyd3Y
+* Nos da un token: hvs.xxx
 * El token dura: 768h (The default Vault TTL is 32 days)
 
 ```
@@ -97,7 +97,7 @@ Realizamos un ansible para recuperar datos de un Ansible.
 Siempre hay que tener la variable *VAULT_TOKEN* definida
 
 ```
-root@cli-ansible-vault:~# export VAULT_TOKEN="hvs.CAESIHa0nr_fihCrHo_X4NByDzCFF0F-K-QWmxyezxSMiAHnGh4KHGh2cy53TGZrNXhLdGl4b3dWS3NJc3huYXkyd3Y"
+root@cli-ansible-vault:~# export VAULT_TOKEN="hvs.xxx"
 ```
 
 Playbook de prueba
