@@ -21,6 +21,10 @@ Documentación de productos usando docker-compose
 * [Prometheus Federation](./docker-compose/Prometheus-Federation/README.md)
 * [Thanos con Sidecar](./docker-compose/Thanos-Sidecar/README.md)
 
+## Varios sin Kubernetes
+
+* [Ansible con Vault](./Varios-sin-k8s/Ansible-con-Vault/README.md)
+
 ## Helm's
 
 Bootstrap (helms básicos)
