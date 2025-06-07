@@ -19,7 +19,7 @@
 Pasos a seguir
 
 * make pre_install ENV=k8s-test
-* make install_kubespray ENV=k8s-test KUBE_VERSION=v1.30.4
+* make install_kubespray ENV=k8s-test KUBE_VERSION=1.31.4
 * make post_install ENV=k8s-test
 * make install_applications ENV=k8s-test
 
@@ -29,7 +29,7 @@ Pasos a seguir:
 
 * kubectl drain --ignore-daemonsets --delete-emptydir-data nombre_nodo
 * kubectl get nodes -o wide
-* make upgrade_kubespray ENV=k8s-test KUBE_VERSION=v1.30.4 NODE=nombre_nodo
+* make upgrade_kubespray ENV=k8s-test KUBE_VERSION=1.31.4 NODE=nombre_nodo
 * ssh nombre_nodo
 * apt-get update && apt-get -y upgrade && apt-get dist-upgrade -y && apt-get -y autoremove && apt-get autoclean && apt-get clean && fstrim --fstab --verbose && reboot
 * kubectl get nodes -o wide
