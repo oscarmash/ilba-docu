@@ -22,6 +22,7 @@
   * [Comandos random de copia](#id302)
   * [Limpieza (Maintenance Safety)](#id303)
   * [Saber lo que ocupa un cliente](#id304)
+  * [Script de autologin en kopia](#id305)
 
 # Documentación inicial <div id='id1' />
 
@@ -1260,4 +1261,27 @@ Histogram:
       188 between 100 KB and 1 MB (total 79.6 MB)
      3396 between 1 MB and 10 MB (total 16.2 GB)
         0 between 10 MB and 100 MB (total 0 B)
+```
+
+## Script de autologin en kopia <div id='id305' />
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# cat /usr/local/sbin/kopia_connect.sh
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+    echo 'Need 2 arguments:
+           $1 pre|provi|pro
+           $2 namespace'
+    exit 1
+fi
+
+kopia repository connect s3 \
+--endpoint stg-nas02-minio.ilimit.net:9000 \
+--bucket ilimit-paas-k8s-$1-velero \
+--access-key LR1hknuwWRRISHEpfwow \
+--secret-access-key ijqXJ6ymsZ82XCE1M43bFV2kgMWxDFaSbTMqrMQQ \
+--disable-tls-verification \
+--prefix kopia/$2/ \
+--password 'static-passw0rd'
 ```
