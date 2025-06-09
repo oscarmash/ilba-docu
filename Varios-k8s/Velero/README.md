@@ -16,6 +16,7 @@
   * [Install velero cli](#id203)
   * [Check access S3](#id204)
   * [Backups ad-hoc](#id205)
+  * [Limpieza jobs Failed](#id206)
 * [Kopia](#id300)
   * [Contenedor con cliente de Kopia](#id301)
   * [Comandos random de copia](#id302)
@@ -1145,6 +1146,20 @@ Lanzar un backup que coja las configuraciones de un _schedule_:
 ```
 $ velero get schedule
 $ velero backup create backup-client1-pre-update --from-schedule=nom-recurs-schedule 
+```
+
+## Limpieza jobs Failed <div id='id206' />
+
+Borrar jobs de velero que no estén "complete":
+
+```
+Borrar jobs de velero que no estén "complete":
+
+root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero get jobs
+repo-maintain-job-1749471128086                                Complete   1/1           8s         7m20s
+repo-maintain-job-1749471389957                                Failed     0/1           2m59s      2m59s
+
+root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero delete job $(kubectl -n velero get jobs | awk '$3 ~ 0' | awk '{print $1}')
 ```
 
 # Kopia <div id='id300' />
