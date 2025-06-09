@@ -1154,8 +1154,6 @@ $ velero backup create backup-client1-pre-update --from-schedule=nom-recurs-sche
 Borrar jobs de velero que no estén "complete":
 
 ```
-Borrar jobs de velero que no estén "complete":
-
 root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero get jobs
 repo-maintain-job-1749471128086                                Complete   1/1           8s         7m20s
 repo-maintain-job-1749471389957                                Failed     0/1           2m59s      2m59s
