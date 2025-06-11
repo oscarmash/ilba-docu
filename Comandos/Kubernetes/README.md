@@ -119,9 +119,29 @@ root@ilimit-paas-k8s-test2-cp01:~# kubectl -n ceph-csi-rbd get secret csi-rbd-se
 
 ### Pod para debug <div id='id18' />
 
+Pod en el mismo NS
+
 ```
 $ kubectl -n default run debug -it --image=debian
-root@debug:/# apt-get update && apt install -y iputils-ping net-tools dnsutils curl telnet nmap default-mysql-client gpg
+```
+
+Contenedor dentro del pod (debugging)
+
+```
+$ kubectl get pods
+NAME                                 READY   STATUS      RESTARTS   AGE
+netbox-postgresql-0                  1/1     Running     0          34d
+
+$ kubectl get pods netbox-postgresql-0 -ojsonpath='{.spec.containers[*].name}' && echo
+postgresql
+
+$ kubectl debug -it netbox-postgresql-0 --image=debian:12 --target=postgresql
+```
+
+Paquetes a instalar, para una debian:
+
+```
+apt-get update && apt install -y iputils-ping net-tools dnsutils curl telnet nmap default-mysql-client gpg htop procps
 ```
 
 ### Hacer limpieza de pods <div id='id19' />
