@@ -132,10 +132,10 @@ $ kubectl get pods
 NAME                                 READY   STATUS      RESTARTS   AGE
 netbox-postgresql-0                  1/1     Running     0          34d
 
-$ kubectl get pods netbox-postgresql-0 -ojsonpath='{.spec.containers[*].name}' && echo
+$ kubectl get pods netbox-postgresql-0 -o jsonpath='{.spec.containers[*].name}' && echo
 postgresql
 
-$ kubectl debug -it netbox-postgresql-0 --image=debian:12 --target=postgresql
+$ kubectl debug -it netbox-postgresql-0 --target=postgresql --image=debian:12
 ```
 
 Paquetes a instalar, para una debian:
