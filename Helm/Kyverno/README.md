@@ -69,11 +69,20 @@ kyvernoPlugin:
   enabled: true
 ui:
   enabled: true
+  name: Cluster-Ilba
+  displayMode: "dark"
+  ingress:
+    enabled: true
+    className: "nginx"
+    hosts:
+     - host: kyverno-reporter.ilba.cat
+       paths:
+         - path: /
+           pathType: ImplementationSpecific
 kyvernoPlugin:
   enabled: true
-resources: {}
 
-helm upgrade --install lan-policy-reporter policy-reporter/policy-reporter \
+$ helm upgrade --install lan-policy-reporter policy-reporter/policy-reporter \
 --create-namespace \
 --namespace lan-policy-reporter \
 --version=2.24.1 \
