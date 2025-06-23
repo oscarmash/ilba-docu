@@ -244,6 +244,18 @@ $ argocd --grpc-web --insecure --username admin login gitops.pre.paas.ilimit.com
 $ argocd app terminate-op helm-picto-advanced-stack
 ```
 
+Script para hacerlo de forma más sencilla:
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# cat /usr/local/sbin/argocd_terminate_app.sh
+#!/bin/bash
+
+pass='Zmw0ZH5LXCIPJ2Op'
+argocd --grpc-web --insecure login --username admin --password $pass gitops.pre.paas.ilimit.com
+#argocd app list
+argocd app terminate-op argocd/$1
+```
+
 ## SYNC STATUS vs LAST SYNC <div id='id902' />
 
 ![alt text](images/sync_status.png)
