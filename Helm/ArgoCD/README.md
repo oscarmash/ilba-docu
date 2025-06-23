@@ -11,6 +11,7 @@
   * [SYNC STATUS vs LAST SYNC](#id902)
   * [Delete resources from ArgoCD](#id903)
   * [Synchronize options from ArgoCD](#id904)
+  * [Finalizers](#id905)
 
 # Prerrequisitos <div id='id00' />
 
@@ -347,3 +348,14 @@ Sync Options:
 * RETRY
   * Tiempo de intentos
   * https://kubernetes-tutorial.schoolofdevops.com/articles/argo_retry_options/
+
+
+## Finalizers <div id='id905' />
+
+Al eliminar alguna cosa del ArgoCD, que queda pensando:
+
+![alt text](images/Finalizers-1.png)
+
+Lo que hemos de hacer es via GUI o por consola, eliminar la parte donde pone Finalizers
+
+![alt text](images/Finalizers-2.png)
