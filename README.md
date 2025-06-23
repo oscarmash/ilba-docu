@@ -23,7 +23,9 @@ Documentación de productos usando docker-compose
 
 ## Varios sin Kubernetes
 
-* [Ansible con Vault](./Varios-sin-k8s/Ansible-con-Vault/README.md)
+* Vault
+  * [Ansible con Vault](./Varios-sin-k8s/Ansible-con-Vault/README.md)
+  * [Docker-Compose con Vault](./Varios-sin-k8s/Docker-Compose-con-Vault/README.md)
 
 ## Helm's
 
