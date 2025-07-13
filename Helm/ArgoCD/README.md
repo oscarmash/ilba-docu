@@ -252,8 +252,6 @@ spec:
   destinations:
   - namespace: 'cb-*'
     server: 'https://kubernetes.default.svc'
-  - namespace: 'argocd'
-    server: 'https://kubernetes.default.svc'
   sourceRepos:
   - '*'
   sourceNamespaces:
