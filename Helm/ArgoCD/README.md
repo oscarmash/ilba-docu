@@ -6,6 +6,7 @@
 * [Creación token en GitLab](#id30)
 * [Estructuca básica (create NS)](#id40)
 * [Estructuca básica (ArgoCD)](#id50)
+* [Gestión de permisos](#id60)
 * [Working daily](#id900)
   * [LAST SYNC se queda SYNC](#id901)
   * [SYNC STATUS vs LAST SYNC](#id902)
@@ -234,6 +235,53 @@ root@k8s-test-cp:~# kubectl get ns
 NAME                    STATUS   AGE
 app-1                   Active   18s
 ...                     ...      ...
+```
+
+# Gestión de permisos <div id='id60' />
+
+[Tabla de permisos](https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/#rbac-model-structure)
+ en las políticas:
+```
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: client-basic
+  namespace: argocd
+spec:
+  description: "Client Basic"
+  destinations:
+  - namespace: 'cb-*'
+    server: 'https://kubernetes.default.svc'
+  - namespace: 'argocd'
+    server: 'https://kubernetes.default.svc'
+  sourceRepos:
+  - '*'
+  sourceNamespaces:
+  - argocd
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  roles:
+  - name: deny-delete
+    description: Deny Delete group Ilimit-Authentik
+    policies:
+    # p, <role/user/group>, <resource>, <action>, <object>, <effect>
+    - p, Ilimit-Authentik, applications, delete, client-basic/*, deny
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cb-example-01
+  namespace: argocd
+spec:
+  project: client-basic
+  source:
+    repoURL: "http://gitlab.ilba.cat/gitops/argocd.git"
+    path: "bootstrap/cb-example-01"
+    targetRevision: master
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: cb-example-01
 ```
 
 # Working daily <div id='id900' />
