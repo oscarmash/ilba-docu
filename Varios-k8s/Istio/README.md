@@ -161,6 +161,10 @@ spec:
         - containerPort: 8080
 ```
 
+Ejemplo de Gateway y VirtualService:
+
+![alt text](images/gateway-virtualservice.png)
+
 ```
 root@kubespray-aio:~# cat 10-istio-ingress.yaml
 apiVersion: networking.istio.io/v1alpha3
