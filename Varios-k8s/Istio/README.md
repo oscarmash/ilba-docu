@@ -4,8 +4,13 @@
   * [Descargandonos el Binario](#id11) Recomendada
   * [Via HELM](#id12)
 * [Creación de un Ingress](#id20)
-* [Jaeger](#id30) FALLA
-* [Kiali](#id40) FALLA
+* [How to Route the Traffic?](#id30)
+  * [Route based on weights](#id31)
+  * [Match and route the traffic](#id32)
+  * [Redirect the traffic (HTTP 301)](#id33)
+  * [Mirror the traffic to another destination](#id34)
+* [Jaeger](#id40) FALLA
+* [Kiali](#id50) FALLA
 
 # Instalación de Istio <div id='id10' />
 
@@ -238,7 +243,102 @@ test-ingress-istio   httpbin   ["httpbin-gateway"]   ["www.dominio.cat"]   4m10s
 
 ![alt text](images/hello-kubernetes.png)
 
-# Jaeger <div id='id30' />
+
+# How to Route the Traffic? <div id='id30' />
+
+## Route based on weights <div id='id31' />
+
+```
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: customers-route
+spec:
+  hosts:
+  - customers.default.svc.cluster.local
+  http:
+  - name: customers-v1-routes
+    route:
+    - destination:
+        host: customers.default.svc.cluster.local
+        subset: v1
+      weight: 70
+  - name: customers-v2-routes
+    route:
+    - destination:
+        host: customers.default.svc.cluster.local
+        subset: v2
+      weight: 30
+```
+
+## Match and route the traffic <div id='id32' />
+
+```
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: customers-route
+spec:
+  hosts:
+  - customers.default.svc.cluster.local
+  http:
+  - match:
+    - headers:
+        user-agent:
+          regex: ".*Firefox.*"
+    route:
+    - destination:
+        host: customers.default.svc.cluster.local
+        subset: v1
+  - route:
+    - destination:
+        host: customers.default.svc.cluster.local
+        subset: v2
+```
+
+## Redirect the traffic (HTTP 301) <div id='id33' />
+
+```
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: customers-route
+spec:
+  hosts:
+  - customers.default.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        exact: /api/v1/helloWorld
+    redirect:
+      uri: /v1/hello
+      authority: hello-world.default.svc.cluster.local
+```
+
+## Mirror the traffic to another destination <div id='id34' />
+
+```
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: customers-route
+spec:
+  hosts:
+    - customers.default.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: customers.default.svc.cluster.local
+        subset: v1
+      weight: 100
+    mirror:
+      host: customers.default.svc.cluster.local
+      subset: v2
+    mirrorPercentage:
+      value: 100.0
+```
+
+# Jaeger <div id='id40' />
 
 Instalación de Jaeger
 
@@ -319,7 +419,7 @@ data:
       metrics:
       - prometheus
 ```
-# Kiali <div id='id40' />
+# Kiali <div id='id50' />
 
 Instalación de Kiali
 
