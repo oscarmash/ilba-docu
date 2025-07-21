@@ -4,6 +4,9 @@
   * [Descargandonos el Binario](#id11) Recomendada
   * [Via HELM](#id12)
 * [Creación de un Ingress](#id20)
+  * [Service / Deployment](#id21)
+  * [Gateway / VirtualService](#id22)
+  * [DestinationRule](#id23)
 * [How to Route the Traffic?](#id30)
   * [Route based on weights](#id31)
   * [Match and route the traffic](#id32)
@@ -127,6 +130,8 @@ metadata:
     istio-injection: enabled
 ```
 
+## Service / Deployment<div id='id21' />
+
 ```
 root@kubespray-aio:~# cat 05-istio-deployment.yaml
 apiVersion: v1
@@ -165,6 +170,8 @@ spec:
         ports:
         - containerPort: 8080
 ```
+
+## Gateway / VirtualService<div id='id22' />
 
 Ejemplo de Gateway y VirtualService:
 
@@ -243,6 +250,30 @@ test-ingress-istio   httpbin   ["httpbin-gateway"]   ["www.dominio.cat"]   4m10s
 
 ![alt text](images/hello-kubernetes.png)
 
+## DestinationRule <div id='id23' />
+
+![alt text](images/DestinationRule.png)
+
+[Aquí](https://istio.io/latest/docs/reference/config/networking/destination-rule/)  podremos ver varios ejemplos, pero dejo uno:
+
+```
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: bookinfo-ratings-port
+spec:
+  host: ratings.prod.svc.cluster.local
+  trafficPolicy: # Apply to all ports
+    portLevelSettings:
+    - port:
+        number: 80
+      loadBalancer:
+        simple: LEAST_REQUEST
+    - port:
+        number: 9080
+      loadBalancer:
+        simple: ROUND_ROBIN
+```
 
 # How to Route the Traffic? <div id='id30' />
 
