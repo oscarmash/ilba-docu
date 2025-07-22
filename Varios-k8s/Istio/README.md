@@ -7,12 +7,16 @@
   * [Service / Deployment](#id21)
   * [Gateway / VirtualService](#id22)
   * [DestinationRule](#id23)
-* [How to Route the Traffic?](#id30)
+* [Advanced Traffic Routing](#id30)
   * [Route based on weights](#id31)
   * [Match and route the traffic](#id32)
   * [Redirect the traffic (HTTP 301)](#id33)
   * [Mirror the traffic to another destination](#id34)
   * [AND and OR Semantics](#id35)
+* [Service Resiliency & Failure Injection](#id40)
+  * [Service Resiliency](#id41)
+  * [Circuit Breaking with Outlier Detection](#id42)
+  * [Failure Injection](#id41)
 * [Jaeger](#id80) FALLA
 * [Kiali](#id90) FALLA
 
@@ -276,7 +280,7 @@ spec:
         simple: ROUND_ROBIN
 ```
 
-# How to Route the Traffic? <div id='id30' />
+# Advanced Traffic Routing <div id='id30' />
 
 ## Route based on weights <div id='id31' />
 
@@ -408,6 +412,75 @@ In the above snippet, the matching will be done on the URI prefix first, and if 
 If the first match does not evaluate to true, the algorithm moves to the second match field and tries to match the header. If we omit the match field on the route, it will continually evaluate to true.
 
 When using either of the two options, make sure you provide a fallback route if applicable. That way, if traffic doesn’t match any of the conditions, it could still be routed to a “default” route.
+
+
+# Service Resiliency & Failure Injection <div id='id40' />
+## Service Resiliency <div id='id41' />
+
+Resiliency is the ability to provide and maintain an acceptable level of service in the face of faults and challenges to regular operation. It's not about avoiding failures. It's responding to them, so there's no downtime or data loss. The goal of resiliency is to return the service to a fully functioning state after a failure occurs.
+
+A crucial element in making services available is using timeouts and retry policies when making service requests. We can configure both in the VirtualService resource.
+
+```
+...
+- route:
+  - destination:
+      host: customers.default.svc.cluster.local
+      subset: v1
+  retries:
+    attempts: 10
+    perTryTimeout: 2s
+    retryOn: connect-failure,reset
+...
+```
+## Circuit Breaking with Outlier Detection <div id='id42' />
+
+Another pattern for creating resiliency applications is circuit breaking. It allows us to write services to limit the impact of failures, latency spikes, and other network issues.
+
+Outlier detection is an implementation of a circuit breaker, and it’s a form of passive health checking. It’s called passive because Envoy isn’t actively sending any requests to determine the health of the endpoints. Instead, Envoy observes the performance of different pods to determine if they are healthy or not. If the pods are deemed unhealthy, they are removed or ejected from the healthy load balancing pool.
+
+The pods’ health is assessed through consecutive failures, temporal success rate, latency, and so on.
+
+```
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: customers
+spec:
+  host: customers
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 1
+      http:
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
+    outlierDetection:
+      consecutive5xxErrors: 1
+      interval: 1s
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
+```
+
+## Failure Injection <div id='id43' />
+
+Another feature to help us with service resiliency is fault injection. We can apply the fault injection policies on HTTP traffic and specify one or more faults to inject when forwarding the request to the destination.
+
+There are two types of fault injection. We can delay the requests before forwarding and emulate a slow network or overloaded service, and we can abort the HTTP request and return a specific HTTP error code to the caller. With the abort, we can simulate a faulty upstream service.
+
+Here's an example that aborts HTTP requests and returns HTTP 404, for 30% of incoming requests:
+
+```
+- route:
+  - destination:
+      host: customers.default.svc.cluster.local
+      subset: v1
+  fault:
+    abort:
+      percentage:
+        value: 30
+      httpStatus: 404
+```
 
 # Jaeger <div id='id80' />
 
