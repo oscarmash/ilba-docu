@@ -12,6 +12,7 @@
   * [Match and route the traffic](#id32)
   * [Redirect the traffic (HTTP 301)](#id33)
   * [Mirror the traffic to another destination](#id34)
+  * [AND and OR Semantics](#id35)
 * [Jaeger](#id40) FALLA
 * [Kiali](#id50) FALLA
 
@@ -368,6 +369,45 @@ spec:
     mirrorPercentage:
       value: 100.0
 ```
+
+## AND and OR Semantics <div id='id35' />
+
+We can either use AND or OR semantics:
+
+```
+http:
+  - match:
+    - uri:
+        prefix: /v1
+      headers:
+        my-header:
+          exact: hello
+...
+```
+
+The above snippet uses the AND semantics. It states that both the URI prefix needs to match /v1 AND the header my-header has to match the value hello. When both conditions are true, the traffic will be routed to the destination.
+
+To use the OR semantic, we can add another match entry, like this:
+
+```
+...
+http:
+  - match:
+    - uri:
+        prefix: /v1
+    ... 
+  - match:
+    - headers:
+        my-header:
+          exact: hello
+...
+```
+
+In the above snippet, the matching will be done on the URI prefix first, and if it matches, the request gets routed to the destination.
+
+If the first match does not evaluate to true, the algorithm moves to the second match field and tries to match the header. If we omit the match field on the route, it will continually evaluate to true.
+
+When using either of the two options, make sure you provide a fallback route if applicable. That way, if traffic doesn’t match any of the conditions, it could still be routed to a “default” route.
 
 # Jaeger <div id='id40' />
 
