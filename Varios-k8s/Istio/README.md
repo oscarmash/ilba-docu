@@ -13,8 +13,8 @@
   * [Redirect the traffic (HTTP 301)](#id33)
   * [Mirror the traffic to another destination](#id34)
   * [AND and OR Semantics](#id35)
-* [Jaeger](#id40) FALLA
-* [Kiali](#id50) FALLA
+* [Jaeger](#id80) FALLA
+* [Kiali](#id90) FALLA
 
 # Instalación de Istio <div id='id10' />
 
@@ -409,7 +409,7 @@ If the first match does not evaluate to true, the algorithm moves to the second 
 
 When using either of the two options, make sure you provide a fallback route if applicable. That way, if traffic doesn’t match any of the conditions, it could still be routed to a “default” route.
 
-# Jaeger <div id='id40' />
+# Jaeger <div id='id80' />
 
 Instalación de Jaeger
 
@@ -490,7 +490,7 @@ data:
       metrics:
       - prometheus
 ```
-# Kiali <div id='id50' />
+# Kiali <div id='id90' />
 
 Instalación de Kiali
 
