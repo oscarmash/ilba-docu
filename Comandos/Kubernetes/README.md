@@ -320,7 +320,7 @@ cb-blas-website-grafana-deployment-559468657c-g2mn7               100m      <non
 ### Events sort by time <div id='id28' />
 
 ```
-$ k -n mariadb-operator-galera get events --sort-by='.lastTimestamp --watch'
+$ k -n mariadb-operator-galera get events --sort-by='.lastTimestamp' --watch
 ```
 
 
