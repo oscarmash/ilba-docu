@@ -19,6 +19,7 @@
   * [Curl (testing ingress)](#id25)
   * [Rollout de resources (reinicio de resources)](#id26)
   * [Show resources (limits/resources) by pod](#id27)
+  * [Events sort by time](#id28)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -314,6 +315,12 @@ cb-blas-website-basic-stack-apache-89f889885-r6fjm                100m      7   
 cb-blas-website-basic-stack-php-6b6ddd88c7-6mz5z                  100m      7         128Mi        256Mi
 cb-blas-website-bastion-clients-fc4c76944-p982p                   50m       <none>    64Mi         256Mi
 cb-blas-website-grafana-deployment-559468657c-g2mn7               100m      <none>    256Mi        1Gi
+```
+
+### Events sort by time <div id='id28' />
+
+```
+$ k -n mariadb-operator-galera get events --sort-by='.lastTimestamp'
 ```
 
 
