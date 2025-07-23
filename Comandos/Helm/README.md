@@ -53,6 +53,29 @@ controller:
     type: LoadBalancer
 ```
 
+---
+
+Rollout de versiones:
+
+```
+$ helm ls
+NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART                   APP VERSION
+ceph-csi-cephfs ceph-csi-cephfs 4               2025-07-23 12:31:02.290029616 +0200 CEST        deployed        ceph-csi-cephfs-3.14.1  3.14.1
+
+$ helm history ceph-csi-cephfs
+REVISION        UPDATED                         STATUS          CHART                   APP VERSION     DESCRIPTION
+1               Mon Feb  3 14:31:59 2025        superseded      ceph-csi-cephfs-3.12.2  3.12.2          Install complete
+2               Fri Mar 21 12:57:46 2025        superseded      ceph-csi-cephfs-3.12.2  3.12.2          Upgrade complete
+3               Tue Apr 29 10:38:57 2025        superseded      ceph-csi-cephfs-3.13.1  3.13.1          Upgrade complete
+4               Wed Jul 23 12:31:02 2025        deployed        ceph-csi-cephfs-3.14.1  3.14.1          Upgrade complete
+
+$ helm rollback ceph-csi-cephfs 3
+
+$ helm ls
+NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART                   APP VERSION
+ceph-csi-cephfs ceph-csi-cephfs 5               2025-07-23 12:48:57.931429897 +0200 CEST        deployed        ceph-csi-cephfs-3.13.1  3.13.1
+```
+
 ## Repositorios <div id='id20' />
 
 Repositorios de Helm, recuerda de hacer un "helm repo update" una vez acabados de añadir los repos
