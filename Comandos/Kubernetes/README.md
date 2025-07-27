@@ -20,6 +20,7 @@
   * [Rollout de resources (reinicio de resources)](#id26)
   * [Show resources (limits/resources) by pod](#id27)
   * [Events sort by time](#id28)
+  * [Borrar todos los pods que hangan match con: xxx](#id29)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -323,6 +324,14 @@ cb-blas-website-grafana-deployment-559468657c-g2mn7               100m      <non
 $ k -n mariadb-operator-galera get events --sort-by='.lastTimestamp' --watch
 ```
 
+### Borrar todos los pods que hangan match con: xxx <div id='id29' />
+
+Se ha de cambiar el xxx por el match de los pods. Por ejemplo: clilium
+
+```
+$ NAMESPACE=pepe
+$ kubectl get pods -n $NAMESPACE --no-headers=true | awk '/xxx/{print $1}' | xargs  kubectl delete -n $NAMESPACE pod --grace-period=0 --force
+```
 
 ## Alias <div id='id999' />
 
