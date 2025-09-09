@@ -8,6 +8,8 @@
   * [Token transit para K8s](#id21)
   * [Vault en K8s](#id22)
   * [External secrets](#id23)
+* [Comandos útiles](#id30)
+  * [Forzar sincronismo](#id31)
 
 # Start <div id='id05' />
 
@@ -533,4 +535,12 @@ root@k8s-test-cp:~# kubectl get secret key-store -o json | jq '.data | map_value
   "password": "super_secret",
   "username": "oscar"
 }
+```
+
+# Comandos útiles <div id='id30' />
+
+## Forzar sincronismo <div id='id31' />
+
+```
+$ kubectl annotate es NameSpace force-sync=$(date +%s) --overwrite
 ```
