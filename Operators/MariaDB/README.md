@@ -252,7 +252,7 @@ MariaDB [mariadb-operator-bbdd]> SELECT * FROM datos;
 +------+--------+----------+
 2 rows in set (0.001 sec)
 
-MariaDB [mariadb-operator-bbdd]> quit
+MariaDB [mariadb-operator-bbdd]> exit
 mysql@mariadb-operator-0:/$ exit
 ```
 
@@ -285,7 +285,7 @@ MariaDB [mariadb-operator-bbdd]> SELECT * FROM datos;
 +------+--------+----------+
 2 rows in set (0.001 sec)
 
-MariaDB [mariadb-operator-bbdd]> quit
+MariaDB [mariadb-operator-bbdd]> exit
 mysql@mariadb-operator-0:/$ exit
 ```
 
