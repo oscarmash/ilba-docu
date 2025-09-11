@@ -4,7 +4,7 @@
 * [Instalación del operator](#id10)
 * [Despliegue de BBDD con el operator](#id20)
 * [Gestión de los backups](#id30)
-  * [Physical backup](#id31)
+  * [Physical backup](#id31) :construction: **No acabado**
   * [Logical backups](#id32)
 * [Restore de un backup](#id40)
 * [Acceso desde fuera del cluster de K8s](#id50)
@@ -250,9 +250,132 @@ mysql@mariadb-operator-0:/$ exit
 
 Los backups que se pueden hacer con el operator de MariaDB son:
 * [Physical backups](https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/physical_backup.md#what-is-a-physical-backup): Physical backups are the recommended method for backing up MariaDB databases, especially in production environments, as they are faster and more efficient than logical backups.
+  * Physical backups can only be restored in brand new MariaDB instances without any existing data. This means that you cannot restore a physical backup into an existing MariaDB instance that already has data.
 * [Logical backups](https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/logical_backup.md#what-is-a-logical-backup): A logical backup is a backup that contains the logical structure of the database, such as tables, indexes, and data, rather than the physical storage format. It is created using mariadb-dump, which generates SQL statements that can be used to recreate the database schema and populate it with data.
 
 ### Physical backups <div id='id31' />
+
+Verificamos los datos actuales de la BBDD:
+
+```
+root@k8s-test-cp:~# k -n test-mariadb-operator exec -it mariadb-operator-0 -- bash
+mysql@mariadb-operator-0:/$ mysql -u root -p
+MariaDB [(none)]> USE mariadb-operator-bbdd;
+
+MariaDB [mariadb-operator-bbdd]> SELECT * FROM datos;
++------+--------+----------+
+| id   | nombre | apellido |
++------+--------+----------+
+|    1 | Oscar  | Mas      |
+|    2 | Nuria  | Ilari    |
++------+--------+----------+
+2 rows in set (0.001 sec)
+
+MariaDB [mariadb-operator-bbdd]> quit
+mysql@mariadb-operator-0:/$ exit
+```
+
+```
+root@k8s-test-cp:~# vim test-mariadb-operator-physicalbackup-now.yaml
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: PhysicalBackup
+metadata:
+  name: test-mariadb-operator-physicalbackup
+  namespace: test-mariadb-operator
+spec:
+  mariaDbRef:
+    name: mariadb-operator
+  storage:
+    s3:
+      bucket: mariadb-operator-backups
+      endpoint: 172.26.0.35:9000
+      secretAccessKeySecretKeyRef:
+        name: mariadb-operator-secrets-bucket
+        key: MINIO_SECRET_KEY
+      accessKeyIdSecretKeyRef:
+        name: mariadb-operator-secrets-bucket
+        key: MINIO_ACCESS_KEY
+      tls:
+        enabled: false
+
+root@k8s-test-cp:~# k apply -f test-mariadb-operator-physicalbackup-now.yaml
+
+root@k8s-test-cp:~# k -n test-mariadb-operator get PhysicalBackup
+NAME                                   COMPLETE   STATUS    MARIADB            LAST SCHEDULED   AGE
+test-mariadb-operator-physicalbackup   True       Success   mariadb-operator   33s              33s
+```
+
+**NOTA:** Hemos de tener configurado el cliente de MinIO
+
+```
+root@k8s-test-cp:~# ./mc_minio ls StorageS3/mariadb-operator-backups/
+[2025-09-11 11:47:18 CEST]  16MiB STANDARD physicalbackup-20250911094714.xb
+```
+
+Eliminamos los datos para hacer la restauración:
+
+```
+root@k8s-test-cp:~# k -n test-mariadb-operator exec -it mariadb-operator-0 -- bash
+mysql@mariadb-operator-0:/$ mysql -u root -p
+
+MariaDB [(none)]> USE mariadb-operator-bbdd;
+
+MariaDB [mariadb-operator-bbdd]> SELECT * FROM datos;
++------+--------+----------+
+| id   | nombre | apellido |
++------+--------+----------+
+|    1 | Oscar  | Mas      |
+|    2 | Nuria  | Ilari    |
++------+--------+----------+
+2 rows in set (0.074 sec)
+
+MariaDB [mariadb-operator-bbdd]> DELETE FROM datos WHERE id='2';
+
+MariaDB [mariadb-operator-bbdd]> SELECT * FROM datos;
++------+--------+----------+
+| id   | nombre | apellido |
++------+--------+----------+
+|    1 | Oscar  | Mas      |
++------+--------+----------+
+1 row in set (0.001 sec)
+
+MariaDB [mariadb-operator-bbdd]> exit
+mysql@mariadb-operator-0:/$ exit
+```
+
+Restauramos:
+
+```
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Logical backups <div id='id32' />
 
@@ -409,7 +532,7 @@ MariaDB [ilba-mariadb-operator-bbdd]> SELECT * FROM datos;
 +------+--------+----------+
 1 row in set (0.001 sec)
 
-MariaDB [ilba-mariadb-operator-bbdd]> quit
+MariaDB [ilba-mariadb-operator-bbdd]> exit
 mysql@ilba-mariadb-operator-0:/$ exit
 ```
 
