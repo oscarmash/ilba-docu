@@ -168,13 +168,13 @@ spec:
   username: mariadb-operator-user
 ```
 
+:warning: El siguiente paso tarda unos 5 minutos :warning:
+
 Aplicamos el Manifest y verificamos su funcionamiento:
 
 ```
 root@k8s-test-cp:~# k apply -f test-mariadb-operator.yaml
 ```
-
-:warning: El siguiente paso tarda unos 5 minutos :warning:
 
 ```
 root@k8s-test-cp:~# kubectl -n test-mariadb-operator get pods
