@@ -648,3 +648,8 @@ NAME                             TYPE           CLUSTER-IP      EXTERNAL-IP    P
 ilba-mariadb-operator            LoadBalancer   10.233.54.165   172.26.0.102   3306:30409/TCP   11h
 ilba-mariadb-operator-internal   ClusterIP      None            <none>         3306/TCP         11h
 ```
+
+## Monitrización con KPS <div id='id60' />
+
+URL de interes:
+* https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/metrics.md
