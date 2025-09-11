@@ -250,6 +250,10 @@ MariaDB [mariadb-operator-bbdd]> quit
 mysql@mariadb-operator-0:/$ exit
 ```
 
+### Como añadir una BBDD <div id='id21' />
+
+XXXXSSSSSS
+
 ## Gestión de los backups <div id='id30' />
 
 Los backups que se pueden hacer con el operator de MariaDB son:
