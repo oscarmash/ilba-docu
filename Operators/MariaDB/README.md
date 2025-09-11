@@ -3,7 +3,9 @@
 * [Getting Started](#id0)
 * [Instalación del operator](#id10)
 * [Despliegue de BBDD (Standalone)](#id20)
-  * [Como añadir una BBDD](#id21) :construction: **No empezado**
+  * [Desplegar BBDD](#id21)
+  * [Añadir datos a la BBDD desplegada](#id22)
+  * [Como añadir una BBDD](#id23) :construction: **No empezado**
 * [Gestión de los backups](#id30)
   * [Physical backup](#id31) :construction: **No acabado**
   * [Logical backups](#id32)
@@ -97,6 +99,8 @@ csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           tr
 ```
 
 ## Despliegue de BBDD (Standalone) <div id='id20' />
+
+### Desplegar BBDD <div id='id21' />
 
 Primero crearemos un NS para poder trabajar en el:
 
@@ -196,6 +200,8 @@ root@k8s-test-cp:~# k -n test-mariadb-operator get databases
 NAME                        READY   STATUS    CHARSET   COLLATE           MARIADB            AGE   NAME
 mariadb-operator-database   True    Created   utf8      utf8_general_ci   mariadb-operator   71s   mariadb-operator-bbdd
 ```
+
+### Añadir datos a la BBDD desplegada <div id='id22' />
 
 Aprovecharemos para meter datos en la BBDD:
 
@@ -351,9 +357,18 @@ MariaDB [mariadb-operator-bbdd]> exit
 mysql@mariadb-operator-0:/$ exit
 ```
 
+Antes de restaurar hemos de eliminar la BBDD:
+
+```
+root@k8s-test-cp:~# k -n test-mariadb-operator delete mariadbs mariadb-operator
+root@k8s-test-cp:~# k -n test-mariadb-operator delete --all pods
+root@k8s-test-cp:~# k -n test-mariadb-operator delete pvc storage-mariadb-operator-0
+```
+
 Restauramos:
 
 ```
+root@k8s-test-cp:~# vim test-mariadb-operator-physicalbackup-restore.yaml
 
 ```
 
