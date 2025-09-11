@@ -4,6 +4,8 @@
 * [Instalación del operator](#id10)
 * [Despliegue de BBDD con el operator](#id20)
 * [Gestión de los backups](#id30)
+  * [Physical backup](#id31)
+  * [Logical backups](#id32)
 * [Restore de un backup](#id40)
 * [Acceso desde fuera del cluster de K8s](#id50)
 
@@ -50,10 +52,12 @@ root@ceph-aio:~# ceph -s
 ## Instalación del operator <div id='id10' />
 
 ```
-root@k8s-test-cp:~# helm repo add mariadb-operator https://helm.mariadb.com/mariadb-operato
-root@k8s-test-cp:~# helm repo update
+root@k8s-test-cp:~# helm repo add mariadb-operator https://helm.mariadb.com/mariadb-operator && helm repo update
 
-root@k8s-test-cp:~# cat values-mariadb-operator.yaml
+root@k8s-test-cp:~# helm search repo mariadb-operator/mariadb-operator-crds | grep mariadb-operator | awk '{print $2}'
+25.8.3
+
+root@k8s-test-cp:~# vim values-mariadb-operator.yaml
 crds:
   enabled: false
 ha:
@@ -64,16 +68,16 @@ root@k8s-test-cp:~# helm upgrade --install \
 mariadb-operator-crds mariadb-operator/mariadb-operator-crds \
 --create-namespace \
 --namespace mariadb-operator \
---version=0.38.1
+--version=25.8.3
 
 root@k8s-test-cp:~# helm upgrade --install \
 mariadb-operator mariadb-operator/mariadb-operator \
 --create-namespace \
 --namespace mariadb-operator \
---version=0.38.1 \
+--version=25.8.3 \
 -f values-mariadb-operator.yaml
 
-root@k8s-test-cp:~# k -n mariadb-operator get pods
+root@k8s-test-cp:~# kubectl -n mariadb-operator get pods
 NAME                                                READY   STATUS    RESTARTS   AGE
 mariadb-operator-7f8dc6f475-8tmvz                   1/1     Running   0          2m47s
 mariadb-operator-7f8dc6f475-gkjs2                   1/1     Running   0          2m47s
@@ -105,8 +109,8 @@ root@k8s-test-cp:~# vim test-mariadb-operator.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ilba-mariadb-operator-secrets
-  namespace: test-ilba-mariadb-operator
+  name: mariadb-operator-secrets
+  namespace: test-mariadb-operator
 data:
   MARIADB_PASSWORD: c29yaXNhdA== #sorisat
   MARIADB_ROOT_PASSWORD: c29yaXNhdA== #sorisat
@@ -114,13 +118,13 @@ data:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: MariaDB
 metadata:
-  name: ilba-mariadb-operator
-  namespace: test-ilba-mariadb-operator
+  name: mariadb-operator
+  namespace: test-mariadb-operator
 spec:
   image: mariadb:10.11.3
-  database: ilba-mariadb-operator-bbdd
+  database: mariadb-operator-bbdd
   rootPasswordSecretKeyRef:
-    name: ilba-mariadb-operator-secrets
+    name: mariadb-operator-secrets
     key: MARIADB_ROOT_PASSWORD
   updateStrategy:
     type: ReplicasFirstPrimaryLast
@@ -140,28 +144,28 @@ spec:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: User
 metadata:
-  name: ilba-mariadb-operator-user
-  namespace: test-ilba-mariadb-operator
+  name: mariadb-operator-user
+  namespace: test-mariadb-operator
 spec:
   mariaDbRef:
-    name: ilba-mariadb-operator
+    name: mariadb-operator
   passwordSecretKeyRef:
-    name: ilba-mariadb-operator-secrets
+    name: mariadb-operator-secrets
     key: MARIADB_PASSWORD
   maxUserConnections: 5
 ---
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Grant
 metadata:
-  name: ilba-mariadb-operator-grant
-  namespace: test-ilba-mariadb-operator
+  name: mariadb-operator-grant
+  namespace: test-mariadb-operator
 spec:
   mariaDbRef:
-    name: ilba-mariadb-operator
+    name: mariadb-operator
   privileges:
   - ALL PRIVILEGES
-  database: ilba-mariadb-operator-bbdd
-  username: ilba-mariadb-operator-user
+  database: mariadb-operator-bbdd
+  username: mariadb-operator-user
 ```
 
 Aplicamos el Manifest y verificamos su funcionamiento:
@@ -169,33 +173,35 @@ Aplicamos el Manifest y verificamos su funcionamiento:
 ```
 root@k8s-test-cp:~# k apply -f test-mariadb-operator.yaml
 
-root@k8s-test-cp:~# k -n test-ilba-mariadb-operator get pods
-NAME                      READY   STATUS    RESTARTS      AGE
-ilba-mariadb-operator-0   1/1     Running   1 (87s ago)   2m54s
+:warning: El siguiente paso tarda unos 5 minutos :warning:
 
-root@k8s-test-cp:~# kubectl -n test-ilba-mariadb-operator get mariadbs
-NAMESPACE                    NAME                    READY   STATUS    PRIMARY                   UPDATES                    AGE
-test-ilba-mariadb-operator   ilba-mariadb-operator   True    Running   ilba-mariadb-operator-0   ReplicasFirstPrimaryLast   3m23s
+root@k8s-test-cp:~# kubectl -n test-mariadb-operator get pods
+NAME                 READY   STATUS    RESTARTS      AGE
+mariadb-operator-0   1/1     Running   1 (32s ago)   2m16s
 
-root@k8s-test-cp:~# kubectl -n test-ilba-mariadb-operator get users
-NAME                                READY   STATUS    MAXCONNS   MARIADB                 AGE
-ilba-mariadb-operator-mariadb-sys   True    Created   20         ilba-mariadb-operator   2m15s
-ilba-mariadb-operator-user          True    Created   0          ilba-mariadb-operator   4m5s
+root@k8s-test-cp:~# kubectl -n test-mariadb-operator get mariadbs
+NAME               READY   STATUS    PRIMARY              UPDATES                    AGE
+mariadb-operator   True    Running   mariadb-operator-0   ReplicasFirstPrimaryLast   2m29s
 
-root@k8s-test-cp:~# kubectl -n test-ilba-mariadb-operator get databases
-NAME                             READY   STATUS    CHARSET   COLLATE           MARIADB                 AGE   NAME
-ilba-mariadb-operator-database   True    Created   utf8      utf8_general_ci   ilba-mariadb-operator   18s   ilba-mariadb-operator-bbdd
+root@k8s-test-cp:~# k -n test-mariadb-operator get users
+NAME                           READY   STATUS    MAXCONNS   MARIADB            AGE
+mariadb-operator-mariadb-sys   True    Created   20         mariadb-operator   55s
+mariadb-operator-user          True    Created   5          mariadb-operator   3m1s
+
+root@k8s-test-cp:~# k -n test-mariadb-operator get databases
+NAME                        READY   STATUS    CHARSET   COLLATE           MARIADB            AGE   NAME
+mariadb-operator-database   True    Created   utf8      utf8_general_ci   mariadb-operator   71s   mariadb-operator-bbdd
 ```
 
 Aprovecharemos para meter datos en la BBDD:
 
 ```
-root@k8s-test-cp:~# k -n test-ilba-mariadb-operator exec -it ilba-mariadb-operator-0 -- bash
+root@k8s-test-cp:~# k -n test-mariadb-operator exec -it mariadb-operator-0 -- bash
 
-mysql@ilba-mariadb-operator-0:/$ df -h
+mysql@mariadb-operator-0:/$ df -h
 Filesystem      Size  Used Avail Use% Mounted on
 ...
-/dev/rbd1       4.9G  125M  4.8G   3% /var/lib/mysql
+/dev/rbd0       4.9G  125M  4.8G   3% /var/lib/mysql
 ...
 
 mysql@ilba-mariadb-operator-0:/$ mysql -u root -p
@@ -221,12 +227,13 @@ MariaDB [(none)]> SHOW DATABASES;
 +----------------------------+
 6 rows in set (0.001 sec)
 
-MariaDB [(none)]> USE ilba-mariadb-operator-bbdd;
-MariaDB [ilba-mariadb-operator-bbdd]> CREATE TABLE datos (id INT, nombre VARCHAR(20), apellido VARCHAR(20));
-MariaDB [ilba-mariadb-operator-bbdd]> INSERT INTO datos (id,nombre,apellido) VALUES(1,"Oscar","Mas");
-MariaDB [ilba-mariadb-operator-bbdd]> INSERT INTO datos (id,nombre,apellido) VALUES(2,"Nuria","Ilari");
+MariaDB [(none)]> USE mariadb-operator-bbdd;
 
-MariaDB [ilba-mariadb-operator-bbdd]> SELECT * FROM datos;
+MariaDB [mariadb-operator-bbdd]> CREATE TABLE datos (id INT, nombre VARCHAR(20), apellido VARCHAR(20));
+MariaDB [mariadb-operator-bbdd]> INSERT INTO datos (id,nombre,apellido) VALUES(1,"Oscar","Mas");
+MariaDB [mariadb-operator-bbdd]> INSERT INTO datos (id,nombre,apellido) VALUES(2,"Nuria","Ilari");
+
+MariaDB [mariadb-operator-bbdd]> SELECT * FROM datos;
 +------+--------+----------+
 | id   | nombre | apellido |
 +------+--------+----------+
@@ -235,36 +242,48 @@ MariaDB [ilba-mariadb-operator-bbdd]> SELECT * FROM datos;
 +------+--------+----------+
 2 rows in set (0.001 sec)
 
-mysql@ilba-mariadb-operator-0:/$ exit
+MariaDB [mariadb-operator-bbdd]> quit
+mysql@mariadb-operator-0:/$ exit
 ```
 
 ## Gestión de los backups <div id='id30' />
 
+Los backups que se pueden hacer con el operator de MariaDB son:
+* [Physical backups](https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/physical_backup.md#what-is-a-physical-backup): Physical backups are the recommended method for backing up MariaDB databases, especially in production environments, as they are faster and more efficient than logical backups.
+* [Logical backups](https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/logical_backup.md#what-is-a-logical-backup): A logical backup is a backup that contains the logical structure of the database, such as tables, indexes, and data, rather than the physical storage format. It is created using mariadb-dump, which generates SQL statements that can be used to recreate the database schema and populate it with data.
+
+### Physical backups <div id='id31' />
+
+### Logical backups <div id='id32' />
+
 Procedimiento previo:
 
-* Creamos un bucket en MinIO -> mariadb-operator-backups
+* Creamos un bucket en [MinIO](http://172.26.0.35:9001/) -> mariadb-operator-backups
 * Access Key que nos ha dado Minio:
-  * Access Key: aLZujA17zfuMlucWx9eC
-  * Secret Key: bOAQg09RKYZ6PqHYMkywla2KrrhZXW91mjly8Nzf
+  * Name: mariadb-operator-backups
+  * Access Key: 85kAT9sBv3XJicxuGFWP
+  * Secret Key: bz7bGHPSEkdBTrUUqiSBB1DZjidJWEZ544Z2KHic
 
 Verificamos los datos de acceso al S3:
 
 ```
 root@k8s-test-cp:~# curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc_minio
 root@k8s-test-cp:~# EDPOINT="http://172.26.0.35:9000"
-root@k8s-test-cp:~# KEY="bOAQg09RKYZ6PqHYMkywla2KrrhZXW91mjly8Nzf"
-root@k8s-test-cp:~# KEY_ID="aLZujA17zfuMlucWx9eC"
+root@k8s-test-cp:~# KEY="bz7bGHPSEkdBTrUUqiSBB1DZjidJWEZ544Z2KHic"
+root@k8s-test-cp:~# KEY_ID="85kAT9sBv3XJicxuGFWP"
+
+root@k8s-test-cp:~# chmod +x mc_minio
+root@k8s-test-cp:~# ./mc_minio alias set StorageS3 $EDPOINT $KEY_ID $KEY
 
 root@k8s-test-cp:~# ./mc_minio alias ls StorageS3
 StorageS3
   URL       : http://172.26.0.35:9000
-  AccessKey : aLZujA17zfuMlucWx9eC
-  SecretKey : bOAQg09RKYZ6PqHYMkywla2KrrhZXW91mjly8Nzf
+  AccessKey : 85kAT9sBv3XJicxuGFWP
+  SecretKey : bz7bGHPSEkdBTrUUqiSBB1DZjidJWEZ544Z2KHic
   API       : s3v4
   Path      : auto
   Src       : /root/.mc_minio/config.json
 
-root@k8s-test-cp:~# ./mc_minio alias set StorageS3 $EDPOINT $KEY_ID $KEY
 ```
 
 Creamos el Manifest para gestionar los backups:
@@ -274,20 +293,20 @@ root@k8s-test-cp:~# vim test-mariadb-operator-backup.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ilba-mariadb-operator-secrets-bucket
-  namespace: test-ilba-mariadb-operator
+  name: mariadb-operator-secrets-bucket
+  namespace: test-mariadb-operator
 data:
-  MINIO_SECRET_KEY: Yk9BUWcwOVJLWVo2UHFIWU1reXdsYTJLcnJoWlhXOTFtamx5OE56Zg== #echo -n "bOAQg09RKYZ6PqHYMkywla2KrrhZXW91mjly8Nzf" | base64
-  MINIO_ACCESS_KEY: YUxadWpBMTd6ZnVNbHVjV3g5ZUM= #echo -n "aLZujA17zfuMlucWx9eC" | base64
+  MINIO_SECRET_KEY: Yno3YkdIUFNFa2RCVHJVVXFpU0JCMURaamlkSldFWjU0NFoyS0hpYw== #echo -n "bz7bGHPSEkdBTrUUqiSBB1DZjidJWEZ544Z2KHic" | base64
+  MINIO_ACCESS_KEY: ODVrQVQ5c0J2M1hKaWN4dUdGV1A= #echo -n "85kAT9sBv3XJicxuGFWP" | base64
 ---
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Backup
 metadata:
   name: test-mariadb-operator-backup
-  namespace: test-ilba-mariadb-operator
+  namespace: test-mariadb-operator
 spec:
   mariaDbRef:
-    name: ilba-mariadb-operator
+    name: mariadb-operator
   schedule:
     cron: "0 1 * * *"
     suspend: false
@@ -296,13 +315,13 @@ spec:
   storage:
     s3:
       bucket: mariadb-operator-backups
-      prefix: mariadb-ilba-folder
+      prefix: mariadb-folder
       endpoint: 172.26.0.35:9000
       secretAccessKeySecretKeyRef:
-        name: ilba-mariadb-operator-secrets-bucket
+        name: mariadb-operator-secrets-bucket
         key: MINIO_SECRET_KEY
       accessKeyIdSecretKeyRef:
-        name: ilba-mariadb-operator-secrets-bucket
+        name: mariadb-operator-secrets-bucket
         key: MINIO_ACCESS_KEY
       tls:
         enabled: false
@@ -313,22 +332,51 @@ Aplicamos los canvios y verificamos:
 ```
 root@k8s-test-cp:~# k apply -f test-mariadb-operator-backup.yaml
 
-root@k8s-test-cp:~# k -n test-ilba-mariadb-operator get backups
-NAME                           COMPLETE   STATUS      MARIADB                 AGE
-test-mariadb-operator-backup   False      Scheduled   ilba-mariadb-operator   14s
+root@k8s-test-cp:~# k -n test-mariadb-operator get backups
+NAME                           COMPLETE   STATUS      MARIADB            AGE
+test-mariadb-operator-backup   False      Scheduled   mariadb-operator   8s
 
-root@k8s-test-cp:~# k -n test-ilba-mariadb-operator get cronjobs
+root@k8s-test-cp:~# k -n test-mariadb-operator get cronjobs
 NAME                           SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
-test-mariadb-operator-backup   0 1 * * *   <none>     False     0        <none>          110s
+test-mariadb-operator-backup   0 1 * * *   <none>     False     0        <none>          23s
 ```
 
 Lanzaremos un job y verificaremos en el S3 que están los datos:
 
 ```
-root@k8s-test-cp:~# k -n test-ilba-mariadb-operator create job --from=cronjob/test-mariadb-operator-backup prueba-de-backup-manual
+root@k8s-test-cp:~# vim test-mariadb-operator-backup-now.yaml
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Backup
+metadata:
+  name: test-mariadb-operator-backup
+  namespace: test-mariadb-operator
+spec:
+  mariaDbRef:
+    name: mariadb-operator
+  maxRetention: 48h
+  compression: gzip
+  storage:
+    s3:
+      bucket: mariadb-operator-backups
+      prefix: mariadb-folder
+      endpoint: 172.26.0.35:9000
+      secretAccessKeySecretKeyRef:
+        name: mariadb-operator-secrets-bucket
+        key: MINIO_SECRET_KEY
+      accessKeyIdSecretKeyRef:
+        name: mariadb-operator-secrets-bucket
+        key: MINIO_ACCESS_KEY
+      tls:
+        enabled: false
 
-root@k8s-test-cp:~# ./mc_minio ls StorageS3/mariadb-operator-backups/mariadb-ilba-folder/
-[2025-06-28 10:27:14 CEST] 514KiB STANDARD backup.2025-06-28T08:27:13Z.gzip.sql
+root@k8s-test-cp:~# k apply -f test-mariadb-operator-backup-now.yaml
+
+root@k8s-test-cp:~# k -n test-mariadb-operator get backups
+NAME                           COMPLETE   STATUS    MARIADB            AGE
+test-mariadb-operator-backup   True       Success   mariadb-operator   2m14s
+
+root@k8s-test-cp:~# ./mc_minio ls StorageS3/mariadb-operator-backups/mariadb-folder/
+[2025-09-11 11:28:59 CEST] 514KiB STANDARD backup.2025-09-11T09:28:57Z.gzip.sql
 ```
 
 ## Restore de un backup <div id='id40' />
