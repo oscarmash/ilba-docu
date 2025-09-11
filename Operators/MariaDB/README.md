@@ -3,11 +3,13 @@
 * [Getting Started](#id0)
 * [Instalación del operator](#id10)
 * [Despliegue de BBDD (Standalone)](#id20)
+  * [Como añadir una BBDD](#id21) :construction: **No empezado**
 * [Gestión de los backups](#id30)
   * [Physical backup](#id31) :construction: **No acabado**
   * [Logical backups](#id32)
 * [Restore de un backup](#id40)
 * [Acceso desde fuera del cluster de K8s](#id50)
+* [Monitrización con KPS](#id60) :construction: **No empezado**
 
 ## Getting Started <div id='id0' />
 
