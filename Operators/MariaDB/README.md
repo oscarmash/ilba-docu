@@ -2,7 +2,7 @@
 
 * [Getting Started](#id0)
 * [Instalación del operator](#id10)
-* [Despliegue de BBDD con el operator](#id20)
+* [Despliegue de BBDD (Standalone)](#id20)
 * [Gestión de los backups](#id30)
   * [Physical backup](#id31) :construction: **No acabado**
   * [Logical backups](#id32)
@@ -94,7 +94,7 @@ NAME                   PROVISIONER        RECLAIMPOLICY   VOLUMEBINDINGMODE   AL
 csi-rbd-sc (default)   rbd.csi.ceph.com   Delete          Immediate           true                   49d
 ```
 
-## Despliegue de BBDD con el operator Started <div id='id20' />
+## Despliegue de BBDD (Standalone) <div id='id20' />
 
 Primero crearemos un NS para poder trabajar en el:
 
