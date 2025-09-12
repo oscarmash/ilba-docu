@@ -11,8 +11,9 @@
   * [Logical backups](#id32)
 * [Restore de un backup](#id40)
 * [Acceso desde fuera del cluster de K8s](#id50)
-* [Monitorización con KPS](#id60) :construction: **No acabado**
+* [Monitorización con KPS](#id60)
   * [Instalamos KPS](#id61)
+  * [Configuración + dashboards](#id62)
 
 ## Getting Started <div id='id0' />
 
@@ -723,7 +724,60 @@ Verificaremos los accesos:
   * Username: admin
   * Password: superpassword
 
+### Configuración + dashboards <div id='id62' />
 
+```
+root@k8s-test-cp:~# k -n test-mariadb-operator get mariadbs
+NAME               READY   STATUS    PRIMARY              UPDATES                    AGE
+mariadb-operator   True    Running   mariadb-operator-0   ReplicasFirstPrimaryLast   19h
+```
 
-URL de interes:
-* https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/metrics.md
+```
+root@k8s-test-cp:~# vim test-mariadb-operator.yaml
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: mariadb
+spec:
+...
+  metrics:
+    enabled: true
+    exporter:
+      image: prom/mysqld-exporter:v0.17.2
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 300m
+          memory: 512Mi
+      port: 9104
+    serviceMonitor:
+      prometheusRelease: kube-prometheus-stack
+      jobLabel: mariadb-monitoring
+      interval: 10s
+      scrapeTimeout: 10s
+    username: monitoring
+    passwordSecretKeyRef:
+      name: mariadb-operator-secrets
+      key: MARIADB_METRICS_PASSWORD
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mariadb-operator-secrets
+  namespace: test-mariadb-operator
+data:
+  ...
+  MARIADB_METRICS_PASSWORD: c29yaXNhdA== #sorisat
+```
+
+```
+root@k8s-test-cp:~# k apply -f test-mariadb-operator.yaml
+```
+
+En el [target de Prometheus](http://kps-prometheus.ilba.cat/targets) podremos ver el Operator
+
+Importaremos los siguientes Dashboards:
+* [MySQL Overview](https://grafana.com/grafana/dashboards/7362-mysql-overview/)
+* [MySQL Exporter Quickstart and Dashboard](https://grafana.com/grafana/dashboards/14057-mysql/)
