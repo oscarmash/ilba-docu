@@ -774,6 +774,10 @@ data:
 
 ```
 root@k8s-test-cp:~# k apply -f test-mariadb-operator.yaml
+
+root@k8s-test-cp:~# k -n test-mariadb-operator get servicemonitor
+NAME                       AGE
+mariadb-operator-metrics   8m47s
 ```
 
 En el [target de Prometheus](http://kps-prometheus.ilba.cat/targets) podremos ver el Operator
