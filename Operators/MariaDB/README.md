@@ -717,7 +717,7 @@ Verificaremos los accesos:
 * Alermanager:
   * URL: [http://kps-alermanager.ilba.cat](http://kps-alermanager.ilba.cat)
 * Prometheus:
-  * URL: [http://kps-prometheus.ilba.cat](http://kps-alermanager.ilba.cat)
+  * URL: [http://kps-prometheus.ilba.cat](http://kps-prometheus.ilba.cat)
 * Grafana:
   * URL: [http://kps-grafana.ilba.cat](http://kps-grafana.ilba.cat)
   * Username: admin
