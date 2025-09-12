@@ -7,11 +7,12 @@
   * [Añadir datos a la BBDD desplegada](#id22)
   * [Como añadir una BBDD](#id23) :construction: **No empezado**
 * [Gestión de los backups](#id30)
-  * [Physical backup](#id31) :construction: **No acabado**
+  * [Physical backup](#id31)
   * [Logical backups](#id32)
 * [Restore de un backup](#id40)
 * [Acceso desde fuera del cluster de K8s](#id50)
-* [Monitrización con KPS](#id60) :construction: **No empezado**
+* [Monitorización con KPS](#id60) :construction: **No acabado**
+  * [Instalamos KPS](#id61)
 
 ## Getting Started <div id='id0' />
 
@@ -539,7 +540,190 @@ ilba-mariadb-operator            LoadBalancer   10.233.54.165   172.26.0.102   3
 ilba-mariadb-operator-internal   ClusterIP      None            <none>         3306/TCP         11h
 ```
 
-## Monitrización con KPS <div id='id60' />
+## Monitorización con KPS <div id='id60' />
+
+### Instalamos KPS <div id='id61' />
+
+```
+root@k8s-test-cp:~# kubectl create ns kube-prometheus-stack
+
+root@k8s-test-cp:~# kubectl -n kube-prometheus-stack create secret generic etcd-client-cert \
+--from-file=/etc/ssl/etcd/ssl/ca.pem \
+--from-file=/etc/ssl/etcd/ssl/node-k8s-test-cp.pem \
+--from-file=/etc/ssl/etcd/ssl/node-k8s-test-cp-key.pem
+
+root@k8s-test-cp:~# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts && helm repo update
+```
+
+```
+root@k8s-test-cp:~# vim values-kps.yaml
+crds:
+  enabled: true
+
+additionalPrometheusRules: []
+
+alertmanager:
+  config:
+    global:
+       resolve_timeout: 5m
+    route:
+      group_by: ['job']
+      group_wait: 30s
+      group_interval: 1m
+      repeat_interval: 5h
+      receiver: 'opsgenie'
+      routes:
+      - match:
+          alertname: Watchdog
+        receiver: dropped
+        group_wait: 0s
+        group_interval: 1m
+        repeat_interval: 1m
+      - match:
+          severity: critical
+        continue: true
+        receiver: dropped
+      - match:
+          severity: warning
+        continue: true
+        receiver: dropped
+      - match:
+          severity: 'info'
+        continue: true
+        receiver: dropped
+    receivers:
+    - name: 'dropped'
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    labels: {}
+    hosts:
+      - kps-alermanager.ilba.cat
+    path: /
+  alertmanagerSpec:
+    storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: csi-rbd-sc
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+
+grafana:
+  defaultDashboardsTimezone: Europe/Madrid
+  adminPassword: superpassword
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    labels: {}
+    hosts:
+      - kps-grafana.ilba.cat
+    path: /
+
+prometheus:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    labels: {}
+    hosts:
+      - kps-prometheus.ilba.cat
+    paths:
+      - /
+  prometheusSpec:
+    secrets: ['etcd-client-cert']
+    retention: 30d
+    storageSpec:
+     volumeClaimTemplate:
+       spec:
+         storageClassName: csi-rbd-sc
+         accessModes: ["ReadWriteOnce"]
+         resources:
+           requests:
+             storage: 10Gi
+
+kubeControllerManager:
+  service:
+    targetPort: 10257
+  serviceMonitor:
+    https: true
+    insecureSkipVerify: true
+
+kubeEtcd:
+  endpoints:
+    - 172.26.0.230
+  service:
+    enabled: true
+    port: 2379
+    targetPort: 2379
+  serviceMonitor:
+   scheme: https
+   insecureSkipVerify: true
+   serverName: k8s-test-cp
+   caFile: /etc/prometheus/secrets/etcd-client-cert/ca.pem
+   certFile: /etc/prometheus/secrets/etcd-client-cert/node-k8s-test-cp.pem
+   keyFile: /etc/prometheus/secrets/etcd-client-cert/node-k8s-test-cp-key.pem
+```
+
+```
+root@k8s-test-cp:~# helm search repo prometheus-community/kube-prometheus-stack | awk '{print $2}'
+
+root@k8s-test-cp:~# helm upgrade --install \
+kube-prometheus-stack prometheus-community/kube-prometheus-stack  \
+--create-namespace \
+--namespace kube-prometheus-stack \
+--version=77.6.1 \
+-f values-kps.yaml
+```
+
+```
+root@k8s-test-cp:~# kubectl edit cm/kube-proxy -n kube-system
+    ...
+    metricsBindAddress: 0.0.0.0:10249
+    ...
+
+root@k8s-test-cp:~# kubectl delete pod -l k8s-app=kube-proxy -n kube-system
+```
+
+Verificaremos el correcto funcionamiento:
+
+```
+root@k8s-test-cp:~# helm -n kube-prometheus-stack ls
+NAME                    NAMESPACE               REVISION        UPDATED                                         STATUS          CHART                           APP VERSION
+kube-prometheus-stack   kube-prometheus-stack   1               2025-09-12 17:52:53.128297161 +0200 CEST        deployed        kube-prometheus-stack-77.6.1    v0.85.0
+
+root@k8s-test-cp:~# kubectl -n kube-prometheus-stack get pods
+NAME                                                        READY   STATUS    RESTARTS   AGE
+kube-prometheus-stack-grafana-6c678f6867-dv7p4              3/3     Running   0          2m20s
+kube-prometheus-stack-kube-state-metrics-557fd457c6-5lfqb   1/1     Running   0          2m20s
+kube-prometheus-stack-operator-6b998987cc-b8m27             1/1     Running   0          2m20s
+kube-prometheus-stack-prometheus-node-exporter-92knl        1/1     Running   0          2m20s
+kube-prometheus-stack-prometheus-node-exporter-jxkck        1/1     Running   0          2m20s
+kube-prometheus-stack-prometheus-node-exporter-tjtfk        1/1     Running   0          2m20s
+kube-prometheus-stack-prometheus-node-exporter-zvsps        1/1     Running   0          2m20s
+prometheus-kube-prometheus-stack-prometheus-0               2/2     Running   0          100s
+
+root@k8s-test-cp:~# kubectl -n kube-prometheus-stack get ingress
+NAME                                 CLASS   HOSTS                      ADDRESS        PORTS   AGE
+kube-prometheus-stack-alertmanager   nginx   kps-alermanager.ilba.cat   172.26.0.101   80      2m34s
+kube-prometheus-stack-grafana        nginx   kps-grafana.ilba.cat       172.26.0.101   80      2m34s
+kube-prometheus-stack-prometheus     nginx   kps-prometheus.ilba.cat    172.26.0.101   80      2m34s
+```
+
+Verificaremos los accesos:
+
+* Alermanager:
+  * URL: [http://kps-alermanager.ilba.cat](http://kps-alermanager.ilba.cat)
+* Prometheus:
+  * URL: [http://kps-prometheus.ilba.cat](http://kps-alermanager.ilba.cat)
+* Grafana:
+  * URL: [http://kps-grafana.ilba.cat](http://kps-grafana.ilba.cat)
+  * Username: admin
+  * Password: superpassword
+
+
 
 URL de interes:
 * https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/metrics.md
