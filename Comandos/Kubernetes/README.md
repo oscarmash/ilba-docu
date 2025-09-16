@@ -21,6 +21,7 @@
   * [Show resources (limits/resources) by pod](#id27)
   * [Events sort by time](#id28)
   * [Borrar todos los pods que hangan match con: xxx](#id29)
+  * [Crear un pod en un nodo en concreto (nodeSelector)](#id30)
 * [Alias](#id999)
 
 ## Working daily <div id='id1' />
@@ -331,6 +332,23 @@ Se ha de cambiar el xxx por el match de los pods. Por ejemplo: clilium
 ```
 $ NAMESPACE=pepe
 $ kubectl get pods -n $NAMESPACE --no-headers=true | awk '/xxx/{print $1}' | xargs  kubectl delete -n $NAMESPACE pod --grace-period=0 --force
+```
+
+### Crear un pod en un nodo en concreto (nodeSelector) <div id='id30' />
+
+```
+$ cat pod-nodeSelector.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: ilimit-paas-k8s-pre-nd02
+  containers:
+  - name: test-container
+    image: registry.ops.paas.ilimit.com/picto-frontendpro/frontendpro:0.0.12
+    imagePullPolicy: Always
 ```
 
 ## Alias <div id='id999' />
