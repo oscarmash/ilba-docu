@@ -76,6 +76,23 @@ NAME            NAMESPACE       REVISION        UPDATED                         
 ceph-csi-cephfs ceph-csi-cephfs 5               2025-07-23 12:48:57.931429897 +0200 CEST        deployed        ceph-csi-cephfs-3.13.1  3.13.1
 ```
 
+---
+
+Descargar un chart y subirlo a un repositorio:
+
+```
+$ helm pull oci://registry-1.docker.io/bitnamicharts/thanos --version=17.2.1
+
+$ ls -lha thanos-17.2.1.tgz
+-rw-r--r-- 1 oscar oscar 216K Sep 23 09:40 thanos-17.2.1.tgz
+
+$ helm push thanos-17.2.1.tgz oci://registry.ilimit.es/charts
+```
+
+![alt text](images/helm_upload_to_harbor.png
+)
+
+
 ## Repositorios <div id='id20' />
 
 Repositorios de Helm, recuerda de hacer un "helm repo update" una vez acabados de añadir los repos
