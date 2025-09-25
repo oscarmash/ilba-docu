@@ -542,5 +542,9 @@ root@k8s-test-cp:~# kubectl get secret key-store -o json | jq '.data | map_value
 ## Forzar sincronismo <div id='id31' />
 
 ```
-$ kubectl annotate es NameSpace force-sync=$(date +%s) --overwrite
+$ k get es
+NAME     STORETYPE            STORE           REFRESH INTERVAL   STATUS         READY
+xxx      ClusterSecretStore   vault-backend   10m                SecretSynced   True
+
+$ kubectl annotate es xxx force-sync=$(date +%s) --overwrite
 ```
