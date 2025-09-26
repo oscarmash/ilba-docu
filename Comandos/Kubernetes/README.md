@@ -282,6 +282,45 @@ k8s-cilium-01-wk02 10.233.66.0/24
 k8s-cilium-01-wk03 10.233.67.0/24
 ```
 
+Por si no funciona el comando anterior:
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# kubectl get IPPool
+NAME           CREATED AT
+default-pool   2025-01-23T15:58:28Z
+
+root@ilimit-paas-k8s-pre-cp01:~# kubectl describe IPPool default-pool
+Name:         default-pool
+Namespace:
+Labels:       <none>
+Annotations:  <none>
+API Version:  projectcalico.org/v3
+Kind:         IPPool
+Metadata:
+  Creation Timestamp:  2025-01-23T15:58:28Z
+  Resource Version:    704
+  UID:                 bc6d026d-f655-4d5b-b760-6fa888628c3b
+Spec:
+  Allowed Uses:
+    Workload
+    Tunnel
+  Block Size:     26
+  Cidr:           10.233.64.0/18
+  Ipip Mode:      Never
+  Nat Outgoing:   true
+  Node Selector:  all()
+  Vxlan Mode:     Always
+Events:           <none>
+```
+Tambien lo podemos hacer con el comando de calico:
+
+```
+root@ilimit-paas-k8s-pre-cp01:~# calicoctl get ippool -o wide
+NAME           CIDR             NAT    IPIPMODE   VXLANMODE   DISABLED   DISABLEBGPEXPORT   SELECTOR
+default-pool   10.233.64.0/18   true   Never      Always      false      false              all()
+```
+
+
 ### Curl - Testing ingress <div id='id25' />
 
 ```
