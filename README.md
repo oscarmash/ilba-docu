@@ -11,6 +11,7 @@ Documentación de comandos de K8S
 
 * [Comandos de Kubernetes](./Comandos/Kubernetes/README.md)
 * [Comandos de Helm](./Comandos/Helm/README.md)
+* [Comandos de bash](./Comandos/bash/README.md)
 
 ## docker-compose
 
