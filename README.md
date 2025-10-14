@@ -2,6 +2,10 @@
 
 ## Básicos
 
+Raspberry PI 5
+
+* [Instalación base](./raspberry-pi/base/README.md)
+
 Instalación de K8s con KubeSpray + BootStrap
 
 * [KubeSpray + BootStrap](./mockup-plataforma-k8s/README.md)
