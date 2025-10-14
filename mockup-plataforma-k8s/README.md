@@ -43,7 +43,7 @@ $ make shell
 root@kubespray:/kubespray# apt-get update && apt-get install less
 
 root@kubespray:/kubespray# less roles/kubespray_defaults/vars/main/checksums.yml
-root@kubespray:/kubespray# less roles/kubespray-defaults/defaults/main/checksums.ym
+root@kubespray:/kubespray# less roles/kubespray-defaults/defaults/main/checksums.yml
 ```
 
 ---
