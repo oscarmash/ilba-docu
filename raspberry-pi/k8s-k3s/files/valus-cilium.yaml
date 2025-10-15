@@ -1,0 +1,17 @@
+k8sServiceHost: "auto"
+k8sServicePort: "auto"
+kubeProxyReplacement: "true"
+bpf:
+  masquerade: true
+ipam:
+  operator:
+    clusterPoolIPv4PodCIDRList: ["10.1.0.0/16"]
+ingressController:
+  enabled: true
+  default: true
+  loadbalancerMode: shared
+l2announcements:
+  enabled: true
+cluster:
+  name: k8s-raspberry-pi-01
+  id: 1
