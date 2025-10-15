@@ -18,7 +18,3 @@ disable:
 
 curl -sfL https://get.k3s.io | sh -s - --config=/etc/rancher/k3s/config.yaml
 ```
-
-```
-
-```
