@@ -4,6 +4,8 @@
   * [SD Card to NVME](#id13)
   * [Configuración del S.O. + updates](#id14)
   * [Configuración del networking](#id15)
+  * [neowofetch / neofetch](#id16)
+
 # Instalación base de RapsBerry Pi <div id='id10' />
 
 ## Instalación en la microSD <div id='id11' />
@@ -29,6 +31,11 @@ Servicios:
 ```
 $ ssh-copy-id -i $HOME/.ssh/id_rsa.pub oscar.mas@172.26.0.111
 $ ssh oscar.mas@172.26.0.111
+```
+
+```
+oscar.mas@2025-05:~ $ sudo apt-get remove --purge -y ntp sntp systemd-timesyncd
+oscar.mas@2025-05:~ $ sudo apt install -y postfix chrony iotop iputils-ping net-tools dnsutils curl telnet nmap gpg htop procps
 ```
 
 ```
@@ -136,4 +143,37 @@ EOF
 
 ```
 root@2025-05:/home/oscar.mas# reboot
+```
+
+## neowofetch / neofetch <div id='id16' />
+
+Desde mi equipo local copiaremos el fichero de configuración a la Raspberry Pi
+
+```
+$ cd $HOME/ilba/ilba-docu/raspberry-pi/base/
+$ scp files/neofetch.conf oscar.mas@172.26.0.111:
+```
+
+Desde la Raspberry Pi:
+
+```
+sudo apt-get update && sudo apt-get install -y neowofetch
+sudo rm -rf /etc/update-motd.d/*
+
+sudo chown root:root /home/oscar.mas/neofetch.conf
+sudo chmod 0755 /home/oscar.mas/neofetch.conf
+sudo mv /home/oscar.mas/neofetch.conf /etc/ssh/neofetch.conf
+
+sudo vim /etc/ssh/sshd_config
+    PrintMotd no
+    PrintLastLog no
+    Banner /dev/null
+
+touch ~/.hushlogin    
+sudo grep -c "^neofetch --config /etc/ssh/neofetch.conf" /etc/profile | true
+sudo vim /etc/profile
+    neowofetch --config /etc/ssh/neofetch.conf
+sudo rm -rf /etc/motd
+sudo raspi-config nonint do_wifi_country ES
+sudo reboot
 ```

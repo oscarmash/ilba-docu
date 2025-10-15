@@ -5,6 +5,7 @@
 Raspberry PI 5
 
 * [Instalación base](./raspberry-pi/base/README.md)
+* [Instalación Kubernetes (K3S)](./raspberry-pi/k8s-k3s/README.md) :construction: **No acabado**
 
 Instalación de K8s con KubeSpray + BootStrap
 
