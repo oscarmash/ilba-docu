@@ -35,11 +35,8 @@ $ ssh oscar.mas@172.26.0.111
 
 ```
 oscar.mas@2025-05:~ $ sudo apt-get remove --purge -y ntp sntp systemd-timesyncd
-oscar.mas@2025-05:~ $ sudo apt install -y postfix chrony iotop iputils-ping net-tools dnsutils curl telnet nmap gpg htop procps
-```
+oscar.mas@2025-05:~ $ sudo apt install -y postfix chrony iotop iputils-ping net-tools dnsutils curl telnet nmap gpg htop procps vim
 
-```
-oscar.mas@2025-05:~ $ sudo apt update && sudo apt install -y vim
 oscar.mas@2025-05:~ $ echo "set mouse=c" > $HOME/.vimrc
 oscar.mas@2025-05:~ $ echo "syntax on" >> $HOME/.vimrc
 oscar.mas@2025-05:~ $ echo "set background=dark" >> $HOME/.vimrc
