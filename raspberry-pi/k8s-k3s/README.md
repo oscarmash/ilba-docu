@@ -17,6 +17,8 @@ $ vim /etc/fastab (remove swap partition)
 
 ### Install K3s
 
+Para saber la versión de K3s a instalar: https://docs.k3s.io/release-notes/v1.33.X
+
 ```
 $ mkdir -p /etc/rancher/k3s/
 
@@ -28,9 +30,14 @@ cluster-init: true
 disable:
   - servicelb
   - traefik
+  - metrics-server
 EOF
 
-$ curl -sfL https://get.k3s.io | sh -s - --config=/etc/rancher/k3s/config.yaml
+$ curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.33.5+k3s1 sh -s - --config=/etc/rancher/k3s/config.yaml
+```
+
+```
+$ systemctl status k3s
 ```
 
 ```
@@ -43,6 +50,7 @@ $ source $HOME/.bashrc
 
 ```
 $ kubectl get nodes
+$ kubectl get all -n kube-system
 ```
 
 ### Tunning bash
