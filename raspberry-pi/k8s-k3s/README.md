@@ -160,13 +160,13 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx::server:xxxxxxxxxxxxxx
 oscar.mas@2025-0X:~ $ K3S_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx::server:xxxxxxxxxxxxxx
 ```
 
+:warning: El siguiente paso tarda unos 5 minutos :warning:
+
 ```
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.33.5+k3s1 sh -s - agent \
 --token "${K3S_TOKEN}" \
 --server "https://172.26.0.111:6443"
 ```
-
-:warning: El siguiente paso tarda unos 5 minutos :warning:
 
 ```
 oscar.mas@2025-05:~ $ k get nodes
