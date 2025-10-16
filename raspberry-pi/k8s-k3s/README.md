@@ -1,13 +1,21 @@
-* [Instalación de Kubernetes (K3S)](#id10)
-  * [Control Plane](#id11)
-  * [Worker](#id12)
+* [Instalación de Kubernetes (K3S)](#id1)
+  * [Control Plane](#id10)
+    * [Pre instalación K8s](#id11)
+    * [Install K3s](#id12)
+    * [Tunning bash](#id13)
+    * [Install Helm](#id14)
+    * [Install Cilium](#id15)
+  * [Worker](#id50)
+    * [Pre instalación K8s](#id51)
+    * [Instalación de Kubernetes en los nodos/workers](#id52)
 
-# Instalación de Kubernetes (K3S) <div id='id10' />
+
+# Instalación de Kubernetes (K3S) <div id='id1' />
 
 
-## Control Plane <div id='id11' />
+## Control Plane <div id='id10' />
 
-### Pre instalación K8s
+### Pre instalación K8s <div id='id11' />
 
 ```
 oscar.mas@2025-05:~ $ sudo systemctl disable systemd-zram-setup@zram0.service
@@ -19,7 +27,7 @@ oscar.mas@2025-05:~ $ sudo vim /boot/firmware/cmdline.txt
 oscar.mas@2025-05:~ $ sudo reboot
 ```
 
-### Install K3s
+### Install K3s <div id='id12' />
 
 Para saber la versión de K3s a instalar: https://docs.k3s.io/release-notes/v1.33.X
 
@@ -63,7 +71,7 @@ NAME      STATUS     ROLES                       AGE   VERSION
 2025-05   NotReady   control-plane,etcd,master   84s   v1.33.5+k3s1
 ```
 
-### Tunning bash
+### Tunning bash <div id='id13' />
 
 Alias del sistema:
 
@@ -89,7 +97,7 @@ Instalar [Krew](https://krew.sigs.k8s.io/docs/user-guide/setup/install/) y los s
 $ kubectl krew install ns
 ```
 
-### Install Helm
+### Install Helm <div id='id14' />
 
 ```
 $ sudo apt-get install -y curl gpg apt-transport-https
@@ -98,7 +106,7 @@ $ echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.
 $ sudo apt-get update && sudo apt-get install -y helm
 ```
 
-### Install Cilium
+### Install Cilium <div id='id15' />
 
 ```
 $ cd $HOME/ilba/ilba-docu/raspberry-pi/k8s-k3s
@@ -134,10 +142,10 @@ NAME      STATUS   ROLES                       AGE   VERSION
 ```
 
 
-## Worker <div id='id12' />
+## Worker <div id='id50' />
 
 
-### Pre instalación K8s
+### Pre instalación K8s <div id='id51' />
 
 ```
 oscar.mas@2025-0X:~ $ sudo systemctl disable systemd-zram-setup@zram0.service
@@ -149,7 +157,7 @@ oscar.mas@2025-0X:~ $ sudo vim /boot/firmware/cmdline.txt
 oscar.mas@2025-0X:~ $ sudo reboot
 ```
 
-### Instalación de Kubernetes en los nodos/workers
+### Instalación de Kubernetes en los nodos/workers  <div id='id52' />
 
 ```
 oscar.mas@2025-05:~ $ sudo cat /var/lib/rancher/k3s/server/token
