@@ -5,6 +5,7 @@
     * [Tunning bash](#id13)
     * [Install Helm](#id14)
     * [Install Cilium](#id15)
+    * [Configuración de IP Pool](#id16)
   * [Worker](#id50)
     * [Pre instalación K8s](#id51)
     * [Instalación de Kubernetes en los nodos/workers](#id52)
@@ -141,6 +142,16 @@ NAME      STATUS   ROLES                       AGE   VERSION
 2025-05   Ready    control-plane,etcd,master   23m   v1.33.5+k3s1
 ```
 
+### Configuración de IP Pool <div id='id16' />
+
+```
+$ cd $HOME/ilba/ilba-docu/raspberry-pi/k8s-k3s
+$ scp files/cilium-lb-ipam.yaml oscar.mas@172.26.0.111:
+```
+
+```
+oscar.mas@2025-05:~ $ kcaf cilium-lb-ipam.yaml
+```
 
 ## Worker <div id='id50' />
 
