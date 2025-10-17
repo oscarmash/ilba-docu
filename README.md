@@ -17,6 +17,7 @@ Documentación de comandos de K8S
 
 * [Instalación base](./raspberry-pi/base/README.md)
 * [Instalación Kubernetes (K3S)](./raspberry-pi/k8s-k3s/README.md)
+* [Aplicaciones](./raspberry-pi/apps/README.md)
 
 ## docker-compose
 

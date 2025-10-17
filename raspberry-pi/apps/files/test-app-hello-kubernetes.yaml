@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-ingress
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: index-html-configmap
+  namespace: test-ingress
+data:
+  index.html: |
+    <html>
+    <h1>Hello Kubernetes</h1>
+    <body>
+    This is Nginx Server
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-ilba-deployment
+  namespace: test-ingress
+  labels:
+    app.kubernetes.io/name: app-ilba
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: app-ilba
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: app-ilba
+    spec:
+      containers:
+        - name: my-nginx
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: nginx-index-file
+              mountPath: /usr/share/nginx/html
+      volumes:
+      - name: nginx-index-file
+        configMap:
+          name: index-html-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-ilba-service
+  namespace: test-ingress
+spec:
+  selector:
+    app.kubernetes.io/name: app-ilba
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ilba-ingress
+  namespace: test-ingress
+spec:
+  ingressClassName: cilium
+  rules:
+  - host: test-ingress.pi.ilba.cat
+    http:
+      paths:
+      - backend:
+          service:
+            name: app-ilba-service
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
