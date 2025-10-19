@@ -1,5 +1,6 @@
 * [Aplicaciones](#id1)
   * [App de test](#id10) (nginx)
+  * [Tailscale](#id11)
 
 
 # Aplicaciones <div id='id1' />
@@ -28,4 +29,47 @@ oscar.mas@2025-05:~ $ curl -s -H "Host: test-ingress.pi.ilba.cat" 172.26.0.110
 This is Nginx Server
 </body>
 </html>
+```
+
+## Tailscale <div id='id11' />
+
+En el tailScale, se le han de dr los permisos de:
+* Devices - Core (write scopes)
+* Keys - Auth Keys (write scopes)
+
+```
+oscar.mas@2025-05:~ $ cat values-tailscale.yaml
+oauth:
+  clientId: "k4o..."
+  clientSecret: "tskey-client-k4of..."
+```
+
+```
+helm upgrade --install \
+tailscale-operator tailscale/tailscale-operator \
+--create-namespace \
+--namespace tailscale \
+--version=1.88.4 \
+-f values-tailscale.yaml
+```
+
+```
+oscar.mas@2025-05:~ $ cat test-app-hello-kubernetes.yaml
+...
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tailscale
+  namespace: test-ingress
+spec:
+  defaultBackend:
+    service:
+      name: app-ilba-service
+      port:
+        number: 8080
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - test-ingress.chocolate-elnath.ts.net
 ```
