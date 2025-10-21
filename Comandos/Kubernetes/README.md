@@ -198,6 +198,16 @@ NAME                                       CPU(cores)   MEMORY(bytes)
 calico-kube-controllers-68485cbf9c-q9g2p   5m           113Mi
 ```
 
+Script que muestra los Requests y Limits por contenedor:
+
+```
+for i in `kubectl get pods --no-headers -o custom-columns=":metadata.name"`; do
+echo "Pod: $i"
+kubectl get pods $i -o jsonpath='{range .spec.containers[*]}{"Container Name: "}{.name}{"\n"}{"Requests:"}{.resources.requests}{"\n"}{"Limits:"}{.resources.limits}{"\n"}{end}'
+echo '---'
+done
+```
+
 ### Change SC to default <div id='id21' />
 
 ```
