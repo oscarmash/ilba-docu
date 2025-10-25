@@ -71,7 +71,7 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: test-ingress.pi.ilba.cat
+  - host: test-ingress.172.26.0.110.sslip.io
     http:
       paths:
       - backend:
