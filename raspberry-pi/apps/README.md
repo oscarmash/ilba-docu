@@ -41,7 +41,7 @@ This is Nginx Server
 
 ## Tailscale <div id='id11' />
 
-En el tailScale, se le han de dr los permisos de:
+En el tailScale, se le han de dar los permisos de:
 * Devices - Core (write scopes)
 * Keys - Auth Keys (write scopes)
 
