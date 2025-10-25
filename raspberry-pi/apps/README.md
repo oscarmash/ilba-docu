@@ -19,10 +19,10 @@ oscar.mas@2025-05:~ $ kcaf test-app-hello-kubernetes.yaml
 
 ```
 oscar.mas@2025-05:~ $ k -n test-ingress get ingress
-NAME               CLASS       HOSTS                                ADDRESS                                PORTS     AGE
-app-ilba-ingress   cilium      test-ingress.172.26.0.110.sslip.io   172.26.0.110                           80        8d
+NAME               CLASS       HOSTS                              ADDRESS                                PORTS     AGE
+app-ilba-ingress   cilium      test-ingress.172.26.0.110.nip.io   172.26.0.110                           80        3s
 
-oscar.mas@2025-05:~ $ curl -s -H "Host: test-ingress.172.26.0.110.sslip.io" 172.26.0.110
+oscar.mas@2025-05:~ $ curl -s -H "Host: test-ingress.172.26.0.110.nip.io" 172.26.0.110
 <html>
 <h1>Hello Kubernetes</h1>
 <body>
@@ -30,7 +30,7 @@ This is Nginx Server
 </body>
 </html>
 
-oscar.mas@2025-05:~ $ curl -s test-ingress.172.26.0.110.sslip.io
+oscar.mas@2025-05:~ $ curl -s test-ingress.172.26.0.110.nip.io
 <html>
 <h1>Hello Kubernetes</h1>
 <body>
