@@ -1,8 +1,8 @@
 SHELL := /bin/bash
 PATH := bin:$(PATH)
 ENV ?= k8s-test
-KUBESPRAY_VERSION=v2.28.1
-KUBE_VERSION ?= 1.32.8
+KUBESPRAY_VERSION=v2.29.0
+KUBE_VERSION ?= 1.33.5
 TAG := xxx
 
 BIN=docker run --rm -it --name kubespray --hostname kubespray \
