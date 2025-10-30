@@ -144,7 +144,7 @@ $ kubectl debug -it netbox-postgresql-0 --target=postgresql --image=debian:12
 Paquetes a instalar, para una debian:
 
 ```
-apt-get update && apt install -y iputils-ping net-tools dnsutils curl telnet nmap default-mysql-client gpg htop procps
+apt-get update && apt install -y iputils-ping net-tools bind9-dnsutils curl telnet nmap default-mysql-client gpg htop procps
 ```
 
 ### Hacer limpieza de pods <div id='id19' />
