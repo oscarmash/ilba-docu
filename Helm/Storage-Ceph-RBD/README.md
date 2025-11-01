@@ -124,12 +124,15 @@ root@ceph-aio:~# ceph auth get client.k8s
 ## Config Ceph <div id='id2' /> 
 
 ```
-root@diba-master:~# helm repo add ceph-csi https://ceph.github.io/csi-charts
-root@diba-master:~# helm repo update
+root@k8s-test-cp:~# helm repo add ceph-csi https://ceph.github.io/csi-charts && helm repo update
 
-root@diba-master:~# helm search repo ceph-csi/ceph-csi-rbd
+root@k8s-test-cp:~# helm search repo ceph-csi/ceph-csi-rbd | awk '{print $2}'
+CHART
+3.15.0
+
+root@k8s-test-cp:~# helm search repo ceph-csi/ceph-csi-rbd
 NAME                    CHART VERSION   APP VERSION     DESCRIPTION
-ceph-csi/ceph-csi-rbd   3.11.0          3.11.0          Container Storage Interface (CSI) driver, provi...
+ceph-csi/ceph-csi-rbd   3.15.0          3.15.0          Container Storage Interface (CSI) driver, provi...
 ```
 
 ```
