@@ -154,6 +154,8 @@ secret:
   userKey: AQDs9H9mvNoLIRAAosZeAMUDg7am2bGbVi7zoA==
 ```
 
+:warning: El siguiente paso tarda unos 15 minutos :warning:
+
 ```
 root@diba-master:~# helm upgrade --install ceph-csi-rbd \
 --create-namespace \
