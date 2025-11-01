@@ -164,12 +164,12 @@ root@diba-master:~# helm upgrade --install ceph-csi-rbd \
 --create-namespace \
 --namespace ceph-csi \
 -f values-ceph-csi-rbd.yaml \
---version=3.11.0 \
+--version=3.15.0 \
 ceph-csi/ceph-csi-rbd
 
 root@kubespray-aio:~# helm -n ceph-csi ls
 NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
-ceph-csi-rbd    ceph-csi        1               2024-06-29 13:12:31.60139992 +0200 CEST deployed        ceph-csi-rbd-3.11.0     3.11.0
+ceph-csi-rbd    ceph-csi        1               2025-11-01 09:35:34.829032692 +0100 CET deployed        ceph-csi-rbd-3.15.0     3.15.0
 ```
 
 ```
