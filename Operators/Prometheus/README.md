@@ -2,6 +2,11 @@
 
 * [Getting Started](#id0)
 * [Instalación](#id10)
+* [Ejemplo](#id20)
+  * [Ingress](#id21)
+  * [Service](#id22)
+  * [Prometheus](#id23)
+  * [ServiceMonitor](#id24)      
 
 ## Getting Started <div id='id0' />
 
@@ -80,3 +85,95 @@ root@diba-master:~# kubectl -n monitoring --address 0.0.0.0 port-forward svc/gra
 ```
 
 Accedemos a la consola de [Grafana](http://172.26.0.191:3000). Usuario y password: admin/admin
+
+## Ejemplo <div id='id20' />
+
+### Ingress <div id='id21' />
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prom-opencost-ui-pub
+  namespace: ca-ilimit-opencost
+  labels:
+    app: prometheus-opencost
+  annotations:
+    #nginx.ingress.kubernetes.io/whitelist-source-range: 80.94.0.0/20,10.0.0.0/8,147.83.58.0/24
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: prom.ilimit-opencost.pre.paas.ilimit.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus-opencost # match-1
+            port:
+              number: 9090
+  tls:
+    - hosts:
+        - prom.ilimit-opencost.pre.paas.ilimit.com
+```
+
+### Service <div id='id22' />
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-opencost # match-1
+  namespace: ca-ilimit-opencost
+  labels:
+    app: prometheus-opencost
+spec:
+  type: ClusterIP
+  selector:
+    prometheus: prometheus-opencost # match-2
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: web
+```
+
+### Prometheus <div id='id23' />
+
+```
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus-opencost # match-2
+  namespace: ca-ilimit-opencost
+spec:
+  replicas: 1
+  version: v3.5.0
+  retention: 365d
+  serviceMonitorSelector:
+    matchLabels:
+      serviceMonitorSelector: prometheus-opencost # match-3
+```
+
+### ServiceMonitor <div id='id24' />
+
+```
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: prometheus-opencost
+  namespace: core
+  labels:
+    serviceMonitorSelector: prometheus-opencost # match-3
+spec:
+  attachMetadata:
+    node: false
+  endpoints:
+  - port: http-metrics
+    scheme: http
+  jobLabel: jobLabel
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: monitoring
+      app.kubernetes.io/name: prometheus-node-exporter
+```

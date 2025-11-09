@@ -66,7 +66,7 @@ Los operators los podemos encontrar aquí:
 Documentación de productos usando Operators
 
 * [Operator - MariaDB](./Operators/MariaDB/README.md)
-* [Operator - Prometheus](./Operators/Prometheus/README.md) :construction: **No acabado**
+* [Operator - Prometheus](./Operators/Prometheus/README.md)
 * [Operator - Loki](./Operators/Loki/README.md) :construction: **No acabado**
 
 ## Varios Kubernetes
