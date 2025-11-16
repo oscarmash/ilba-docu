@@ -3,7 +3,9 @@
 * [Requisitos previos](#id10)
 * [MinIO](#id20)
 * [Loki](#id30)
-* [Promtail](#id40)
+* [Collect container logs](#id40)
+  * [Promtail](#id41) :no_entry_sign:
+  * [Alloy](#id42)
 * [KPS](#id50) (Kube Prometheus Stack)
 * [KEE](#id60) (Kubernetes Event Exporter)
 * [End](#id70)
@@ -99,7 +101,10 @@ loki-read-7f6774c7d6-kfb7s      1/1     Running   0          75s
 loki-results-cache-0            2/2     Running   0          75s
 loki-write-0                    1/1     Running   0          75s
 ```
-## promtail <div id='id40' />
+
+## Collect container logs <div id='id40' />
+
+### Promtail <div id='id41' />
 
 ```
 helm upgrade --install \
@@ -126,6 +131,34 @@ promtail-z6gk5   1/1     Running   0          2m5s
 En estos momentos, MinIO ya tiene que estar recibiendo datos:
 
 ![alt text](images/bucket_recibiendo_datos.png)
+
+### Alloy <div id='id42' />
+
+```
+$ scp "Helm/logs_pods_and_events/yaml/values-alloy.yaml" 172.26.0.230:
+```
+
+```
+helm upgrade --install \
+alloy grafana/alloy \
+--create-namespace \
+--namespace alloy \
+--version=1.4.0 \
+-f values-alloy.yaml
+```
+
+```
+root@k8s-test-cp:~# helm -n alloy ls
+NAME    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
+alloy   alloy           1               2025-11-16 10:04:21.82373654 +0100 CET  deployed        alloy-1.4.0     v1.11.3
+
+root@k8s-test-cp:~# k -n alloy get pods
+NAME          READY   STATUS    RESTARTS   AGE
+alloy-dkmp5   2/2     Running   0          30m
+alloy-ls2ts   2/2     Running   0          30m
+alloy-pllgx   2/2     Running   0          30m
+```
+
 
 ## KPS <div id='id50' />
 
@@ -187,11 +220,19 @@ Verificaremos los accesos:
   * Username: admin
   * Password: superpassword
 
-Aplicaremos el dashboard de Loki:
+~~Aplicaremos el dashboard de Loki:~~
 
 ```
 root@k8s-test-cp:~# kubectl apply -f dashboard-loki.yaml
 ```
+
+Aplicaremos el dashboard de Loki (para Alloy):
+
+```
+root@k8s-test-cp:~# kubectl apply -f dashboard-loki-alloy.yaml
+```
+
+
 
 ![alt text](images/dashboard_loki.png)
 
