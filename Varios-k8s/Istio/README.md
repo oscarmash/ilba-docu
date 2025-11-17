@@ -6,7 +6,6 @@
     * [CRD's](#id13)
     * [Istio CNI plugin](#id14)
     * [Ingress Gateway](#id15)
-    * [Create IngressClass](#id16)
 * [Creación de un Ingress](#id20)
   * [Service / Deployment](#id21)
   * [Gateway / VirtualService](#id22)
@@ -87,7 +86,6 @@ La instalación de Istio via helm, se compone de los siguientes productos:
 * [CRD's](#id13)
 * [Istio CNI plugin](#id14)
 * [Ingress Gateway](#id15)
-* [Create IngressClass](#id16)
 
 ### CRD's <div id='id13' />
 
@@ -169,34 +167,6 @@ root@kubespray-aio:~# kubectl -n istio-ingress logs -f $POD
 ....
 2024-07-06T06:40:42.055182Z     info    Readiness succeeded in 1.110894429s
 2024-07-06T06:40:42.056220Z     info    Envoy proxy is ready
-```
-
-### Create IngressClass <div id='id16' />
-
-Por defecto, no nos crea el IngressClass:
-
-```
-root@k8s-test-cp:~# k get ingressclass -A
-NAME    CONTROLLER             PARAMETERS   AGE
-nginx   k8s.io/ingress-nginx   <none>       18d
-```
-
-```
-kubectl apply -f - <<EOF
-apiVersion: networking.k8s.io/v1
-kind: IngressClass
-metadata:
-  name: istio
-spec:
-  controller: istio.io/ingress-controller
-EOF
-```
-
-```
-root@k8s-test-cp:~# k get ingressclass -A
-NAME    CONTROLLER                    PARAMETERS   AGE
-istio   istio.io/ingress-controller   <none>       11s
-nginx   k8s.io/ingress-nginx          <none>       18d
 ```
 
 # Creación de un Ingress<div id='id20' />
