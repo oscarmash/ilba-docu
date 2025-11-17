@@ -3,6 +3,9 @@
 * [Instalación de Istio](#id10)
   * [Descargandonos el Binario](#id11) Recomendada
   * [Via HELM](#id12)
+    * [CRD's](#id13)
+    * [Istio CNI plugin](#id14)
+    * [Ingress Gateway](#id15)  
 * [Creación de un Ingress](#id20)
   * [Service / Deployment](#id21)
   * [Gateway / VirtualService](#id22)
@@ -79,32 +82,71 @@ istiod                 ClusterIP      10.233.44.147   <none>         15010/TCP,1
 
 ## Via Helm <div id='id12' />
 
+La instalación de Istio via helm, se compone de los siguientes productos:
+* [CRD's](#id13)
+* [Istio CNI plugin](#id14)
+* [Ingress Gateway](#id15)
+
+### CRD's <div id='id13' />
+
+Istio Base instala los CRDs (Custom Resource Definitions) y los roles de clúster esenciales.
+
 ```
 root@kubespray-aio:~# helm repo add istio https://istio-release.storage.googleapis.com/charts && helm repo update
 
-root@kubespray-aio:~# kubectl create ns istio-system
-
-root@kubespray-aio:~# helm install istio-base istio/base -n istio-system --set defaultRevision=default
+root@kubespray-aio:~# helm install istio-base istio/base -n istio-system --set defaultRevision=default --create-namespace
 
 root@kubespray-aio:~# helm -n istio-system ls
 NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
 istio-base      istio-system    1               2024-07-06 08:38:31.152764741 +0200 CEST        deployed        base-1.22.2     1.22.2
+```
 
+### Istio CNI plugin <div id='id14' />
+
+Istio CNI plugin redirige el tráfico de red a los proxies sidecar de Envoy sin requerir el uso de un contenedor init o credenciales elevadas en el pod.
+
+```
 root@kubespray-aio:~# helm install istiod istio/istiod -n istio-system --wait
 
 root@kubespray-aio:~# helm -n istio-system ls
 NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
 istio-base      istio-system    1               2024-07-06 08:38:31.152764741 +0200 CEST        deployed        base-1.22.2     1.22.2
 istiod          istio-system    1               2024-07-06 08:39:01.60726576 +0200 CEST         deployed        istiod-1.22.2   1.22.2
+```
 
-root@kubespray-aio:~# kubectl create ns istio-ingress
+### Ingress Gateway <div id='id15' />
 
-root@kubespray-aio:~# kubectl get ns istio-ingress --show-labels
-NAME            STATUS   AGE   LABELS
-istio-ingress   Active   39s   kubernetes.io/metadata.name=istio-ingress
+Se ha ce verificar que tengamos ip's libres antes de instalar el Ingress Gateway:
 
+```
+root@k8s-test-cp:~# k -n metallb-system get IPAddressPool
+NAME        AUTO ASSIGN   AVOID BUGGY IPS   ADDRESSES
+base-pool   true          false             ["172.26.0.101/32"]
+
+root@k8s-test-cp:~# cat <<EOF > metallb_config.yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: base-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 172.26.0.101/32
+  - 172.26.0.102/32
+EOF
+
+root@k8s-test-cp:~# k apply -f metallb_config.yaml
+
+root@k8s-test-cp:~# k -n metallb-system get IPAddressPool
+NAME        AUTO ASSIGN   AVOID BUGGY IPS   ADDRESSES
+base-pool   true          false             ["172.26.0.101/32","172.26.0.102/32"]
+```
+
+El Ingress Gatewayde Istio sirve como punto de entrada único para el tráfico entrante a un clúster de Kubernetes (es el Ingress):
+
+```
 root@kubespray-aio:~# echo "kind: DaemonSet" > values-istio.yaml
-root@kubespray-aio:~# helm upgrade --install istio-ingress istio/gateway -n istio-ingress -f values-istio.yaml --wait
+root@kubespray-aio:~# helm upgrade --install istio-ingress istio/gateway -n istio-ingress -f values-istio.yaml --create-namespace
 
 root@kubespray-aio:~# kubectl -n istio-ingress get pods -o wide
 NAME                  READY   STATUS    RESTARTS   AGE   IP              NODE               NOMINATED NODE   READINESS GATES
@@ -115,6 +157,10 @@ istio-ingress-xw4jp   1/1     Running   0          32s   10.233.112.20   kubespr
 root@kubespray-aio:~# helm -n istio-ingress ls
 NAME            NAMESPACE       REVISION        UPDATED                                         STATUS          CHART           APP VERSION
 istio-ingress   istio-ingress   1               2024-07-06 08:40:09.378262571 +0200 CEST        deployed        gateway-1.22.2  1.22.2
+
+root@kubespray-aio:~# k -n istio-ingress get svc
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP    PORT(S)                                      AGE
+istio-ingress   LoadBalancer   10.233.11.105   172.26.0.102   15021:30561/TCP,80:30319/TCP,443:30916/TCP   10m
 
 root@kubespray-aio:~# POD=`kubectl -n istio-ingress get pods | grep istio-ingress | awk '{print $1}' | tail -1`
 root@kubespray-aio:~# kubectl -n istio-ingress logs -f $POD
@@ -592,4 +638,3 @@ Testing de acceso:
 ```
 root@kubespray-aio:~# kubectl port-forward svc/kiali 20001:20001 -n istio-observability --address 0.0.0.0
 ```
-
