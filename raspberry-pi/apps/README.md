@@ -5,7 +5,8 @@
     * [Instalación](#id31)
     * [Creación del cluster](#id32)
 * [Troubleshooting](#id100)
-  * [Rook Ceph: no encuentra los OSDs](#id110)
+  * [Rook Ceph: toolbox](#id111)
+  * [Rook Ceph: no encuentra los OSDs](#id112)
 
 # Aplicaciones <div id='id1' />
 
@@ -223,9 +224,54 @@ rook-ceph-nvme   /var/lib/rook     3          17h   Ready   Cluster created succ
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Troubleshooting <div id='id100' />
 
-### Rook Ceph: no encuentra los OSDs <div id='id110' />
+### Rook Ceph: toolbox <div id='id111' />
+
+Contenedor para poder acceder a la consola de Ceph:
+
+```
+oscar.mas@2025-05:~ $ wget https://raw.githubusercontent.com/rook/rook/refs/heads/master/deploy/examples/toolbox.yaml
+oscar.mas@2025-05:~ $ k ns rook-ceph
+oscar.mas@2025-05:~ $ k apply -f toolbox.yaml
+oscar.mas@2025-05:~ $ k -n rook-ceph exec deploy/rook-ceph-tools -it -- bash
+```
+Recopilación de comandos útiles
+
+```
+bash-5.1$ ceph -s
+```
+
+```
+bash-5.1$ ceph osd tree
+bash-5.1$ ceph osd df
+```
+
+### Rook Ceph: no encuentra los OSDs <div id='id112' />
 
 El estado del cluster de Ceph nos da *HEALTH_WARN*
 
@@ -233,13 +279,6 @@ El estado del cluster de Ceph nos da *HEALTH_WARN*
 oscar.mas@2025-05:~ $ kubectl -n rook-ceph get cephcluster
 NAME             DATADIRHOSTPATH   MONCOUNT   AGE   PHASE   MESSAGE                        HEALTH        EXTERNAL   FSID
 rook-ceph-nvme   /var/lib/rook     3          52m   Ready   Cluster created successfully   HEALTH_WARN              a4a44952-4dcf-4389-bfa7-745bfa633870
-```
-
-```
-oscar.mas@2025-05:~ $ wget https://raw.githubusercontent.com/rook/rook/refs/heads/master/deploy/examples/toolbox.yaml
-oscar.mas@2025-05:~ $ k ns rook-ceph
-oscar.mas@2025-05:~ $ k apply -f toolbox.yaml
-oscar.mas@2025-05:~ $ kubectl -n rook-ceph exec deploy/rook-ceph-tools -it -- bash
 ```
 
 En los logs podemos ver el siguiente mensaje:
