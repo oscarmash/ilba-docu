@@ -289,10 +289,8 @@ root@kubespray-aio:~# kubectl get -n test-ingress-istio pods $POD -o jsonpath='{
 mi-primer-deployment istio-proxy
 
 root@kubespray-aio:~# kubectl -n istio-system get svc
-NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP    PORT(S)                                                                      AGE
-istio-egressgateway    ClusterIP      10.233.23.70    <none>         80/TCP,443/TCP                                                               13m
-istio-ingressgateway   LoadBalancer   10.233.49.152   172.26.0.101   15021:30511/TCP,80:31774/TCP,443:31205/TCP,31400:31367/TCP,15443:31689/TCP   13m
-istiod                 ClusterIP      10.233.44.147   <none>         15010/TCP,15012/TCP,443/TCP,15014/TCP                                        14m
+NAME     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                 AGE
+istiod   ClusterIP   10.233.35.121   <none>        15010/TCP,15012/TCP,443/TCP,15014/TCP   41m                                      14m
 
 root@kubespray-aio:~# kubectl get vs -A
 NAMESPACE            NAME      GATEWAYS              HOSTS                 AGE
