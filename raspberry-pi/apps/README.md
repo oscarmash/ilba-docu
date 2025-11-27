@@ -7,6 +7,7 @@
     * [Crush map](#id33)
     * [Dashboard](#id34)
     * [Creación del pool + SC](#id35)
+    * [Test de rook](#id36)
 * [Troubleshooting](#id100)
   * [Rook Ceph: toolbox](#id111)
   * [Rook Ceph: Recopilación de comandos](#id112)
@@ -15,7 +16,6 @@
 # Aplicaciones <div id='id1' />
 
 ## App de test (nginx) <div id='id10' />
-
 
 ```
 $ cd $HOME/ilba/ilba-docu/raspberry-pi/apps/files
@@ -353,6 +353,74 @@ local-path (default)   rancher.io/local-path        Delete          WaitForFirst
 rook-ceph-block        rook-ceph.rbd.csi.ceph.com   Delete          Immediate              true                   3m14
 ```
 
+## Test de rook <div id='id36' />
+
+```
+cat <<EOF > rook-ceph-test-rbd.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-ceph-rbd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-fs-apache
+  namespace: test-ceph-rbd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deployment
+  namespace: test-ceph-rbd
+spec:
+  selector:
+    matchLabels:
+      app: httpd
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      containers:
+      - name: httpd
+        image: httpd
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: data
+          mountPath: /mydata
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-fs-apache
+EOF
+```
+
+```
+oscar.mas@2025-05:~ $ k apply -f rook-ceph-test-rbd.yaml
+
+oscar.mas@2025-05:~ $ k -n test-ceph-rbd get pvc
+NAME            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      VOLUMEATTRIBUTESCLASS   AGE
+pvc-fs-apache   Bound    pvc-8faff9c2-c3cc-4099-b2b8-352955b916ba   1Gi        RWO            rook-ceph-block   <unset>                 53s
+
+oscar.mas@2025-05:~ $ k -n test-ceph-rbd get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+httpd-deployment-56d456c694-k5x72   1/1     Running   0          71s
+
+oscar.mas@2025-05:~ $ POD=`kubectl -n test-ceph-rbd get pods | grep http | awk '{print $1}'`
+oscar.mas@2025-05:~ $ k -n test-ceph-rbd exec -it $POD -- df -h | grep rbd0
+/dev/rbd0       974M   24K  958M   1% /mydata
+```
 
 
 
