@@ -8,6 +8,7 @@
     * [Dashboard](#id34)
     * [Creación del pool + SC](#id35)
     * [Test de rook](#id36)
+  * [KPS](#id40)
 * [Troubleshooting](#id100)
   * [Rook Ceph: toolbox](#id111)
   * [Rook Ceph: Recopilación de comandos](#id112)
@@ -421,6 +422,26 @@ oscar.mas@2025-05:~ $ POD=`kubectl -n test-ceph-rbd get pods | grep http | awk '
 oscar.mas@2025-05:~ $ k -n test-ceph-rbd exec -it $POD -- df -h | grep rbd0
 /dev/rbd0       974M   24K  958M   1% /mydata
 ```
+
+## KPS <div id='id40' />
+
+```
+oscar.mas@2025-05:~ $ kubectl create ns kps
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
