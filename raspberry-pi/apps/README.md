@@ -4,6 +4,9 @@
   * [Rook Ceph](#id30)
     * [Instalación](#id31)
     * [Creación del cluster](#id32)
+    * [Crush map](#id33)
+    * [Dashboard](#id34)
+    * [Creación del pool + SC](#id35)
 * [Troubleshooting](#id100)
   * [Rook Ceph: toolbox](#id111)
   * [Rook Ceph: no encuentra los OSDs](#id112)
@@ -219,8 +222,135 @@ NAME             DATADIRHOSTPATH   MONCOUNT   AGE   PHASE   MESSAGE             
 rook-ceph-nvme   /var/lib/rook     3          17h   Ready   Cluster created successfully   HEALTH_OK              a4a44952-4dcf-4389-bfa7-745bfa633870
 ```
 
+### Crush Map <div id='id32' />
 
+```
+oscar.mas@2025-05:~ $ k -n rook-ceph exec deploy/rook-ceph-tools -it -- bash
 
+bash-5.1$ ceph osd tree
+ID  CLASS  WEIGHT   TYPE NAME         STATUS  REWEIGHT  PRI-AFF
+-1         1.04846  root default
+-5         0.34949      host 2025-07
+ 1   nvme  0.34949          osd.1         up   1.00000  1.00000
+-7         0.34949      host 2025-09
+ 2   nvme  0.34949          osd.2         up   1.00000  1.00000
+-3         0.34949      host 2025-11
+ 0   nvme  0.34949          osd.0         up   1.00000  1.00000
+
+bash-5.1$ ceph osd crush add-bucket raspberry-pi-row1 row
+
+bash-5.1$ ceph osd crush move raspberry-pi-row1 root=default
+
+bash-5.1$ ceph osd crush move 2025-07 row=raspberry-pi-row1
+bash-5.1$ ceph osd crush move 2025-09 row=raspberry-pi-row1
+bash-5.1$ ceph osd crush move 2025-11 row=raspberry-pi-row1
+
+bash-5.1$ ceph osd tree
+ID  CLASS  WEIGHT   TYPE NAME                  STATUS  REWEIGHT  PRI-AFF
+-1         1.04846  root default
+-9         1.04846      row raspberry-pi-row1
+-5         0.34949          host 2025-07
+ 1   nvme  0.34949              osd.1              up   1.00000  1.00000
+-7         0.34949          host 2025-09
+ 2   nvme  0.34949              osd.2              up   1.00000  1.00000
+-3         0.34949          host 2025-11
+ 0   nvme  0.34949              osd.0              up   1.00000  1.00000
+```
+
+### Dashboard <div id='id34' />
+
+```
+oscar.mas@2025-05:~ $ cat rook-ceph-dashboard.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rook-ceph-dashboard
+  namespace: rook-ceph
+spec:
+  ingressClassName: cilium
+  rules:
+  - host: ceph-dashboard.172.26.0.110.nip.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: rook-ceph-mgr-dashboard
+            port:
+              number: 7000
+        path: /
+        pathType: Prefix
+```
+
+Saber el password del Dashboard que viene por defecto:
+
+```
+oscar.mas@2025-05:~ $ sudo apt-get update && sudo apt-get install jq -y
+
+oscar.mas@2025-05:~ $ k -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath="{['data']['password']}" | base64 --decode && echo
+&+f4&;\$l[^k7lpug<sN
+```
+Datos de acceso:
+
+* URL: http://ceph-dashboard.172.26.0.110.nip.io
+* USERNAME: admin
+* PASSWORD: &+f4&;\$l[^k7lpug<sN
+
+### Creación del pool + SC <div id='id35' />
+
+```
+oscar.mas@2025-05:~ $ vim rook-ceph-pool-rbd.yaml
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: replicapool
+  namespace: rook-ceph
+spec:
+  failureDomain: host
+  replicated:
+    size: 3
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: rook-ceph-block
+provisioner: rook-ceph.rbd.csi.ceph.com
+parameters:
+  clusterID: rook-ceph
+  pool: replicapool
+  imageFormat: "2"
+  imageFeatures: layering
+  csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+  csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+  csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+  csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+  csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+  csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+  csi.storage.k8s.io/fstype: ext4
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+```
+
+```
+oscar.mas@2025-05:~ $ k apply -f rook-ceph-pool-rbd.yaml
+```
+
+```
+oscar.mas@2025-05:~ $ k -n rook-ceph exec deploy/rook-ceph-tools -it -- bash
+
+bash-5.1$ ceph health detail
+HEALTH_OK
+
+bash-5.1$ exit
+
+oscar.mas@2025-05:~ $ k -n rook-ceph get cephblockpool
+NAME          PHASE   TYPE         FAILUREDOMAIN   AGE
+replicapool   Ready   Replicated   host            3m8s
+
+oscar.mas@2025-05:~ $ k -n rook-ceph get sc
+NAME                   PROVISIONER                  RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+local-path (default)   rancher.io/local-path        Delete          WaitForFirstConsumer   false                  42d
+rook-ceph-block        rook-ceph.rbd.csi.ceph.com   Delete          Immediate              true                   3m14
+```
 
 
 
@@ -269,6 +399,7 @@ bash-5.1$ ceph -s
 ```
 bash-5.1$ ceph osd tree
 bash-5.1$ ceph osd df
+bash-5.1$ ceph osd lspools
 ```
 
 ### Rook Ceph: no encuentra los OSDs <div id='id112' />
