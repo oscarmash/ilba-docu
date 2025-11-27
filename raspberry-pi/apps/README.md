@@ -9,7 +9,8 @@
     * [Creación del pool + SC](#id35)
 * [Troubleshooting](#id100)
   * [Rook Ceph: toolbox](#id111)
-  * [Rook Ceph: no encuentra los OSDs](#id112)
+  * [Rook Ceph: Recopilación de comandos](#id112)
+  * [Rook Ceph: no encuentra los OSDs](#id113)
 
 # Aplicaciones <div id='id1' />
 
@@ -390,7 +391,9 @@ oscar.mas@2025-05:~ $ k ns rook-ceph
 oscar.mas@2025-05:~ $ k apply -f toolbox.yaml
 oscar.mas@2025-05:~ $ k -n rook-ceph exec deploy/rook-ceph-tools -it -- bash
 ```
-Recopilación de comandos útiles
+
+### Rook Ceph: Recopilación de comandos <div id='id112' />
+
 
 ```
 bash-5.1$ ceph -s
@@ -398,11 +401,14 @@ bash-5.1$ ceph -s
 
 ```
 bash-5.1$ ceph osd tree
+bash-5.1$ ceph osd df tree
+bash-5.1$ ceph osd status
 bash-5.1$ ceph osd df
 bash-5.1$ ceph osd lspools
+bash-5.1$ ceph osd pool get <pool> size
 ```
 
-### Rook Ceph: no encuentra los OSDs <div id='id112' />
+### Rook Ceph: no encuentra los OSDs <div id='id113' />
 
 El estado del cluster de Ceph nos da *HEALTH_WARN*
 
