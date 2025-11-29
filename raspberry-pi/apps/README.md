@@ -8,7 +8,9 @@
     * [Dashboard](#id34)
     * [Creación del pool + SC](#id35)
     * [Test de rook](#id36)
-  * [KPS](#id40)
+  * [Monitorización](#id40)
+    * [Prometheus operator](#id41)
+    * [Grafana operator](#id42)
 * [Troubleshooting](#id100)
   * [Rook Ceph: toolbox](#id111)
   * [Rook Ceph: Recopilación de comandos](#id112)
@@ -423,14 +425,47 @@ oscar.mas@2025-05:~ $ k -n test-ceph-rbd exec -it $POD -- df -h | grep rbd0
 /dev/rbd0       974M   24K  958M   1% /mydata
 ```
 
-## KPS <div id='id40' />
+## Monitorización <div id='id40' />
 
 ```
-oscar.mas@2025-05:~ $ kubectl create ns kps
-
+oscar.mas@2025-05:~ $ kubectl create ns monitoring && k ns monitoring
+oscar.mas@2025-05:~ $ mkdir monitoring && cd monitoring
 ```
 
+## Prometheus operator <div id='id41' />
 
+```
+oscar.mas@2025-05:~/monitoring $ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts && helm repo update
+```
+
+```
+oscar.mas@2025-05:~/monitoring $ vim values-kps.yaml
+```
+
+```
+helm upgrade --install \
+kps prometheus-community/kube-prometheus-stack  \
+--namespace monitoring \
+--version=79.8.2 \
+-f values-kps.yaml
+```
+
+Verificaciones de acceso a los entornos web:
+* http://prometheus.172.26.0.110.nip.io/
+* http://alertmanager.172.26.0.110.nip.io/
+
+## Grafana operator <div id='id42' />
+
+```
+oscar.mas@2025-05:~/monitoring $ helm repo add grafana https://grafana.github.io/helm-charts && helm repo update
+```
+
+```
+helm upgrade --install \
+grafana-operator grafana/grafana-operator  \
+--namespace monitoring \
+--version=v5.20.0
+```
 
 
 
