@@ -1,3 +1,11 @@
+Comandos para hacer backups de los yamls que hay en las rapsberrys:
+
+```
+$ cd $HOME/ilba/ilba-docu/raspberry-pi/apps/files
+$ scp oscar.mas@172.26.0.111:"/home/oscar.mas/*" .
+$ scp oscar.mas@172.26.0.111:"/home/oscar.mas/monitoring/*" monitoring
+```
+
 * [Aplicaciones](#id1)
   * [App de test](#id10)
   * [Tailscale](#id20)
@@ -11,10 +19,13 @@
   * [Monitorización](#id40)
     * [Prometheus operator](#id41)
     * [Grafana operator](#id42)
+        * [Instalación Grafana operator](#id43)
+        * [Grafana Dashboards](#id44)
 * [Troubleshooting](#id100)
   * [Rook Ceph: toolbox](#id111)
   * [Rook Ceph: Recopilación de comandos](#id112)
   * [Rook Ceph: no encuentra los OSDs](#id113)
+  * [Dashboard Grafana: Too long: may not be more than 262144 bytes](#id114)
 
 # Aplicaciones <div id='id1' />
 
@@ -456,6 +467,8 @@ Verificaciones de acceso a los entornos web:
 
 ## Grafana operator <div id='id42' />
 
+### Instalación Grafana operator <div id='id43' />
+
 ```
 oscar.mas@2025-05:~/monitoring $ helm repo add grafana https://grafana.github.io/helm-charts && helm repo update
 ```
@@ -466,6 +479,51 @@ grafana-operator grafana/grafana-operator  \
 --namespace monitoring \
 --version=v5.20.0
 ```
+
+El fichero de *grafana.yaml*, lo podemos encontrar [aquí](files/grafana.yaml)
+
+```
+oscar.mas@2025-05:~/monitoring $ vim grafana.yaml
+xxxx
+```
+
+```
+oscar.mas@2025-05:~/monitoring $ k apply -f grafana.yaml
+
+oscar.mas@2025-05:~/monitoring $ k get grafana.grafana
+NAME      VERSION   STAGE      STAGE STATUS   AGE
+grafana   12.1.0    complete   success        82s
+```
+
+### Grafana Dashboards <div id='id44' />
+
+Ubicación de los ficheros de dashboard:
+
+* [dashboard-10372-Node_exporter_simple.yaml](files/dashboard-10372-Node_exporter_simple.yaml)
+* [dashboard-15758-Kubernetes_Views_Namespaces](files/dashboard-15758-Kubernetes_Views_Namespaces)
+
+```
+oscar.mas@2025-05:~/monitoring $ k apply -f dashboard-10372-Node_exporter_simple.yaml
+oscar.mas@2025-05:~/monitoring $ k apply -f dashboard-15758-Kubernetes_Views_Namespaces.yaml
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -569,3 +627,14 @@ oscar.mas@2025-05:~ $ kubectl scale deployment rook-ceph-operator --replicas=0
 oscar.mas@2025-05:~ $ kubectl scale deployment rook-ceph-operator --replicas=1
 oscar.mas@2025-05:~ $ kubectl -n rook-ceph get cephcluster
 ```
+
+### Dashboard Grafana: Too long: may not be more than 262144 bytes <div id='id114' />
+
+Al aplicar un Dashboard, nos ha salido el siguiente mensaje:
+
+```
+oscar.mas@2025-05:~/monitoring $ k apply -f dashboard-Node_Exporter_Full.yaml
+The ConfigMap "dashboard-definition" is invalid: metadata.annotations: Too long: may not be more than 262144 bytes
+```
+
+Recordar que los ConfigMaps no son infinitos ;-)

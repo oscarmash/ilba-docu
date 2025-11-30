@@ -1,0 +1,49 @@
+defaultRules:
+  rules:
+    kubeProxy: false
+
+crds:
+  enabled: true
+
+grafana:
+  enabled: false
+
+alertmanager:
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    labels: {}
+    hosts:
+      - alertmanager.172.26.0.110.nip.io
+    path: /
+    pathType: Prefix
+  alertmanagerSpec: 
+    storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: rook-ceph-block
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+
+prometheus:
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    labels: {}
+    hosts:
+      - prometheus.172.26.0.110.nip.io
+    paths:
+      - /
+    pathType: Prefix
+  prometheusSpec:
+    retention: 120d
+    storageSpec:
+     volumeClaimTemplate:
+       spec:
+         storageClassName: rook-ceph-block
+         accessModes: ["ReadWriteOnce"]
+         resources:
+           requests:
+             storage: 20Gi

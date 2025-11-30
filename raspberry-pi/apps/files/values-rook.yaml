@@ -1,0 +1,4 @@
+nodeSelector:
+  topology.rook.io/cephnode: "true"
+monitoring:
+  enabled: true
