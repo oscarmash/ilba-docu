@@ -21,6 +21,7 @@ $ scp oscar.mas@172.26.0.111:"/home/oscar.mas/monitoring/*" monitoring
     * [Grafana operator](#id42)
         * [Instalación Grafana operator](#id43)
         * [Grafana Dashboards](#id44)
+    * [Rook Ceph](#id50)
 * [Troubleshooting](#id100)
   * [Rook Ceph: toolbox](#id111)
   * [Rook Ceph: Recopilación de comandos](#id112)
@@ -505,8 +506,28 @@ Ubicación de los ficheros de dashboard:
 ```
 oscar.mas@2025-05:~/monitoring $ k apply -f dashboard-10372-Node_exporter_simple.yaml
 oscar.mas@2025-05:~/monitoring $ k apply -f dashboard-15758-Kubernetes_Views_Namespaces.yaml
+oscar.mas@2025-05:~/monitoring $ k apply -f dashboard-13646-kubernetes_persistent_volumes.yaml
 ```
 
+## Rook Ceph <div id='id50' />
+
+Verificaremos que esten los exportes deplegados:
+
+```
+oscar.mas@2025-05:~/monitoring $ k -n rook-ceph get pods | grep exporter
+rook-ceph-exporter-2025-07-57c4694774-khbc4                 1/1     Running     14 (20m ago)     8d
+rook-ceph-exporter-2025-09-5df5f57f84-s4f9n                 1/1     Running     14 (20m ago)     8d
+rook-ceph-exporter-2025-11-7bbdfb88c-r4gds                  1/1     Running     14 (20m ago)     9d
+```
+
+```
+oscar.mas@2025-05:~/monitoring $ helm -n rook-ceph get values rook-ceph
+USER-SUPPLIED VALUES:
+monitoring:
+  enabled: true
+nodeSelector:
+  topology.rook.io/cephnode: "true"
+```
 
 
 

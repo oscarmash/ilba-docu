@@ -9,7 +9,7 @@
   * [Worker](#id50)
     * [Pre instalación K8s](#id51)
     * [Instalación de Kubernetes en los nodos/workers](#id52)
-
+* [Actualización de Kubernetes (K3S)](#id100)
 
 # Instalación de Kubernetes (K3S) <div id='id1' />
 
@@ -193,4 +193,51 @@ NAME      STATUS   ROLES                       AGE     VERSION
 2025-05   Ready    control-plane,etcd,master   37m     v1.33.5+k3s1
 2025-07   Ready    <none>                      2m45s   v1.33.5+k3s1
 2025-09   Ready    <none>                      113s    v1.33.5+k3s1
+```
+
+# Actualización de Kubernetes (K3S) <div id='id100' />
+
+Como saber la nueva versión: https://github.com/k3s-io/k3s/releases
+
+Primero hemos de saber en la versión que estamos:
+
+```
+oscar.mas@2025-05:~ $ k get nodes
+NAME      STATUS   ROLES                       AGE   VERSION
+2025-05   Ready    control-plane,etcd,master   50d   v1.33.5+k3s1
+2025-07   Ready    <none>                      50d   v1.33.5+k3s1
+2025-09   Ready    <none>                      50d   v1.33.5+k3s1
+2025-11   Ready    <none>                      18d   v1.33.5+k3s1
+```
+
+Para actualizar hay que lanzar el siguiente comando en el **Control Plane**:
+
+```
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.34.2+k3s1 sh -s - --config=/etc/rancher/k3s/config.yaml
+```
+
+Para actualizar hay que lanzar el siguiente comando en todos los **Nodos / Workers**:
+
+```
+oscar.mas@2025-05:~ $ sudo cat /var/lib/rancher/k3s/server/token
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx::server:xxxxxxxxxxxxxx
+```
+
+```
+$ K3S_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx::server:xxxxxxxxxxxxxx
+
+$ curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.34.2+k3s1 sh -s - agent \
+--token "${K3S_TOKEN}" \
+--server "https://172.26.0.111:6443"
+```
+
+**Verificar** que la actulización haya ido bien:
+
+```
+oscar.mas@2025-05:~ $ k get nodes
+NAME      STATUS   ROLES                       AGE   VERSION
+2025-05   Ready    control-plane,etcd,master   50d   v1.34.2+k3s1
+2025-07   Ready    <none>                      50d   v1.34.2+k3s1
+2025-09   Ready    <none>                      50d   v1.34.2+k3s1
+2025-11   Ready    <none>                      18d   v1.34.2+k3s1
 ```
