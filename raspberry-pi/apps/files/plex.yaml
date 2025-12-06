@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plex-movies
+  namespace: plex
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plex-tv
+  namespace: plex
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plex-config
+  namespace: plex
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plex-media-server
+  namespace: plex
+  labels:
+    app: plex-media-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plex-media-server
+  template:
+    metadata:
+      labels:
+        app: plex-media-server
+    spec:
+      containers:
+          # You should probably pin this to a specific version
+        - image: linuxserver/plex:arm64v8-1.42.2
+          name: plex-media-server
+          env:
+          - name: TZ
+            value: "Europe/Madrid"
+            # Only first run; https://www.plex.tv/claim/
+          - name: PLEX_CLAIM
+            value: "claim-CEagqQX92oo413sitBzN"
+          - name: PUID 
+            value: "1000"
+          - name: PGID 
+            value: "1000"
+          volumeMounts:
+            - mountPath: /config
+              name: plex-config
+            - mountPath: /tv
+              name: plex-tv
+            - mountPath: /movies
+              name: plex-movies
+      restartPolicy: Always
+      volumes:
+        - name: plex-config
+          persistentVolumeClaim:
+            claimName: plex-config
+        - name: plex-tv
+          persistentVolumeClaim:
+            claimName: plex-tv
+        - name: plex-movies
+          persistentVolumeClaim:
+            claimName: plex-movies
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plex-media-server
+  namespace: plex
+spec:
+  selector:
+    app: plex-media-server
+  ports:
+    - protocol: TCP
+      port: 32400
+      targetPort: 32400
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plex-media-server
+  namespace: plex
+spec:
+  ingressClassName: cilium
+  rules:
+  - host: plex.172.26.0.110.nip.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: plex-media-server
+            port:
+              number: 32400
+        path: /
+        pathType: Prefix
