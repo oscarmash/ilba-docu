@@ -16,7 +16,7 @@ $ scp oscar.mas@172.26.0.111:"/home/oscar.mas/monitoring/*" monitoring
     * [Dashboard](#id34)
     * [Creación del pool + SC](#id35)
     * [Test de rook](#id36)
-  * [Monitorización](#id40)
+  * [Monitorización](#id40) :construction:
     * [Prometheus operator](#id41)
     * [Grafana operator](#id42)
         * [Instalación Grafana operator](#id43)
