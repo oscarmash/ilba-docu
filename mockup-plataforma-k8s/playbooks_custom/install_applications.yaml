@@ -73,23 +73,23 @@
         definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/metallb/metallb_config.yaml') | from_yaml_all }}"
       tags: metallb_manifests
 
-#Ingress-nginx installation
-- name: Ingress-nginx installation and configuration
-  hosts: kube_control_plane
-  gather_facts: false
-  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
-  tasks:
-    - name: Install ingress-nginx Chart
-      kubernetes.core.helm:
-        binary_path: /usr/local/bin/helm
-        name: ingress-nginx
-        create_namespace: true
-        namespace: ingress-nginx
-        chart_repo_url: https://kubernetes.github.io/ingress-nginx
-        chart_ref: ingress-nginx
-        chart_version: "{{ chart_version_ingress_nginx }}"
-        wait: true
-      tags: ingress-nginx_installation
+##Ingress-nginx installation
+#- name: Ingress-nginx installation and configuration
+#  hosts: kube_control_plane
+#  gather_facts: false
+#  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+#  tasks:
+#    - name: Install ingress-nginx Chart
+#      kubernetes.core.helm:
+#        binary_path: /usr/local/bin/helm
+#        name: ingress-nginx
+#        create_namespace: true
+#        namespace: ingress-nginx
+#        chart_repo_url: https://kubernetes.github.io/ingress-nginx
+#        chart_ref: ingress-nginx
+#        chart_version: "{{ chart_version_ingress_nginx }}"
+#        wait: true
+#      tags: ingress-nginx_installation
 
 #Metrics Server installation
 - name: Metrics server installation and configuration
@@ -111,14 +111,14 @@
             - --kubelet-insecure-tls
       tags: metrics-server_installation
 
-#ingress-testing
-- name: Deploy a simple ingress-testing
-  hosts: kube_control_plane
-  gather_facts: false
-  ignore_errors: true
-  tasks:
-    - name: Apply deploy a simple sample project
-      k8s:
-        definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/ingress-testing/project.yaml') | from_yaml_all }}"
-        state: present
-      tags: ingress_testing
+##ingress-testing
+#- name: Deploy a simple ingress-testing
+#  hosts: kube_control_plane
+#  gather_facts: false
+#  ignore_errors: true
+#  tasks:
+#    - name: Apply deploy a simple sample project
+#      k8s:
+#        definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/ingress-testing/project.yaml') | from_yaml_all }}"
+#        state: present
+#      tags: ingress_testing
