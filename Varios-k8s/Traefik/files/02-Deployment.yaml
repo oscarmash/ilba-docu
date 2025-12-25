@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-ilba-deployment
+  namespace: test1
+  labels:
+    app.kubernetes.io/name: app-ilba
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: app-ilba
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: app-ilba
+    spec:
+      containers:
+        - name: hello-kubernetes
+          image: paulbouwer/hello-kubernetes:1.9
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP

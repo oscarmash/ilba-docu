@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: test1
+spec:
+  parentRefs:
+    - name: gateway-api
+      sectionName: http
+      kind: Gateway
+  hostnames:
+    - test1.ilba.cat
+  rules:
+     - matches:
+        - path:
+            type: PathPrefix
+            value: /
+       backendRefs:
+        - name: app-ilba-service
+          namespace: test1
+          port: 8080

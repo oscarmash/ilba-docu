@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: test1-ingressroute
+  namespace: test1
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`test2.ilba.cat`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: app-ilba-service
+          namespace: test1
+          port: 8080

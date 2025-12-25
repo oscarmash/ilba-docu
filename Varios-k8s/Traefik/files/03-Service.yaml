@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-ilba-service
+  namespace: test1
+spec:
+  selector:
+    app.kubernetes.io/name: app-ilba
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: http

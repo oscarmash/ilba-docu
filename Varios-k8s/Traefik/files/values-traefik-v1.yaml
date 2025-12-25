@@ -1,0 +1,15 @@
+ingressClass:
+  enabled: false
+gateway:
+  enabled: false
+gatewayClass:
+  enabled: false
+providers:
+  kubernetesCRD:
+    enabled: true # se instala por separado el CRD, pero es necesario para el IngressRoute
+  kubernetesIngress:
+    enabled: false
+  kubernetesGateway:
+    enabled: true
+  kubernetesIngressNginx:
+    enabled: false

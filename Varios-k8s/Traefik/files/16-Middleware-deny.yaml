@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: test1-ipallowlist
+  namespace: test1
+spec:
+  ipAllowList:
+    sourceRange:
+      - 172.26.0.1/32
