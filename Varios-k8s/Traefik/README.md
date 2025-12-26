@@ -15,7 +15,7 @@
 Copiar los _yamls_ al cluster:
 
 ```
-$ clear && cd $HOME/tmp/traefik && scp * 172.26.0.230:"/root/"
+$ clear && cd $HOME/ilba/ilba-docu/Varios-k8s/Traefik && scp files/* 172.26.0.230:"/root/"
 ```
 
 ## Puntualizaciones <div id='id11' />
@@ -100,7 +100,7 @@ test1       test-httproute   ["test1.ilba.cat"]   16m
 ```
 
 ```
-root@k8s-test-cp:~# curl -H "Host: test1.ilba.cat" "http://172.26.0.101/"
+$ curl -H "Host: test1.ilba.cat" "http://172.26.0.101/"
 ```
 
 ## CRD Traefik <div id='id32' />
@@ -111,11 +111,13 @@ root@k8s-test-cp:~# k apply -f 10-IngressRoute.yaml
 root@k8s-test-cp:~# k get ingressroute -A
 NAMESPACE   NAME                 AGE
 test1       test1-ingressroute   16s
-
-root@k8s-test-cp:~# curl -H "Host: test2.ilba.cat" "http://172.26.0.101/"
 ```
 
-#### Middleware: ipAllowList <div id='id35' />
+```
+$ curl -H "Host: test2.ilba.cat" "http://172.26.0.101/"
+```
+
+### Middleware: ipAllowList <div id='id35' />
 
 
 ```
@@ -135,6 +137,12 @@ traefik traefik/traefik \
 root@k8s-test-cp:~# k -n traefik get svc traefik -o yaml | grep TrafficPolicy
   externalTrafficPolicy: Local
   internalTrafficPolicy: Cluster
+
+root@k8s-test-cp:~# kubectl -n traefik get pods -o wide
+NAME            READY   STATUS    RESTARTS   AGE   IP               NODE            NOMINATED NODE   READINESS GATES
+traefik-2pz5w   1/1     Running   0          12s   10.233.74.137    k8s-test-wk03   <none>           <none>
+traefik-8svwh   1/1     Running   0          12s   10.233.113.71    k8s-test-wk01   <none>           <none>
+traefik-ktmqz   1/1     Running   0          12s   10.233.120.135   k8s-test-wk02   <none>           <none>
 ```
 
 ```
