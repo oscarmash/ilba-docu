@@ -6,7 +6,7 @@
 * [Instalación](#id20)
 * [Formas de trabajar](#id30)
   * [Gateway API](#id31)
-  * [CRD Traefik](#id32)
+  * [IngressRoute (CRD de traefik)](#id32)
       * [Middleware: ipAllowList](#id35)
 * [Enable Debug](#id40)
 
@@ -30,9 +30,10 @@ Cosas _random_ que hemos de saber:
   * Es un standard
   * No es un competidor del Service Mesh
   * El estado de les implementaciones, lo podemos ver en su [web oficial](https://gateway-api.sigs.k8s.io/implementations/#gateway-controller-implementation-status)
-* CRD de Traefik
+* IngressRoute (CRD de traefik)
   * Más potente que el Gateway API
   * Los [Middleware](https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/crd/http/middleware/), sólo se pueden implementar con IngressRoute.
+  * Dispone de un ecosistema de [plugins](https://plugins.traefik.io/plugins)
 
 ## Esquema <div id='id12' />
 
@@ -103,7 +104,7 @@ test1       test-httproute   ["test1.ilba.cat"]   16m
 $ curl -H "Host: test1.ilba.cat" "http://172.26.0.101/"
 ```
 
-## CRD Traefik <div id='id32' />
+## IngressRoute (CRD de traefik) <div id='id32' />
 
 ```
 root@k8s-test-cp:~# k apply -f 10-IngressRoute.yaml
