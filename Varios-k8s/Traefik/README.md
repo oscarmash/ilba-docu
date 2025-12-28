@@ -8,7 +8,10 @@
   * [Gateway API](#id31)
   * [IngressRoute (CRD de traefik)](#id32)
       * [Middleware: ipAllowList](#id35)
-* [Enable Debug](#id40)
+* [Enable](#id100)
+  * [Debug](#id101)
+  * [Dashboard](#id101)
+
 
 # Indice <div id='id10' />
 
@@ -173,7 +176,9 @@ $ curl -H "Host: test3.ilba.cat" "http://172.26.0.101/" && echo
 Forbidden
 ```
 
-# Enable Debug <div id='id40' />
+# Enable <div id='id100' />
+
+## Debug <div id='id101' />
 
 ```
 root@k8s-test-cp:~# kubectl edit deployment traefik -n traefik
@@ -184,3 +189,30 @@ root@k8s-test-cp:~# kubectl edit deployment traefik -n traefik
 root@k8s-test-cp:~# k -n traefik logs -f deploy/traefik
 2025-12-25T21:37:08Z DBG github.com/traefik/traefik/v3/pkg/middlewares/ipallowlist/ip_allowlist.go:78 > Rejecting IP 10.233.72.0: "10.233.72.0" matched none of the trusted IPs middlewareName=test1-test1-ipallowlist@kubernetescrd middlewareType=IPAllowLister
 ```
+
+## Dashboard <div id='id102' />
+
+```
+helm upgrade --install \
+traefik traefik/traefik \
+--create-namespace \
+--namespace traefik \
+--version=38.0.1 \
+-f values-traefik-v3.yaml
+```
+
+```
+root@k8s-test-cp:~# k apply -f 20-IngressRoute-Dashboard.yaml
+```
+
+```
+root@k8s-test-cp:~# kubectl exec -n traefik daemonset/traefik -- wget -qO- http://localhost:9000/api/rawdata
+```
+
+```
+root@k8s-test-cp:~# kubectl port-forward --address 0.0.0.0 -n traefik daemonset/traefik 9000:9000
+```
+
+Verificaremos que podemos acceder al Dashboard: http://172.26.0.230:9000/dashboard/
+
+![alt text](images/dashboard-traefik.png)
