@@ -1,0 +1,34 @@
+ingressClass:
+  enabled: false
+gateway:
+  enabled: false
+gatewayClass:
+  enabled: false
+providers:
+  kubernetesCRD:
+    enabled: true # se puede instalar por separado el CRD, pero es necesario para el IngressRoute
+  kubernetesIngress:
+    enabled: false
+  kubernetesGateway:
+    enabled: true
+  kubernetesIngressNginx:
+    enabled: false
+# lo siguiente, es para preservar la IP de Origen x-forwarded-for (XFF)
+service:
+  spec:
+    externalTrafficPolicy: Local
+deployment:
+  kind: DaemonSet
+# habilitamos el Dashboard
+api:
+  dashboard: true
+  insecure: false
+ingressRoute:
+  dashboard:
+    enabled: true
+ports:
+  traefik:
+    port: 9000
+    expose:
+      default: false
+    protocol: TCP
