@@ -49,6 +49,7 @@ root@kubespray:/kubespray# less roles/kubespray-defaults/defaults/main/checksums
 ---
 
 De la siguiente [web](https://quay.io/repository/kubespray/kubespray?tab=tags&tag=latest), sacamos la versión del: **KUBESPRAY_VERSION**
+En esta [web](https://github.com/kubernetes-sigs/kubespray/releases/), sabemos por qué versión va el Ansible de Kubespray
 
 # Errores <div id='id30' />
 
