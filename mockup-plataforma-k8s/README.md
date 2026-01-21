@@ -4,6 +4,8 @@
 * [Instalación de K8s](#id10)
 * [Actualización de K8s](#id11)
 * [Dudas](#id20) 
+  * [Saber la versión de K8s que podemos instalar](#id21)
+  * [Saber Releases](#id22)
 * [Errores](#id30) 
   * [Kubelet client certificate rotation fails](#id31)
 * [Cosas de KubeSpray](#id40)
@@ -37,7 +39,8 @@ Pasos a seguir:
 
 # Dudas <div id='id20' />
 
-Saber la versión de K8s que podemos instalar
+## Saber la versión de K8s que podemos instalar <div id='id21' />
+
 ```
 $ make shell
 root@kubespray:/kubespray# apt-get update && apt-get install less
@@ -46,9 +49,10 @@ root@kubespray:/kubespray# less roles/kubespray_defaults/vars/main/checksums.yml
 root@kubespray:/kubespray# less roles/kubespray-defaults/defaults/main/checksums.yml
 ```
 
----
+## Saber Releases <div id='id22' />
 
 De la siguiente [web](https://quay.io/repository/kubespray/kubespray?tab=tags&tag=latest), sacamos la versión del: **KUBESPRAY_VERSION**
+
 En esta [web](https://github.com/kubernetes-sigs/kubespray/releases/), sabemos por qué versión va el Ansible de Kubespray
 
 # Errores <div id='id30' />
