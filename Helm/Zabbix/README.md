@@ -49,10 +49,16 @@ Sólo hay que crear dos "equipos" con las templates indicadas:
 
 Necesitaremos los siguientes datos:
 
-* Token:
+* Token (forma antigua):
 ```
 $ kubectl get secret zabbix-service-account -n zabbix-proxy -o jsonpath={.data.token} | base64 -d
 ```
+
+* Token (forma nueva):
+```
+$ kubectl get secret zabbix-zabbix-helm-chart -o jsonpath='{.data.token}' | base64 -d
+```
+
 * URL de la API:
 ```
 $ kubectl cluster-info
