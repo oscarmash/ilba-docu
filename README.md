@@ -33,7 +33,7 @@ Documentación de productos usando docker-compose
 * Vault
   * [Ansible con Vault](./Varios-sin-k8s/Ansible-con-Vault/README.md)
   * [Docker-Compose con Vault](./Varios-sin-k8s/Docker-Compose-con-Vault/README.md)
-  * [MariaDB](./Varios-sin-k8s/MariaDB/README.md)
+  * [Dynamic Secrets: MariaDB](./Varios-sin-k8s/Dynamic-Secrets-MariaDB/README.md)
 
 ## Helm's
 
