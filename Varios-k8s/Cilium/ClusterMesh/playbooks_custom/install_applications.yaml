@@ -74,6 +74,23 @@
         state: present
       tags: cilium_installation, cilium_config
 
+    - name: Get latest version of Cilium CLI
+      uri:
+        url: https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt
+        return_content: yes
+      register: cilium_version
+      tags: cilium_installation, cilium_config
+
+    - name: Download Cilium CLI
+      unarchive:
+        src: "https://github.com/cilium/cilium-cli/releases/download/{{ cilium_version.content | trim }}/cilium-linux-amd64.tar.gz"
+        dest: "/usr/local/bin"
+        remote_src: yes
+        mode: '0755'
+        owner: root
+        group: root
+      tags: cilium_installation, cilium_config
+
 #Metrics Server installation
 - name: Metrics server installation and configuration
   hosts: kube_control_plane
