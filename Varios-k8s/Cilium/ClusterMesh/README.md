@@ -56,6 +56,11 @@ k8s-cilium-01-wk02   NotReady   <none>          23m   v1.30.4
 k8s-cilium-01-wk03   NotReady   <none>          23m   v1.30.4
 ```
 
+```
+root@k8s-cilium-01-cp:~# kubectl get nodes k8s-cilium-01-wk02 -o yaml | grep cni
+      message:Network plugin returns error: cni plugin not initialized'
+```
+
 Datos iportantes a mencionar, que se han usado en los values de los Helms de Cilium desplegados en cada custer (aconsejamos revisar los values.yaml de cada cluster) :
 * Se ha cambiado el rango de red de los dos clusters, para que no sean el mismo:
   * En el cluster k8s-cilium-01 el rango es: 10.1.0.0/16
