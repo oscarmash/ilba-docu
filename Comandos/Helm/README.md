@@ -1,11 +1,19 @@
 # Comandos de Helm
 
 * [Comandos básicos](#id10)
-* [Repositorios](#id20)
+  * [Instalar un Chart con Helm](#id11)
+  * [Mostrar versiones](#id12)
+  * [Mostrar los valores por defecto](#id13)
+  * [Ver los valores que se ha aplicado en un Helm](#id14)
+  * [Rollout de versiones](#id15)
+  * [Descargar un Chart y subirlo a un repositorio](#id16)
+  * [Modificar un Chart desplegado: reuse-values](#id17)
+  * [Añadir un repo a helm y hacer un update: force-update](#id18)
+* [Repositorios](#id50)
 
-## Comandos básicos <div id='id10' />
+# Comandos básicos <div id='id10' />
 
-Instalar un programa con Helm:
+## Instalar un Chart con Helm <div id='id11' />
 
 ```
 helm upgrade --install \
@@ -16,9 +24,7 @@ ingress-nginx ingress-nginx/ingress-nginx \
 -f values-nginx.yaml
 ```
 
----
-
-Mostrar versiones:
+## Mostrar versiones <div id='id12' />
 
 ```
 root@kubespray-aio:~# helm search repo mariadb-operator/mariadb-operator -l | head -n 5
@@ -29,17 +35,13 @@ mariadb-operator/mariadb-operator       0.28.0          v0.0.28         Run and 
 mariadb-operator/mariadb-operator       0.27.0          v0.0.27         Run and operate MariaDB in a cloud native way
 ```
 
----
-
-Mostrar los valores por defecto:
+## Mostrar los valores por defecto <div id='id13' />
 
 ```
 root@kubespray-aio:~# helm show values mariadb-operator/mariadb-operator --version 0.29.0 > values-mariadb-operator.yaml
 ```
 
----
-
-Ver los valores que se ha aplicado en un Helm
+## Ver los valores que se ha aplicado en un Helm <div id='id14' />
 
 ```
 root@kubespray-aio:~# helm -n ingress-nginx get values ingress-nginx
@@ -53,9 +55,7 @@ controller:
     type: LoadBalancer
 ```
 
----
-
-Rollout de versiones:
+## Rollout de versiones <div id='id15' />
 
 ```
 $ helm ls
@@ -76,9 +76,7 @@ NAME            NAMESPACE       REVISION        UPDATED                         
 ceph-csi-cephfs ceph-csi-cephfs 5               2025-07-23 12:48:57.931429897 +0200 CEST        deployed        ceph-csi-cephfs-3.13.1  3.13.1
 ```
 
----
-
-Descargar un chart y subirlo a un repositorio:
+## Descargar un Chart y subirlo a un repositorio <div id='id16' />
 
 ```
 $ helm pull oci://registry-1.docker.io/bitnamicharts/thanos --version=17.2.1
@@ -92,8 +90,26 @@ $ helm push thanos-17.2.1.tgz oci://registry.ilimit.es/charts
 ![alt text](images/helm_upload_to_harbor.png
 )
 
+# Modificar un Chart desplegado: reuse-values <div id='id17' />
 
-## Repositorios <div id='id20' />
+Tenemos un helm deplegado y le queremos añadir un valor para probarlo:
+
+```
+helm upgrade --install \
+cilium cilium/cilium \
+--namespace kube-system \
+--version=1.18.4 
+--resuse-values \
+--set hubble.replay.enable=true
+```
+
+# Añadir un repo a helm y hacer un update: force-update <div id='id18' />
+
+```
+$ helm repo add stable https://charts.helm.sh/stable --force-update
+```
+
+# Repositorios <div id='id50' />
 
 Repositorios de Helm, recuerda de hacer un "helm repo update" una vez acabados de añadir los repos
 
