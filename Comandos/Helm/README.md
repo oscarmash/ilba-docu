@@ -99,7 +99,7 @@ helm upgrade --install \
 cilium cilium/cilium \
 --namespace kube-system \
 --version=1.18.4 
---resuse-values \
+--reuse-values \
 --set hubble.replay.enable=true
 ```
 
