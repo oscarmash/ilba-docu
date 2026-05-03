@@ -11,7 +11,7 @@
 
 Vamos a pasar, de un sistema de Cilium con BGP totalmente aislado en el cluster de kubernetes, a darle todo el conocimiento a un router FRR basado en debian.
 
-Una de las utilidaes podría ser que para llegar a un Pod desde fuera del clúster, normalmente tendrías que usar un NodePort o un LoadBalancer. Con BGP, el router Debian (FRR) "sabe" dónde están los Pods y se les puede hacer ping directamente a su IP privada
+Una de las utilidaes podría ser; para llegar a un Pod desde fuera del clúster, normalmente se tedría que configurar un NodePort o un LoadBalancer. Con esta configuración de BGP, el router Debian (FRR) o cualquier equipo que se encunetre configurado con el sistema de BGP, "sabe" dónde están todos los Pods y se les puede hacer ping directamente a su IP privada.
 
 Equipos necesarios:
 
