@@ -22,7 +22,8 @@ Es muy importante no confundir estas nuevas opciones de trafficDistribution con 
 
 # Configuración previa del sistema (Sysctl para Kind y Cilium) <div id='id20' />
 
-Todo el lab que aremos, lo hemos hecho con "kind", ya que Cilium necesita un accedo intensivo a nuestro equipo, habremos de modificar los siguientes valores (de nuestro equipo físico), sinó nos encontraremos con el siguiente error:
+Todo el lab  lo hemos hecho con [Kind](https://kind.sigs.k8s.io/)
+Cilium necesita un acceso intensivo a nuestro equipo y habremos de modificar los siguientes valores (de nuestro equipo físico), sinó nos encontraremos con el siguiente error:
 
 ```
 Error: failed to create fsnotify watcher: too many open files
