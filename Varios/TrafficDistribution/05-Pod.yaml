@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-zone-a
+  namespace: traffic-distribution
+spec:
+  nodeSelector:
+    topology.kubernetes.io/zone: zone-a
+  containers:
+  - name: client
+    image: curlimages/curl:latest
+    command: ["/bin/sh", "-c", "sleep 3600"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-zone-b
+  namespace: traffic-distribution
+spec:
+  nodeSelector:
+    topology.kubernetes.io/zone: zone-b
+  containers:
+  - name: client
+    image: curlimages/curl:latest
+    command: ["/bin/sh", "-c", "sleep 3600"]

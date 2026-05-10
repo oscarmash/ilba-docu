@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-ilba-deployment
+  namespace: traffic-distribution
+  labels:
+    app.kubernetes.io/name: app-ilba
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: app-ilba
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: app-ilba
+    spec:
+     containers:
+        - name: echo
+          image: traefik/whoami:v1.11
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP

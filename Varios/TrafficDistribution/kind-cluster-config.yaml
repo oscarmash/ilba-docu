@@ -1,0 +1,24 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    image: &nodeImage kindest/node:v1.35.1
+  - role: worker
+    image: *nodeImage
+    labels:
+      topology.kubernetes.io/zone: zone-a
+  - role: worker
+    image: *nodeImage
+    labels:
+      topology.kubernetes.io/zone: zone-a
+  - role: worker
+    image: *nodeImage
+    labels:
+      topology.kubernetes.io/zone: zone-b
+  - role: worker
+    image: *nodeImage
+    labels:
+      topology.kubernetes.io/zone: zone-b
+networking:
+  disableDefaultCNI: true
+  kubeProxyMode: none
