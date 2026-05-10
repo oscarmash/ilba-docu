@@ -76,6 +76,7 @@ Documentación de productos usando Operators
 ### Varios
 
 * [RBAC](./Varios/RBAC/README.md)
+* [TrafficDistribution](./Varios/TrafficDistribution/README.md)
 * [Traefik](./Varios-k8s/Traefik/README.md) (sin eBPF)
 * [Istio](./Varios-k8s/Istio/README.md) (sin eBPF)
 * [Velero](./Varios-k8s/Velero/README.md)
