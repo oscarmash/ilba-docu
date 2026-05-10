@@ -126,6 +126,8 @@ for i in $(seq 1 10); do
 done' | grep Hostname
 ```
 
+![alt text](images/svc-simple.png)
+
 Ahora haremos las mismas peticiones desde el cliente de la zona A, pero hacia el servicio optimizado (svc-traffic-distribution):
 
 ```
@@ -134,5 +136,7 @@ for i in $(seq 1 10); do
   curl -s svc-traffic-distribution
 done' | grep Hostname
 ```
+
+![alt text](images/svc-traffic-distribution.png)
 
 **Qué observar:** Esta vez, el 100% de las respuestas vendrán de pods ubicados en la zone-a (el tráfico se mantiene local, evitando saltos de red innecesarios).
