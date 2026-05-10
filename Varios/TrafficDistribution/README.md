@@ -96,16 +96,12 @@ Confirmamos que los pods de la aplicación estén distribuidos entre las zonas z
 ```
 $ k -n traffic-distribution get pods -L topology.kubernetes.io/zone
 NAME                                   READY   STATUS    RESTARTS   AGE   ZONE
-app-ilba-deployment-5ddfccd95d-559pb   1/1     Running   0          17s   zone-b
-app-ilba-deployment-5ddfccd95d-bl6fs   1/1     Running   0          17s   zone-b
-app-ilba-deployment-5ddfccd95d-dlrb6   1/1     Running   0          17s   zone-a
-app-ilba-deployment-5ddfccd95d-mgfc2   1/1     Running   0          17s   zone-a
-app-ilba-deployment-5ddfccd95d-n8n8n   1/1     Running   0          17s   zone-b
-app-ilba-deployment-5ddfccd95d-phvhf   1/1     Running   0          17s   zone-a
-app-ilba-deployment-5ddfccd95d-pnhh2   1/1     Running   0          17s   zone-b
-app-ilba-deployment-5ddfccd95d-xb242   1/1     Running   0          17s   zone-a
-client-zone-a                          1/1     Running   0          20s   zone-a
-client-zone-b                          1/1     Running   0          20s   zone-b
+app-ilba-deployment-5ddfccd95d-dswfk   1/1     Running   0          28s   zone-b
+app-ilba-deployment-5ddfccd95d-pbw64   1/1     Running   0          28s   zone-a
+app-ilba-deployment-5ddfccd95d-sw9xh   1/1     Running   0          28s   zone-b
+app-ilba-deployment-5ddfccd95d-z7s9q   1/1     Running   0          28s   zone-a
+client-zone-a                          1/1     Running   0          36s   zone-a
+client-zone-b                          1/1     Running   0          36s   zone-b
 ```
 
 Verificamos que ambos servicios estén listos y tengan asignada su IP virtual (ClusterIP)
@@ -140,7 +136,3 @@ done' | grep Hostname
 ```
 
 **Qué observar:** Esta vez, el 100% de las respuestas vendrán de pods ubicados en la zone-a (el tráfico se mantiene local, evitando saltos de red innecesarios).
-
-Como curiosidad técnica, Kubernetes utiliza EndpointSlices para gestionar los destinos de los servicios. Podemos inspeccionar cómo se estructuran ejecutando:
-
-$ k -n traffic-distribution get endpointslice
