@@ -1,4 +1,12 @@
-# Enrutamiento inteligente con trafficDistribution en Kubernetes
+# Index:
+
+* [Enrutamiento inteligente con trafficDistribution en Kubernetes](#id10)
+* [Configuración previa del sistema (Sysctl para Kind y Cilium)](#id20)
+* [Instalación y Preparación del Entorno](#id30)
+* [Despliegue de applicacion de test](#id40)
+* [Verificaciones de Tráfico](#id50)
+
+# Enrutamiento inteligente con trafficDistribution en Kubernetes <div id='id10' />
 
 En Kubernetes, el tráfico que entra a un Service se distribuye por defecto entre todos los pods disponibles, sin importar en qué nodo o zona de disponibilidad estén. Esto genera dos problemas en clústeres grandes: latencia innecesaria (por enviar tráfico de un nodo a otro) y altos costos de transferencia de datos (porque los proveedores de nube cobran por mover datos entre diferentes zonas de disponibilidad).
 
@@ -12,7 +20,7 @@ Es muy importante no confundir estas nuevas opciones de trafficDistribution con 
 * externalTrafficPolicy: Controla el tráfico que viene desde fuera del clúster y se decide si se procesa en el nodo que ha recibido la petición (Local) o se distribuye por todo el clúster (Cluster).
 * internalTrafficPolicy: Controla el tráfico dentro del clúster (entre los pods), permitiendo restringir de forma estricta que las peticiones solo vayan a pods del mismo nodo (Local) en lugar de repartirse de forma aleatoria (Cluster).
 
-# Configuración previa del sistema (Sysctl para Kind y Cilium)
+# Configuración previa del sistema (Sysctl para Kind y Cilium) <div id='id20' />
 
 Todo el lab que aremos, lo hemos hecho con "kind", ya que Cilium necesita un accedo intensivo a nuestro equipo, habremos de modificar los siguientes valores (de nuestro equipo físico), sinó nos encontraremos con el siguiente error:
 
@@ -27,7 +35,7 @@ $ echo "fs.inotify.max_user_instances=512" | tee -a /etc/sysctl.conf
 $ sysctl -p
 ```
 
-# Instalación y Preparación del Entorno
+# Instalación y Preparación del Entorno <div id='id30' />
 
 Crearemos nuestro cluster de kubernetes con kind:
 
@@ -73,7 +81,7 @@ k8s-kind-oscar-worker4         Ready    <none>          2m52s   v1.35.1   zone-b
 
 ```
 
-# Despliegue de applicacion de test
+# Despliegue de applicacion de test <div id='id40' />
 
 Desplegaremos el entorno de pruebas basado es:
 
@@ -113,7 +121,7 @@ svc-simple                 ClusterIP   10.96.225.61   <none>        80/TCP    13
 svc-traffic-distribution   ClusterIP   10.96.185.63   <none>        80/TCP    3m20s
 ```
 
-# Verificaciones de Tráfico
+# Verificaciones de Tráfico <div id='id50' />
 
 Haremos peticiones desde nuestro cliente en la zona A hacia el servicio estándar (svc-simple):
 
