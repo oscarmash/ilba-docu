@@ -73,13 +73,13 @@ Datos iportantes a mencionar, que se han usado en los values de los Helms de Cil
 $ make install_applications ENV=k8s-cilium-0x
 ```
 
+:warning: $ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
+
 ## Añadir un host <div id='id13' />
 
 ```
 $ make add_host ENV=k8s-cilium-0x KUBE_VERSION=vx.xx.x NODE=k8s-cilium-0x-wk0x
 ```
-
-:warning: $ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
 
 ## Verificaciones <div id='id14' />
 
