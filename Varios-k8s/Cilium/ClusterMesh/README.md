@@ -154,6 +154,22 @@ root@k8s-cilium-01-cp:~# cilium status
     \__/       ClusterMesh:        OK
 ```
 
+```
+root@k8s-cilium-01-cp:~# cilium clustermesh status
+⚠️  Service type NodePort detected! Service may fail when nodes are removed from the cluster!
+✅ Service "clustermesh-apiserver" of type "NodePort" found
+✅ Cluster access information is available:
+  - 172.26.0.141:32379
+✅ Deployment clustermesh-apiserver is ready
+ℹ️  KVStoreMesh is enabled
+
+✅ All 4 nodes are connected to all clusters [min:1 / avg:1.0 / max:1]
+✅ All 1 KVStoreMesh replicas are connected to all clusters [min:1 / avg:1.0 / max:1]
+
+🔌 Cluster Connections:
+  - k8s-cilium-02: 4/4 configured, 4/4 connected - KVStoreMesh: 1/1 configured, 1/1 connected
+```
+
 ## Añadir un host <div id='id14' />
 
 ```
