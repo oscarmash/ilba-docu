@@ -100,6 +100,10 @@
         wait_timeout: 15m
       tags: cilium_installation
 
+    - name: Esperar 4 minutos antes de continuar
+      ansible.builtin.pause:
+        seconds: 240
+
     - name: Apply config LB IPAM
       k8s:
         definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/cilium/lb-ipam.yaml') | from_yaml_all }}"
