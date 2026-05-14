@@ -69,6 +69,18 @@ Datos iportantes a mencionar, que se han usado en los values de los Helms de Cil
   * Cluster name: k8s-cilium-01 y el id es: 1
   * Cluster name: k8s-cilium-02 y el id es: 2
 
+
+Hemos creado los certificados que usará cilium para realizar la conexión de los clusters.
+No es necesario hacerlo, ya que está hardcodeados en el values de cilium de cada clusters de kubernetes, pero dejo los comandos:
+
+```
+$ openssl genrsa -out cilium-ca.key 4096
+$ openssl req -x509 -new -nodes -key cilium-ca.key -sha256 -days 3650 -out cilium-ca.crt -subj "/CN=Cilium-CA"
+cat cilium-ca.crt | base64 | tr -d '\n'
+cat cilium-ca.key | base64 | tr -d '\n'
+```
+
+
 ```
 $ make install_applications ENV=k8s-cilium-0x
 ```
