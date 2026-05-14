@@ -79,6 +79,8 @@ $ make install_applications ENV=k8s-cilium-0x
 $ make add_host ENV=k8s-cilium-0x KUBE_VERSION=vx.xx.x NODE=k8s-cilium-0x-wk0x
 ```
 
+:warning: $ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
+
 ## Verificaciones <div id='id14' />
 
 Relizaremos las siguientes verificaciones:
@@ -131,9 +133,22 @@ root@k8s-cilium-01-cp:~# curl -H "Host: test-ingress.ilba.cat" "http://172.26.0.
     ...
 ```
 
-# Setting up Cluster Mesh <div id='id20' />
+Verificaremos en los dos clusters el estado de cilium:
 
-:warning: $ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
+```
+root@k8s-cilium-01-cp:~# cilium status
+    /¯¯\
+ /¯¯\__/¯¯\    Cilium:             OK
+ \__/¯¯\__/    Operator:           OK
+ /¯¯\__/¯¯\    Envoy DaemonSet:    OK
+ \__/¯¯\__/    Hubble Relay:       disabled
+    \__/       ClusterMesh:        OK
+```
+
+> [!WARNING]  
+> Creo que lo siguiente no es necesario
+
+# Setting up Cluster Mesh <div id='id20' />
 
 
 Instalar la [consola de cilium](https://docs.cilium.io/en/stable/network/clustermesh/clustermesh/#install-the-cilium-cli) en un nodo y verificación del funcionamiento:
