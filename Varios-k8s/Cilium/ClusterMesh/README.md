@@ -76,8 +76,8 @@ No es necesario hacerlo, ya que está hardcodeados en el values de cilium de cad
 ```
 $ openssl genrsa -out cilium-ca.key 4096
 $ openssl req -x509 -new -nodes -key cilium-ca.key -sha256 -days 3650 -out cilium-ca.crt -subj "/CN=Cilium-CA"
-cat cilium-ca.crt | base64 | tr -d '\n'
-cat cilium-ca.key | base64 | tr -d '\n'
+$ cat cilium-ca.crt | base64 | tr -d '\n'
+$ cat cilium-ca.key | base64 | tr -d '\n'
 ```
 
 
