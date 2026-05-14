@@ -3,8 +3,8 @@
 * [Instalación de K8s con Cilium via KubeSpray](#id10)
   * [Equipos a desplegar](#id11)
   * [Procedimiento de instalación](#id12)
-  * [Añadir un host](#id13)
-  * [Verificaciones](#id14)
+  * [Verificaciones](#id13)
+  * [Añadir un host](#id14)
 * [Setting up Cluster Mesh](#id20)
   * [Prepare the contexts](#id21)
   * [Enable Cluster Mesh](#id22)
@@ -73,15 +73,13 @@ Datos iportantes a mencionar, que se han usado en los values de los Helms de Cil
 $ make install_applications ENV=k8s-cilium-0x
 ```
 
-:warning: $ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
-
-## Añadir un host <div id='id13' />
+:warning: Pongo el siguiente comando, por si al instalar Cilium da algún tipo de problema:
 
 ```
-$ make add_host ENV=k8s-cilium-0x KUBE_VERSION=vx.xx.x NODE=k8s-cilium-0x-wk0x
+$ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
 ```
 
-## Verificaciones <div id='id14' />
+## Verificaciones <div id='id13' />
 
 Relizaremos las siguientes verificaciones:
 
@@ -143,6 +141,12 @@ root@k8s-cilium-01-cp:~# cilium status
  /¯¯\__/¯¯\    Envoy DaemonSet:    OK
  \__/¯¯\__/    Hubble Relay:       disabled
     \__/       ClusterMesh:        OK
+```
+
+## Añadir un host <div id='id14' />
+
+```
+$ make add_host ENV=k8s-cilium-0x KUBE_VERSION=vx.xx.x NODE=k8s-cilium-0x-wk0x
 ```
 
 > [!WARNING]  
