@@ -5,12 +5,12 @@
   * [Procedimiento de instalación](#id12)
   * [Verificaciones](#id13)
   * [Añadir un host](#id14)
-* [Setting up Cluster Mesh](#id20)
-  * [Prepare the contexts](#id21)
-  * [Enable Cluster Mesh](#id22)
-  * [Connect the Clusters](#id23)
-  * [Test connectivity with commands](#id24)
-  * [Test connectivity with x-wing and rebel-base](#id25)
+* ~~[Setting up Cluster Mesh](#id20)~~
+  * ~~[Prepare the contexts](#id21)~~
+  * ~~[Enable Cluster Mesh](#id22)~~
+  * ~~[Connect the Clusters](#id23)~~
+  * ~~[Test connectivity with commands](#id24)~~
+  * ~~[Test connectivity with x-wing and rebel-base](#id25)~~
 
 # Instalación de K8s con Cilium via KubeSpray <div id='id10' />
 
@@ -68,10 +68,7 @@ Datos iportantes a mencionar, que se han usado en los values de los Helms de Cil
 * También el cluster name y el ID, son diferentes en cada cluster
   * Cluster name: k8s-cilium-01 y el id es: 1
   * Cluster name: k8s-cilium-02 y el id es: 2
-
-
-Hemos creado los certificados que usará cilium para realizar la conexión de los clusters.
-No es necesario hacerlo, ya que está hardcodeados en el values de cilium de cada clusters de kubernetes, pero dejo los comandos:
+* Hemos creado los certificados que usará cilium para realizar la conexión de los clusters. No es necesario hacerlo, ya que está hardcodeados en el values de cilium de cada clusters de kubernetes, pero dejo los comandos:
 
 ```
 $ openssl genrsa -out cilium-ca.key 4096
@@ -79,6 +76,8 @@ $ openssl req -x509 -new -nodes -key cilium-ca.key -sha256 -days 3650 -out ciliu
 $ cat cilium-ca.crt | base64 | tr -d '\n'
 $ cat cilium-ca.key | base64 | tr -d '\n'
 ```
+
+Instalaremos las aplicaciones dentro del cluster:
 
 
 ```
@@ -93,7 +92,7 @@ $ make install_applications_tag ENV=k8s-cilium-0x TAG=cilium_installation
 
 ## Verificaciones <div id='id13' />
 
-Relizaremos las siguientes verificaciones:
+Relizaremos las siguientes verificaciones en los dos clusters:
 
 ```
 root@k8s-cilium-01-cp:~# kubectl get nodes
@@ -161,11 +160,10 @@ root@k8s-cilium-01-cp:~# cilium status
 $ make add_host ENV=k8s-cilium-0x KUBE_VERSION=vx.xx.x NODE=k8s-cilium-0x-wk0x
 ```
 
-> [!WARNING]  
-> Creo que lo siguiente no es necesario
-
 # Setting up Cluster Mesh <div id='id20' />
 
+> [!WARNING]  
+> Creo que lo siguiente no es necesario
 
 Instalar la [consola de cilium](https://docs.cilium.io/en/stable/network/clustermesh/clustermesh/#install-the-cilium-cli) en un nodo y verificación del funcionamiento:
 
