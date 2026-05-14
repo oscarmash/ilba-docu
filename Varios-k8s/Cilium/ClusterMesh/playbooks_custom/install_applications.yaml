@@ -32,6 +32,43 @@
       become: true
       tags: install_helm
 
+#Alias custom
+- name: kubectl aliases
+  hosts: kube_control_plane
+  gather_facts: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  vars:
+    bashrc: /root/.bashrc
+  tasks:
+
+    - name: Alias kubectl
+      lineinfile:
+        path: "{{ bashrc }}"
+        line: alias k='kubectl'
+        create: true
+      tags: alias_custom
+
+    - name: Alias kubectl delete
+      lineinfile:
+        path: "{{ bashrc }}"
+        line: alias kcdf='kubectl delete -f'
+        create: true
+      tags: alias_custom
+
+    - name: Alias kubectl apply
+      lineinfile:
+        path: "{{ bashrc }}"
+        line: alias kcaf='kubectl apply -f'
+        create: true
+      tags: alias_custom
+
+    - name: Alias kubectl delete pod grace-period force
+      lineinfile:
+        path: "{{ bashrc }}"
+        line: alias kcdp='kubectl delete pod --grace-period=0 --force'
+        create: true
+      tags: alias_custom
+
 #Dependency needed in order to apply yaml files
 - name: Requirements
   hosts: kube_control_plane
