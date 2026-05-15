@@ -5,7 +5,7 @@
   * [Procedimiento de instalación](#id12)
   * [Verificaciones](#id13)
   * [Añadir un host](#id14)
-
+* [Cilium Global Services](#id20)
 
 # Instalación de K8s con Cilium via KubeSpray <div id='id10' />
 
@@ -171,3 +171,48 @@ root@k8s-cilium-01-cp:~# cilium clustermesh status
 $ make add_host ENV=k8s-cilium-0x KUBE_VERSION=vx.xx.x NODE=k8s-cilium-0x-wk0x
 ```
 
+# Cilium Global Services <div id='id20' />
+
+En esta parte del laboratorio veremos el funcionamiento de *Cilium ClusterMesh* mediante un Global Service. Al desplegar el servicio con la anotación *io.cilium/global-service: "true"* en ambos lados, Cilium permite que un pod que está en el cluster 01 (k8s-cilium-01) acceda de forma transparente a los pods situados en el Cluster 02 (k8s-cilium-02), resolviendo las peticiones con un nombre DNS local pero enviando el tráfico a través de la malla de red entre los clusters.
+
+```
+root@k8s-cilium-02-cp:~# k apply -f cluster-apps/k8s-cilium-02/configs/global-services/deploy-configmap-svc.yaml
+```
+
+```
+root@k8s-cilium-01-cp:~# k apply -f cluster-apps/k8s-cilium-01/configs/global-services/svc.yaml
+```
+
+Verificamos las configuraciones aplicadas:
+
+```
+root@k8s-cilium-02-cp:~# k get svc
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+global-service   ClusterIP   10.233.53.114   <none>        80/TCP    3m
+
+root@k8s-cilium-02-cp:~# kubectl exec -n kube-system ds/cilium -- cilium-dbg service list
+...
+19   10.233.53.114:80/TCP     ClusterIP      1 => 10.2.1.236:80/TCP (active)
+                                             2 => 10.2.2.25:80/TCP (active
+
+root@k8s-cilium-01-cp:~# curl 10.2.2.25
+{"Cluster": "k8s-cilium-02"}
+```
+
+```
+root@k8s-cilium-01-cp:~# k get svc
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+global-service   ClusterIP   10.233.37.172   <none>        80/TCP    16s
+
+root@k8s-cilium-01-cp:~# kubectl exec -n kube-system ds/cilium -- cilium-dbg service list
+...
+19   10.233.37.172:80/TCP     ClusterIP      1 => 10.2.1.236:80/TCP (active)
+                                             2 => 10.2.2.25:80/TCP (active)
+
+root@k8s-cilium-01-cp:~# kubectl run test-curl --rm -it --image=alpine -- sh
+/ # apk add --no-cache curl
+/ # for i in $(seq 1 10); do curl -s global-service; done
+{"Cluster": "k8s-cilium-02"}
+...
+{"Cluster": "k8s-cilium-02"}
+```

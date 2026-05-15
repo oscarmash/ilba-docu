@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-cluster-02
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      name: deploy-cluster-02
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        name: deploy-cluster-02
+    spec:
+      containers:
+      - name: deploy-cluster-02
+        image: docker.io/nginx:1.27.1
+        volumeMounts:
+          - name: html
+            mountPath: /usr/share/nginx/html/
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          periodSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+      volumes:
+        - name: html
+          configMap:
+            name: configmap-cluster-02
+            items:
+              - key: message
+                path: index.html
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-cluster-02
+  namespace: default
+data:
+  message: "{\"Cluster\": \"k8s-cilium-02\"}\n"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: global-service
+  namespace: default
+  annotations:
+    io.cilium/global-service: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+  selector:
+    name: deploy-cluster-02
