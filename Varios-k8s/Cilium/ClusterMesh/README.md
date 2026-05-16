@@ -4,7 +4,8 @@
   * [Equipos a desplegar](#id11)
   * [Procedimiento de instalación](#id12)
   * [Verificaciones](#id13)
-  * [Añadir un host](#id14)
+  * [Verificaciones específicas](#id14)
+  * [Añadir un host](#id15)
 * [Cilium Global Services](#id20)
 
 # Instalación de K8s con Cilium via KubeSpray <div id='id10' />
@@ -165,7 +166,41 @@ root@k8s-cilium-01-cp:~# cilium clustermesh status
   - k8s-cilium-02: 4/4 configured, 4/4 connected - KVStoreMesh: 1/1 configured, 1/1 connected
 ```
 
-## Añadir un host <div id='id14' />
+## Verificaciones específicas <div id='id14' />
+
+Verificaciones:
+
+* Está el BGP habilitado (aunque esté vacía o dé un mensaje de que no hay peers, el motor BGP de Cilium está activo)
+
+```
+root@k8s-cilium-01-cp:~# kubectl -n kube-system exec ds/cilium -- cilium bgp peers
+Local AS   Peer AS   Peer Address   Session   Uptime   Family   Received   Advertised
+```
+
+* Está el reemplazo de kube-proxy activo:
+
+```
+root@k8s-cilium-01-cp:~# kubectl -n kube-system exec ds/cilium -- cilium status | grep KubeProxyReplacement
+KubeProxyReplacement:    True   [ens18   172.26.0.142 fe80::be24:11ff:fe51:2ef8 (Direct Routing)]
+```
+
+* Está L2 configurada
+
+```
+root@k8s-cilium-01-cp:~# kubectl -n kube-system logs ds/cilium | grep -i "l2-announcements"
+time=2026-05-16T15:09:44.106890104Z level=info msg="  --enable-l2-announcements='true'"
+```
+
+* Está el enmascaramiento BPF funcionando
+
+```
+root@k8s-cilium-01-cp:~# kubectl -n kube-system exec ds/cilium -- cilium status | grep Masquerading
+Masquerading:            BPF   [ens18]   10.1.1.0/24  [IPv4: Enabled, IPv6: Disabled]
+```
+
+
+
+## Añadir un host <div id='id15' />
 
 ```
 $ make add_host ENV=k8s-cilium-0x KUBE_VERSION=vx.xx.x NODE=k8s-cilium-0x-wk0x

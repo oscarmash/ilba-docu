@@ -3,6 +3,8 @@ k8sServicePort: "auto"
 kubeProxyReplacement: "true"
 bpf:
   masquerade: true
+bgpControlPlane:
+  enabled: true
 ipam:
   operator:
     clusterPoolIPv4PodCIDRList: ["10.2.0.0/16"]
