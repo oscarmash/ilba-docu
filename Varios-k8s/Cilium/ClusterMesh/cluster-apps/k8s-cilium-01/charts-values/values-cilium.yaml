@@ -3,8 +3,8 @@ k8sServicePort: "auto"
 kubeProxyReplacement: "true"
 bpf:
   masquerade: true
-ipMasqAgent:
-  enabled: true
+# ipMasqAgent:
+#   enabled: true
 bgpControlPlane:
   enabled: true
 ipam:
