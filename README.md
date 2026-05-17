@@ -96,3 +96,4 @@ Documentación de productos usando Operators
 * [Cilium - Hubble](./Varios-k8s/Cilium/Hubble/README.md)
 * [Cilium - Egress Gateway](./Varios-k8s/Cilium/EgressGateway/README.md)
 * [Cilium - BGP Control Plane](./Varios-k8s/Cilium/BGPControlPlane/README.md)
+* [Cilium - Masquerading](./Varios-k8s/Cilium/Masquerading/README.md)

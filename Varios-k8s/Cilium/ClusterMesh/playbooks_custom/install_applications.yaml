@@ -116,6 +116,12 @@
         state: present
       tags: cilium_installation, cilium_config
 
+    - name: Non masquerade CIDRs
+      k8s:
+        definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/cilium/nonMasqueradeCIDRs.yaml') | from_yaml_all }}"
+        state: present
+      tags: cilium_installation, cilium_config
+
     - name: Apply deploy a simple sample project
       k8s:
         definition: "{{ lookup('file', '/kubespray/cluster-apps/' + cluster_name + '/configs/test-ingress/app.yaml') | from_yaml_all }}"
