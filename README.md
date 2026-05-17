@@ -97,3 +97,4 @@ Documentación de productos usando Operators
 * [Cilium - Egress Gateway](./Varios-k8s/Cilium/EgressGateway/README.md)
 * [Cilium - BGP Control Plane](./Varios-k8s/Cilium/BGPControlPlane/README.md)
 * [Cilium - Masquerading](./Varios-k8s/Cilium/Masquerading/README.md)
+* [Cilium - BandwidthManager](./Varios-k8s/Cilium/BandwidthManager/README.md)

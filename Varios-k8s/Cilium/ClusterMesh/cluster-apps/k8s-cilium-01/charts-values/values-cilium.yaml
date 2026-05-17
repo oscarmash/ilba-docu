@@ -5,6 +5,8 @@ bpf:
   masquerade: true
 # ipMasqAgent:
 #   enabled: true
+bandwidthManager:
+  enabled: true
 bgpControlPlane:
   enabled: true
 ipam:
