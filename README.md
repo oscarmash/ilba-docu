@@ -52,7 +52,7 @@ Helms avanzados:
 * [Helm - Kyverno](./Helm/Kyverno/README.md)
 * [Helm - Kyverno Rules](./Helm/Kyverno-Rules/README.md)
 * [Helm - Zabbix](./Helm/Zabbix/README.md)
-* [Helm - Argo CD](./Helm/ArgoCD/README.md)
+* [Helm - ArgoCD](./Helm/ArgoCD/README.md)
 * [Helm - Argo Rollout](./Helm/ArgoRollout/README.md) :construction: **No acabado**
 * [Helm - Vault](./Helm/Vault/README.md) (ExternalSecrets)
 * [Helm - Goldilocks](./Helm/Goldilocks/README.md) (Limits and Requests)

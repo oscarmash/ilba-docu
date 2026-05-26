@@ -7,6 +7,7 @@
   * [Promtail](#id41) :no_entry_sign:
   * [Alloy](#id42)
 * [KPS](#id50) (Kube Prometheus Stack)
+  * [Alerta desde consola (curl)](#id51)
 * [KEE](#id60) (Kubernetes Event Exporter)
 * [End](#id70)
 * [Cosas de Grafana](#id100)
@@ -232,9 +233,27 @@ Aplicaremos el dashboard de Loki (para Alloy):
 root@k8s-test-cp:~# kubectl apply -f dashboard-loki-alloy.yaml
 ```
 
-
-
 ![alt text](images/dashboard_loki.png)
+
+# Alerta desde consola (curl) <div id='id51' />
+
+```
+curl -H "Content-Type: application/json" -d '[
+  {
+    "labels": {
+      "alertname": "TestAlertCritical",
+      "severity": "critical",
+      "instance": "servidor-test-critical",
+      "namespace": "ns-critical"
+    },
+    "annotations": {
+      "summary": "¡Alerta de prueba Crítica!",
+      "description": "Esto es un test manual para validar el envío de correos critical."
+    },
+    "endsAt": "'$(date -u -d '+1 hour' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v+1H +%Y-%m-%dT%H:%M:%SZ)'"
+  }
+]' http://pro-kps-alertmanager.corpo.ad.diba.es/api/v2/alerts
+```
 
 ## KEE <div id='id60' />
 
