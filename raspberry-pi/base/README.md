@@ -5,6 +5,7 @@
   * [Configuración del S.O. + updates](#id14)
   * [Configuración del networking](#id15)
   * [neowofetch / neofetch](#id16)
+  * [CPU: ondemand](#id17)
 
 # Instalación base de RapsBerry Pi <div id='id10' />
 
@@ -174,3 +175,18 @@ sudo rm -rf /etc/motd
 sudo raspi-config nonint do_wifi_country ES
 sudo reboot
 ```
+
+## CPU: ondemand <div id='id17' />
+
+```
+apt update && apt install -y sysfsutils
+cat /proc/cpuinfo
+vim /etc/sysfs.conf
+    devices/system/cpu/cpu0/cpufreq/scaling_governor = ondemand
+    devices/system/cpu/cpu1/cpufreq/scaling_governor = ondemand
+    devices/system/cpu/cpu2/cpufreq/scaling_governor = ondemand
+    devices/system/cpu/cpu3/cpufreq/scaling_governor = ondemand
+systemctl enable sysfsutils
+```
+
+
