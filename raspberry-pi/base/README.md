@@ -187,6 +187,7 @@ vim /etc/sysfs.conf
     devices/system/cpu/cpu2/cpufreq/scaling_governor = ondemand
     devices/system/cpu/cpu3/cpufreq/scaling_governor = ondemand
 systemctl enable sysfsutils
+reboot
 ```
 
 
