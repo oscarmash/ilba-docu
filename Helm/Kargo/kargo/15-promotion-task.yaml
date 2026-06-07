@@ -40,7 +40,6 @@ spec:
   - uses: git-push
     config:
       path: ./workspace
-      # remoteURL: https://oscarmash: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@github.com/oscarmash/test-argocd.git
 
   # 5. Avisamos a ArgoCD para que refresque la aplicación correspondiente
   - uses: argocd-update
