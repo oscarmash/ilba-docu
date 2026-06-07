@@ -1,0 +1,9 @@
+global:
+  domain: argocd.172.26.0.101.nip.io
+configs:  
+  params:  
+    server.insecure: true
+server:
+  ingress:
+    enabled: true
+    ingressClassName: "cilium"

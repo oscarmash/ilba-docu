@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-ilba-deployment
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: app-ilba
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: app-ilba
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: app-ilba
+    spec:
+     containers:
+        - name: apache
+          image: httpd:2.4.66-trixie
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP

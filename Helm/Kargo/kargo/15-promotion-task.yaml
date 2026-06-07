@@ -1,0 +1,52 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: PromotionTask
+metadata:
+  name: kargo-ilba-promo-task
+  namespace: kargo-ilba-ns
+spec:
+  vars:
+  - name: gitopsRepo
+    value: https://github.com/oscarmash/test-argocd.git
+  - name: imageRepo
+    value: registry.hub.docker.com/library/httpd
+  - name: branch
+    value: main
+  steps:
+  # 1. Clonamos tu repositorio en la carpeta local /workspace
+  - uses: git-clone
+    config:
+      repoURL: ${{ vars.gitopsRepo }}
+      checkout:
+      - branch: main
+        path: ./workspace
+
+  # 2. Modificamos el kustomization.yaml del entorno dinámicamente
+  - uses: kustomize-set-image
+    as: update
+    config:
+      path: ./workspace/stage/${{ ctx.stage }}
+      images:
+      - image: ${{ vars.imageRepo }}
+        tag: ${{ imageFrom(vars.imageRepo).Tag }}
+
+  # 3. Hacemos commit del cambio en el kustomization.yaml
+  - uses: git-commit
+    as: commit
+    config:
+      path: ./workspace
+      message: "Profiles(GitOps): Kargo updated httpd to ${{ imageFrom(vars.imageRepo).Tag }} in ${{ ctx.stage }}"
+
+  # 4. Subimos el cambio a GitHub
+  - uses: git-push
+    config:
+      path: ./workspace
+      # remoteURL: https://oscarmash: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@github.com/oscarmash/test-argocd.git
+
+  # 5. Avisamos a ArgoCD para que refresque la aplicación correspondiente
+  - uses: argocd-update
+    config:
+      apps:
+      - name: kargo-${{ ctx.stage }}
+        sources:
+        - repoURL: ${{ vars.gitopsRepo }}
+          desiredRevision: ${{ outputs.commit.commit }}

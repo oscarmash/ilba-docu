@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: 00-bootstrap
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - stage: dev
+      - stage: staging
+      - stage: prod
+  template:
+    metadata:
+      name: kargo-{{stage}}
+      annotations:
+        kargo.akuity.io/authorized-stage: kargo-ilba-ns:{{stage}}
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/oscarmash/test-argocd.git'
+        targetRevision: stage/{{stage}}
+        path: .
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: kargo-{{stage}}
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true

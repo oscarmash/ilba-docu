@@ -1,0 +1,4 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Project
+metadata:
+  name: kargo-ilba-ns # El nombre del proyecto DEBE ser el mismo que el del NS

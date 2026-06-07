@@ -1,0 +1,60 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: dev
+  namespace: kargo-ilba-ns
+spec:
+  # Dev bebe directamente del Warehouse
+  requestedFreight:
+  - origin:
+      kind: Warehouse
+      name: kargo-ilba-warehouse
+    sources:
+      direct: true
+  promotionTemplate:
+    spec:
+      steps:
+      - task:
+          name: kargo-ilba-promo-task # <- Corregido: Ahora estructurado como objeto con 'name'
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: staging
+  namespace: kargo-ilba-ns
+spec:
+  # Staging requiere que el Freight haya venido del Warehouse...
+  requestedFreight:
+  - origin:
+      kind: Warehouse
+      name: kargo-ilba-warehouse
+    sources:
+      # ...pero metemos el candado de que haya pasado antes por el stage 'dev'
+      stages:
+      - dev
+  promotionTemplate:
+    spec:
+      steps:
+      - task:
+          name: kargo-ilba-promo-task
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: prod
+  namespace: kargo-ilba-ns
+spec:
+  # Prod requiere que el Freight haya venido del Warehouse...
+  requestedFreight:
+  - origin:
+      kind: Warehouse
+      name: kargo-ilba-warehouse
+    sources:
+      # ...pero con el candado de que haya pasado antes por el stage 'staging'
+      stages:
+      - staging
+  promotionTemplate:
+    spec:
+      steps:
+      - task:
+          name: kargo-ilba-promo-task

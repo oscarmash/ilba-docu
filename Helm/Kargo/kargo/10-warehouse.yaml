@@ -1,0 +1,12 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: kargo-ilba-warehouse
+  namespace: kargo-ilba-ns
+spec:
+  subscriptions:
+  - image:
+      repoURL: registry.hub.docker.com/library/httpd
+      constraint: '^2.4'
+      discoveryLimit: 5
+      imageSelectionStrategy: SemVer

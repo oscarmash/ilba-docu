@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: applications
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - stage: dev
+      - stage: staging
+      - stage: prod
+  template:
+    metadata:
+      name: '{{stage}}-stage'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/oscarmash/test-argocd.git
+        targetRevision: HEAD
+        path: stage/{{stage}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: {{stage}}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

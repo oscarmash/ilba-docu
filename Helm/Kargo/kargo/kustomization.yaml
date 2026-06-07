@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./01-project.yaml
+  - ./05-secret.yaml
+  - ./10-warehouse.yaml
+  - ./15-promotion-task.yaml
+  - ./20-stage.yaml
+
+#namespace: kargo-ilba-ns
