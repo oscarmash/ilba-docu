@@ -34,6 +34,7 @@ Documentación de productos usando docker-compose
   * [Ansible con Vault](./Varios-sin-k8s/Ansible-con-Vault/README.md)
   * [Docker-Compose con Vault](./Varios-sin-k8s/Docker-Compose-con-Vault/README.md)
   * [Dynamic Secrets: MariaDB](./Varios-sin-k8s/Dynamic-Secrets-MariaDB/README.md)
+  * [One-time SSH passwords (OTP)](./Varios-sin-k8s/Vault-OTP/README.md)
 
 ## Helm's
 
