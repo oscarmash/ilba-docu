@@ -17,6 +17,7 @@
   * [Check access S3](#id204)
   * [Backups ad-hoc](#id205)
   * [Limpieza jobs Failed](#id206)
+  * [Limpieza jobs Queued|InProgress](#id207)
 * [Kopia](#id300)
   * [Contenedor con cliente de Kopia](#id301)
   * [Comandos random de copia](#id302)
@@ -1159,6 +1160,23 @@ repo-maintain-job-1749471128086                                Complete   1/1   
 repo-maintain-job-1749471389957                                Failed     0/1           2m59s      2m59s
 
 root@ilimit-paas-k8s-pre-cp01:~# kubectl -n velero delete job $(kubectl -n velero get jobs | awk '$3 ~ 0' | awk '{print $1}')
+```
+
+## Limpieza jobs Queued|InProgress <div id='id207' />
+
+```
+$ velero get backups
+NAME                                                                           STATUS            ERRORS   WARNINGS   CREATED                          EXPIRES   STORAGE LOCATION   QUEUE POSITION   SELECTOR
+...
+ca-ilimit-galera-advanced-stack-schedule-backup-daily-20260710000037           InProgress        0        0          2026-07-10 10:01:38 +0200 CEST   5d        velero-backups                      <none>
+...
+ca-ilimit-homer-advanced-stack-schedule-backup-daily-20260710000037            Queued            0        0          <nil>                            5d                           4                <none>
+...
+```
+
+```
+$ velero get backups | awk '$2 ~ /Queued|InProgress/ {print $1}' | xargs -r velero backup delete --confirm
+$ velero get backups | awk '$2 ~ /Queued|InProgress/ {print $1}' | xargs -I {} kubectl delete -n velero backup.velero.io/{}
 ```
 
 # Kopia <div id='id300' />
