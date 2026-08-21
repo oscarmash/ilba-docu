@@ -13,6 +13,10 @@ Documentación de comandos de K8S
 * [Comandos de Helm](./Comandos/Helm/README.md)
 * [Comandos de bash](./Comandos/bash/README.md)
 
+## OKD
+
+* [Comandos de bash](./Comandos/bash/README.md)
+
 ## Raspberry PI 5
 
 * [Instalación base](./raspberry-pi/base/README.md)
@@ -65,6 +69,10 @@ Helms avanzados:
 Los operators los podemos encontrar aquí:
 * https://operatorhub.io/
 * https://artifacthub.io/packages/search
+
+Gestor de paquetes y ciclo de vida para Operators
+
+* [OLM (Operator Lifecycle Manager)](./Operators/OLM/README.md)
 
 Documentación de productos usando Operators
 
