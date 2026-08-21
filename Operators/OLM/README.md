@@ -1,10 +1,10 @@
 # Tabla de Contenidos
 
-1. [Prerrequisitos del Clúster](#prerrequisitos-del-clúster)
-2. [Instalación de OLM (Operator Lifecycle Manager)](#instalación-de-olm-operator-lifecycle-manager)
-3. [Despliegue del MariaDB Operator](#despliegue-del-mariadb-operator)
-4. [Despliegue básico con MariaDB](#despliegue-básico-con-mariadb)
-5. [Actualización del Operador (Update Process)](#actualización-del-operador-update-process)
+* [Prerrequisitos del Clúster](#prerrequisitos-del-clúster)
+* [Instalación de OLM (Operator Lifecycle Manager)](#instalación-de-olm-operator-lifecycle-manager)
+* [Despliegue del MariaDB Operator](#despliegue-del-mariadb-operator)
+* [Despliegue básico con MariaDB](#despliegue-básico-con-mariadb)
+* [Actualización del Operador (Update Process)](#actualización-del-operador-update-process)
 
 
 # Prerrequisitos del Clúster
