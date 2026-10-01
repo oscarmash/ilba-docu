@@ -27,6 +27,18 @@ Características principales:
 * Automated Rollbacks: in case of failer or suboptimal performance
 * Customizable Metrics: custom metrics for accessing success and making automated decisions
 
+Diferencia entre el rollout de k8s pelado y ArgoCD:
+
+| Capacidad | Deployment nativo de K8s | Argo Rollouts (`kind: Rollout`) |
+|---|---|---|
+| **Estrategias soportadas** | `RollingUpdate` y `Recreate` | `Canary`, `Blue-Green`, `RollingUpdate` |
+| **Control de tráfico** | Indirección básica (por recuento de pods vía `Service`) | División de tráfico exacta a nivel de red (L4/L7) |
+| **Integración con Ingress / Mesh** | Ninguna nativa para splitting de tráfico | Nativa con **Istio, Linkerd, Traefik, NGINX Ingress, AWS ALB, Cilium** |
+| **Análisis automático (Métricas)** | No (solo health checks `liveness`/`readiness`) | Sí (consultas a **Prometheus, Datadog, New Relic, Webhooks**) |
+| **Rollback automático por error** | Solo si el pod falla al arrancar (`CrashLoop`) | **Rollback automático si suben los errores HTTP 5xx o la latencia** |
+| **Pausas y pasos manuales** | No soportado | Sí (pausas automáticas por tiempo o aprobación manual vía CLI/UI) |
+| **Interfaz de visualización** | Requiere herramientas externas (`kubectl`, Lens) | Dashboard UI nativo dedicado (`kubectl-argo-rollouts dashboard`) |
+
 # Instalación de Argo Rollout <div id='id10' />
 
 ## Instalación de Argo Rollout
