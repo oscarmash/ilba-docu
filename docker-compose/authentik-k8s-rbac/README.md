@@ -439,8 +439,6 @@ users:
 $ ssh 172.26.0.235 -L 8000:127.0.0.1:8000
 ```
 
-![alt text](images/login-k8s.png)
-
 ```
 root@authentik:~# rm -rf ~/.kube/cache/oidc-login
 root@authentik:~# kubectl get nodes
@@ -451,3 +449,5 @@ k8s-test-wk01   Ready    <none>          5h8m   v1.36.4
 k8s-test-wk02   Ready    <none>          5h8m   v1.36.4
 k8s-test-wk03   Ready    <none>          5h8m   v1.36.4
 ```
+
+![alt text](images/login-k8s.png)
