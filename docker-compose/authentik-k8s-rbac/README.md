@@ -1,4 +1,17 @@
 
+## Índice
+
+- [Instalación de Authentik](#instalación-de-authentik)
+- [Creación de la CA](#creación-de-la-ca)
+- [Importación del certificado en Authentik](#importación-del-certificado-en-authentik)
+- [Scope de Grupos en Authentik](#scope-de-grupos-en-authentik)
+- [Crear el Provider OIDC para Kubernetes + la Application en Authentik](#crear-el-provider-oidc-para-kubernetes--la-application-en-authentik)
+- [Crear el grupo de administradores y tu usuario](#crear-el-grupo-de-administradores-y-tu-usuario)
+- [Asignar el certificado a la interfaz web de Authentik](#asignar-el-certificado-a-la-interfaz-web-de-authentik)
+- [Copiar la CA a tu clúster de Kubernetes](#copiar-la-ca-a-tu-clúster-de-kubernetes)
+- [Crear el RBAC en Kubernetes para el grupo k8s-admins](#crear-el-rbac-en-kubernetes-para-el-grupo-k8s-admins)
+- [Pruebas desde authentik](#pruebas-desde-authentik)
+
 Gestionar el acceso a Kubernetes mediante certificados TLS de cliente (x509) presenta dos problemas graves a medio plazo: 
 * No admiten revocación nativa (si un certificado se filtra o un empleado se va, la única forma de anularlo antes de su caducidad es cambiar la CA del clúster o retirar permisos en RBAC)
 * Carecen de un flujo de auditoría/MFA centralizado. 
