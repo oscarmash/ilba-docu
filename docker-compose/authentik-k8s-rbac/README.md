@@ -16,8 +16,9 @@ Gestionar el acceso a Kubernetes mediante certificados TLS de cliente (x509) pre
 * No admiten revocación nativa (si un certificado se filtra o un empleado se va, la única forma de anularlo antes de su caducidad es cambiar la CA del clúster o retirar permisos en RBAC)
 * Carecen de un flujo de auditoría/MFA centralizado. 
 Integrar Authentik mediante OpenID Connect (OIDC) resuelve esto de raíz delegando la identidad, caducidad de tokens y grupos al proveedor de identidad.
+Por eso vamos a usar Authentik ;-)
 
-Arquitectura:
+La arquitectura lógica es la siguiente:
 
 ```
 [ kubectl / Lens ]
