@@ -69,7 +69,8 @@ Los operators los podemos encontrar aquí:
 
 Gestor de paquetes y ciclo de vida para Operators
 
-* [OLM (Operator Lifecycle Manager)](./Operators/OLM/README.md)
+* OLM (Operator Lifecycle Manager)
+  * [OLM v0](./Operators/OLM_v0/README.md)
 
 Documentación de productos usando Operators
 
