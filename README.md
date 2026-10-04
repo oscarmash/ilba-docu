@@ -43,13 +43,9 @@ Documentación de productos usando docker-compose
 
 ## Helm's
 
-Bootstrap (helms básicos)
 
 * <del>[Helm - Ingress Nginx](./Helm/Ingress-Nginx/README.md)</del> :skull:
 * <del>[Helm - multiples Ingress Nginx (LAN / DMZ)](./Helm/multiples-lan-dmz-Ingress-Nginx/README.md)</del> :skull:
-
-Helms avanzados:
-
 * [Helm - Storage - NFS](./Helm/Storage-NFS/README.md)
 * [Helm - Storage - Ceph (RBD)](./Helm/Storage-Ceph-RBD/README.md)
 * [Helm - Storage - CephFS](./Helm/Storage-CephFS/README.md)
