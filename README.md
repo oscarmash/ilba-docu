@@ -31,7 +31,7 @@ Documentación de productos usando docker-compose
 * [Ceph all-in-one (AIO)](./docker-compose/Ceph-AIO/README.md)
 * [Prometheus Federation](./docker-compose/Prometheus-Federation/README.md)
 * [Thanos con Sidecar](./docker-compose/Thanos-Sidecar/README.md)
-* [Authentik: RBAC Kubernetes](./docker-compose/authentik-k8s-rbac/README.md)
+* [Autenticación OIDC en Kubernetes con Authentik](./docker-compose/authentik-OIDC-k8s/README.md)
 
 ## Varios sin Kubernetes
 
