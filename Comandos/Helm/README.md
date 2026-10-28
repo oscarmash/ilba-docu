@@ -7,6 +7,7 @@
   * [Ver los valores que se ha aplicado en un Helm](#id14)
   * [Rollout de versiones](#id15)
   * [Descargar un Chart y subirlo a un repositorio](#id16)
+  * [Descargar un OCI](#id19)
   * [Modificar un Chart desplegado: reuse-values](#id17)
   * [Añadir un repo a helm y hacer un update: force-update](#id18)
 * [Repositorios](#id50)
@@ -107,6 +108,15 @@ cilium cilium/cilium \
 
 ```
 $ helm repo add stable https://charts.helm.sh/stable --force-update
+```
+
+# Descargar un OCI <div id='id19' />
+
+```
+$ helm pull oci://ghcr.io/netbox-community/netbox-chart/netbox --version 8.3.57 --untar
+
+$ ls netbox/
+Chart.lock  charts  Chart.yaml  files  README.md  templates  values.schema.json  values.yaml
 ```
 
 # Repositorios <div id='id50' />

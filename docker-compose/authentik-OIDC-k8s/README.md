@@ -384,6 +384,8 @@ root@k8s-test-cp:~# kubectl apply -f authentik-rbac.yaml
 
 # Pruebas desde authentik
 
+## Plugin de "int128"
+
 ```
 root@authentik:~# apt-get update && apt-get -y install unzip kubectl
 root@authentik:~# curl -LO https://github.com/int128/kubelogin/releases/latest/download/kubelogin_linux_amd64.zip
@@ -451,3 +453,34 @@ k8s-test-wk03   Ready    <none>          5h8m   v1.36.4
 ```
 
 ![alt text](images/login-k8s.png)
+
+## Plugin de "authentik" (oficial)
+
+Vamos a usar el [plugin oficial de authentik](https://docs.goauthentik.io/endpoint-devices/authentik-agent/device-authentication/cli-app-authentication/k8s/)
+
+Limpiamos los ratros del plugin anterior:
+
+```
+root@authentik:~# rm -f /usr/local/bin/kubectl-oidc_login
+root@authentik:~# rm -rf ~/.kube/cache/oidc-login
+root@authentik:~# rm -f ~/.kube/config
+```
+
+
+
+https://docs.goauthentik.io/endpoint-devices/authentik-agent/configuration/
+https://docs.goauthentik.io/endpoint-devices/authentik-agent/agent-deployment/linux/
+
+
+$ ssh oscar@172.26.0.221
+oscar@desktop:~$ su -
+root@desktop:~# apt-get update && apt-get install curl kubectl
+
+
+oscar@desktop:~$ scp root@172.26.0.235:/etc/docker-compose/certs/ca.crt .
+oscar@desktop:~$ sudo mv ca.crt /usr/local/share/ca-certificates/
+oscar@desktop:~$ sudo update-ca-certificates
+
+oscar@desktop:~$ sudo ak-sysd domains join authentik-agent --authentik-url https://authentik.local
+Enter authentik enrollment token: LkLUpHjB6Sw7fCWOaK6Lw5YIJCg6tF2n0UpBkigHFCxFulEpQYfrcmMSbg48
+
